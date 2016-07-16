@@ -98,7 +98,7 @@ HTTP，超文本传送协议，通过因特网传送万维网文档的数据传�
 HTTP，超文本传送协议，通过因特网传送万维网文档的数据传送协议。
 
 我们访问一个网页的实际过程如下：客户端C===HTTP请求===&amp;gt;服务端S：GET index.html http/1.1客户端C&amp;lt;==HTTP响应====服务端S：HTTP/1.">
-<meta property="og:updated_time" content="2016-07-16T11:38:08.000Z">
+<meta property="og:updated_time" content="2016-07-16T12:21:31.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux下cURL使用教程之二：HTTP协议概述">
 <meta name="twitter:description" content="虽然cURL支持多种协议，但日常我们最常用的还是HTTP协议，下文中着重介绍HTTP的相关使用方法，因此我们要对HTTP协议有所了解。
@@ -316,6 +316,7 @@ HTTP，超文本传送协议，通过因特网传送万维网文档的数据传�
 <p>而平常我们通过浏览器浏览网页这个过程，浏览器自动完成发送HTTP请求及对服务端应答的数据进行解析的工作，从而将网页呈现给我们。</p>
 <p>我们使用cURL要做的就是模仿浏览器的动作，因此要对HTTP请求的格式进行进一步的解析。</p>
 <h2 id="HTTP请求"><a href="#HTTP请求" class="headerlink" title="HTTP请求"></a>HTTP请求</h2><p>在你向HTTP服务器请求一个资源（比如简单的使用浏览器打开一个网页），TCP三次握手建立连接后，HTTP请求发出。<br>HTTP请求信息由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">l 请求行(Request Line)</div><div class="line">l 请求头(Request Header)</div><div class="line">l 请求正文(Message Body)</div></pre></td></tr></table></figure></p>
+<a id="more"></a>
 <h3 id="HTTP请求行"><a href="#HTTP请求行" class="headerlink" title="HTTP请求行"></a>HTTP请求行</h3><p>典型的HTTP请求行格式为：<br><code>HTTP命令 请求资源的URI HTTP版本号</code><br>HTTP请求行例子如下：<br><code>GET / HTTP/1.1\r\n</code></p>
 <p>这个请求行的意思是：请求得到（GET）/路径下的默认主页文件，使用HTTP协议1.1版本。</p>
 <p>根据HTTP标准，HTTP请求可以使用多种请求方法。例如：HTTP1.1支持7种请求方法：GET、POST、HEAD、OPTIONS、PUT、DELETE和TARCE。而服务器也可以自定义请求命令供客户端使用。具体请参考HTTP的RFC文档。而我们最常用的是GET和POST命令：</p>
@@ -380,8 +381,8 @@ HTTP，超文本传送协议，通过因特网传送万维网文档的数据传�
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/07/fresh-start/" rel="prev" title="新域名启用">
-                新域名启用 <i class="fa fa-chevron-right"></i>
+              <a href="/2012/08/linux-curl-basic-usage/" rel="prev" title="Linux下cURL使用教程之三：curl基本使用">
+                Linux下cURL使用教程之三：curl基本使用 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -450,7 +451,7 @@ HTTP，超文本传送协议，通过因特网传送万维网文档的数据传�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
