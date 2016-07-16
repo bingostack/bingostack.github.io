@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="curl,linux curl,linux," />
 
 
 
@@ -84,22 +84,22 @@
 
 
 
-<meta name="description" content="说起来比较搞笑：去年下半年比较忙，比较烦，比较拖延。然后旧域名adeploy.com忘了续费。然后竟然被一个创业团队抢注拿去创业了。。是不是我太有眼光。。
-所有就有了现在的域名。
-网站采用hexo，建在github上。其实本身想用hugo的，毕竟拿go写的。但是试用了下，卡卡的真心无感。既然也做过一段时间的伪前端，那就接着nidejs吧。hexo好多模板真心业界良心。">
+<meta name="description" content="随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；可能还需要模仿成一个正常浏览器的样子，或者使用代理；甚至需要上传或POST数据。
+而cURL就是HTTP脚本编程的利器。
+什么是cURLcURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端">
 <meta property="og:type" content="article">
-<meta property="og:title" content="新域名启用">
-<meta property="og:url" content="http://stackeye.com/2016/07/fresh-start/index.html">
+<meta property="og:title" content="Linux下cURL使用教程之一：cURL简介">
+<meta property="og:url" content="http://stackeye.com/2012/07/linux-curl-description/index.html">
 <meta property="og:site_name" content="StackEye">
-<meta property="og:description" content="说起来比较搞笑：去年下半年比较忙，比较烦，比较拖延。然后旧域名adeploy.com忘了续费。然后竟然被一个创业团队抢注拿去创业了。。是不是我太有眼光。。
-所有就有了现在的域名。
-网站采用hexo，建在github上。其实本身想用hugo的，毕竟拿go写的。但是试用了下，卡卡的真心无感。既然也做过一段时间的伪前端，那就接着nidejs吧。hexo好多模板真心业界良心。">
-<meta property="og:updated_time" content="2016-07-16T03:12:11.000Z">
+<meta property="og:description" content="随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；可能还需要模仿成一个正常浏览器的样子，或者使用代理；甚至需要上传或POST数据。
+而cURL就是HTTP脚本编程的利器。
+什么是cURLcURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端">
+<meta property="og:updated_time" content="2016-07-16T03:59:57.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="新域名启用">
-<meta name="twitter:description" content="说起来比较搞笑：去年下半年比较忙，比较烦，比较拖延。然后旧域名adeploy.com忘了续费。然后竟然被一个创业团队抢注拿去创业了。。是不是我太有眼光。。
-所有就有了现在的域名。
-网站采用hexo，建在github上。其实本身想用hugo的，毕竟拿go写的。但是试用了下，卡卡的真心无感。既然也做过一段时间的伪前端，那就接着nidejs吧。hexo好多模板真心业界良心。">
+<meta name="twitter:title" content="Linux下cURL使用教程之一：cURL简介">
+<meta name="twitter:description" content="随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；可能还需要模仿成一个正常浏览器的样子，或者使用代理；甚至需要上传或POST数据。
+而cURL就是HTTP脚本编程的利器。
+什么是cURLcURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端">
 
 
 
@@ -120,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="http://stackeye.com/2016/07/fresh-start/"/>
+  <link rel="canonical" href="http://stackeye.com/2012/07/linux-curl-description/"/>
 
-  <title> 新域名启用 | StackEye </title>
+  <title> Linux下cURL使用教程之一：cURL简介 | StackEye </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -242,7 +242,7 @@
             
             
               
-                新域名启用
+                Linux下cURL使用教程之一：cURL简介
               
             
           </h1>
@@ -254,11 +254,30 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-16T11:06:18+08:00" content="2016-07-16">
-              2016-07-16
+            <time itemprop="dateCreated" datetime="2012-07-28T11:49:44+08:00" content="2012-07-28">
+              2012-07-28
             </time>
           </span>
 
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
           
 
           
@@ -282,9 +301,14 @@
       
 
       
-        <p>说起来比较搞笑：<br>去年下半年比较忙，比较烦，比较拖延。<br>然后旧域名adeploy.com忘了续费。<br>然后竟然被一个创业团队抢注拿去创业了。。<br>是不是我太有眼光。。</p>
-<p>所有就有了现在的域名。</p>
-<p>网站采用hexo，建在github上。<br>其实本身想用hugo的，毕竟拿go写的。但是试用了下，卡卡的真心无感。<br>既然也做过一段时间的伪前端，那就接着nidejs吧。<br>hexo好多模板真心业界良心。</p>
+        <p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
+<p>而cURL就是HTTP脚本编程的利器。</p>
+<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。</p>
+<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
+<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
+<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
+<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="external">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
+</ol>
 
       
     </div>
@@ -305,18 +329,28 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/curl/" rel="tag">#curl</a>
+          
+            <a href="/tags/linux-curl/" rel="tag">#linux curl</a>
+          
+            <a href="/tags/linux/" rel="tag">#linux</a>
+          
+        </div>
+      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2012/07/linux-curl-description/" rel="next" title="Linux下cURL使用教程之一：cURL简介">
-                <i class="fa fa-chevron-left"></i> Linux下cURL使用教程之一：cURL简介
-              </a>
-            
           </div>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/fresh-start/" rel="prev" title="新域名启用">
+                新域名启用 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -430,7 +464,7 @@
               
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是cURL"><span class="nav-number">1.</span> <span class="nav-text">什么是cURL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cURL主要特点"><span class="nav-number">2.</span> <span class="nav-text">cURL主要特点</span></a></li></ol></div>
             
           </div>
         </section>
