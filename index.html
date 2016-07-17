@@ -331,6 +331,128 @@
             
               
                 
+                <a class="post-title-link" href="/2012/08/linux-curl-basic-usage-example/" itemprop="url">
+                  Linux下cURL使用教程之四：curl基本使用实例
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-02T20:24:24+08:00" content="2012-08-02">
+              2012-08-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>本篇主要结合编写的PHP程序实例对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage/">curl基本使用</a>进行具体说明。</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="HTTP服务器"><a href="#HTTP服务器" class="headerlink" title="HTTP服务器"></a>HTTP服务器</h3><p>建议<code>Ubuntu+Apache+PHP</code>，方便简洁:<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">sudo apt-get install apache2 php5</div></pre></td></tr></table></figure></p>
+<p>即可。</p>
+<h3 id="网页"><a href="#网页" class="headerlink" title="网页"></a>网页</h3><p>以下为测试使用的服务器端代码，全部使用php实现。</p>
+<ul>
+<li>curldemo.php，用于输出User-Agent、Referer、Cookie信息：<figure class="highlight php"><table><tr><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;</div><div class="line">PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</div><div class="line">&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line"><span class="meta">&lt;?php</span></div><div class="line">    <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_USER_AGENT'</span>].<span class="string">"&lt;br&gt;\n"</span>;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">'HTTP_REFERER'</span>]))</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_REFERER'</span>].<span class="string">"&lt;br&gt;\n"</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_COOKIE[<span class="string">'user'</span>]))</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user="</span>.$_COOKIE[<span class="string">'user'</span>].<span class="string">"&lt;br&gt;\n"</span>;</div><div class="line">        setcookie(<span class="string">"user"</span>,<span class="string">""</span>,time()<span class="number">-1</span>);</div><div class="line">    &#125;</div><div class="line"><span class="meta">?&gt;</span></div><div class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</div><div class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-basic-usage-example/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2012/08/linux-curl-basic-usage/" itemprop="url">
                   Linux下cURL使用教程之三：curl基本使用
                 </a>
@@ -710,7 +832,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-count">5</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
