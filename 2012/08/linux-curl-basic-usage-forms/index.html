@@ -94,7 +94,7 @@
 <meta property="og:image" content="http://stackeye.com/img/curl_encode.jpg">
 <meta property="og:image" content="http://stackeye.com/img/developertools_post.jpg">
 <meta property="og:image" content="http://stackeye.com/img/developertools_get.jpg">
-<meta property="og:updated_time" content="2016-07-17T09:11:54.000Z">
+<meta property="og:updated_time" content="2016-07-17T09:14:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux下cURL使用教程之五：curl基本使用之提交表单">
 <meta name="twitter:description" content="很多时候，我们想获得的内容或者想进行的操作，只有在登陆之后才有权限，此时就需要用到提交表单。表单以HTML的形式呈现给用户，用户使用表单提交数据后，服务端获得表单数据进行处理，然后进行后续操作。比如我们登录的过程，登录的表单呈现给我们，输入用户名密码提交后，服务端获得用户名密码在数据库中查询，以查询结果判定密码正确与否。向HTTP服务器提交数据常用的有GET和POST两种方法。下文针对这两种方法，">
@@ -129,6 +129,16 @@
   
 
 
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
 
 
 
@@ -281,6 +291,13 @@
 
           
             
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-basic-usage-forms/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-basic-usage-forms/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
           
 
           
@@ -303,11 +320,12 @@
         <p>很多时候，我们想获得的内容或者想进行的操作，只有在登陆之后才有权限，此时就需要用到提交表单。<br>表单以HTML的形式呈现给用户，用户使用表单提交数据后，服务端获得表单数据进行处理，然后进行后续操作。比如我们登录的过程，登录的表单呈现给我们，输入用户名密码提交后，服务端获得用户名密码在数据库中查询，以查询结果判定密码正确与否。<br>向HTTP服务器提交数据常用的有GET和POST两种方法。下文针对这两种方法，结合实例说明curl的使用。</p>
 <h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前篇，服务端所有代码通过php实现。</p>
 <ul>
-<li><p>post.php，显示表单用于POST提交数据：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;</div><div class="line">PHP POST Demo <span class="keyword">for</span> curl basic usage By Stackeye</div><div class="line">&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">This is a post form demo.&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;form action=<span class="string">"welcome.php"</span> method=<span class="string">"post"</span>&gt;</div><div class="line">Name: &lt;input type=<span class="string">"text"</span> name=<span class="string">"name"</span> /&gt;</div><div class="line">Age: &lt;input type=<span class="string">"text"</span> name=<span class="string">"age"</span> /&gt;</div><div class="line">&lt;input type=<span class="string">"submit"</span> /&gt;</div><div class="line">&lt;/form&gt;</div><div class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+<li>post.php，显示表单用于POST提交数据：<figure class="highlight php"><table><tr><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;</div><div class="line">PHP POST Demo <span class="keyword">for</span> curl basic usage By Stackeye</div><div class="line">&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">This is a post form demo.&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;form action=<span class="string">"welcome.php"</span> method=<span class="string">"post"</span>&gt;</div><div class="line">Name: &lt;input type=<span class="string">"text"</span> name=<span class="string">"name"</span> /&gt;</div><div class="line">Age: &lt;input type=<span class="string">"text"</span> name=<span class="string">"age"</span> /&gt;</div><div class="line">&lt;input type=<span class="string">"submit"</span> /&gt;</div><div class="line">&lt;/form&gt;</div><div class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
 </li>
-<li><p>welcome.php，处理POST或GET的数据并显示：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;</div><div class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Stackeye</div><div class="line">&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">This is a PHP Form Demo.&lt;br /&gt;</div><div class="line">It can parse both GET <span class="keyword">and</span> POST data.&lt;br /&gt;</div><div class="line">This is a &lt;strong&gt;</div><div class="line"><span class="meta">&lt;?php</span> </div><div class="line"><span class="keyword">if</span>(count($_POST) &gt; <span class="number">0</span>)</div><div class="line">    <span class="keyword">echo</span> <span class="string">"POST"</span>;</div><div class="line"><span class="keyword">else</span> </div><div class="line">    <span class="keyword">echo</span> <span class="string">"GET"</span>; </div><div class="line"><span class="meta">?&gt;</span>&lt;/strong&gt; Request.&lt;br /&gt;&lt;br /&gt;</div><div class="line">Welcome &lt;strong&gt;<span class="meta">&lt;?php</span> <span class="keyword">echo</span> $_REQUEST[<span class="string">"name"</span>]; <span class="meta">?&gt;</span>&lt;/strong&gt;.&lt;br /&gt;</div><div class="line">You are &lt;strong&gt;<span class="meta">&lt;?php</span> <span class="keyword">echo</span> $_REQUEST[<span class="string">"age"</span>]; <span class="meta">?&gt;</span>&lt;/strong&gt; years old.</div><div class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+</ul>
+<a id="more"></a>
+<ul>
+<li>welcome.php，处理POST或GET的数据并显示：<figure class="highlight php"><table><tr><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;</div><div class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Stackeye</div><div class="line">&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">This is a PHP Form Demo.&lt;br /&gt;</div><div class="line">It can parse both GET <span class="keyword">and</span> POST data.&lt;br /&gt;</div><div class="line">This is a &lt;strong&gt;</div><div class="line"><span class="meta">&lt;?php</span> </div><div class="line"><span class="keyword">if</span>(count($_POST) &gt; <span class="number">0</span>)</div><div class="line">    <span class="keyword">echo</span> <span class="string">"POST"</span>;</div><div class="line"><span class="keyword">else</span> </div><div class="line">    <span class="keyword">echo</span> <span class="string">"GET"</span>; </div><div class="line"><span class="meta">?&gt;</span>&lt;/strong&gt; Request.&lt;br /&gt;&lt;br /&gt;</div><div class="line">Welcome &lt;strong&gt;<span class="meta">&lt;?php</span> <span class="keyword">echo</span> $_REQUEST[<span class="string">"name"</span>]; <span class="meta">?&gt;</span>&lt;/strong&gt;.&lt;br /&gt;</div><div class="line">You are &lt;strong&gt;<span class="meta">&lt;?php</span> <span class="keyword">echo</span> $_REQUEST[<span class="string">"age"</span>]; <span class="meta">?&gt;</span>&lt;/strong&gt; years old.</div><div class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
 </li>
 </ul>
 <h2 id="跟踪表单提交的过程"><a href="#跟踪表单提交的过程" class="headerlink" title="跟踪表单提交的过程"></a>跟踪表单提交的过程</h2><p>提交表单的过程比GET网页的过程要复杂些。GET一个网页一般只会对Referer、User-Agent等字段进行限制。而提交表单的过程，需要知道提交的数据的字段名称、字段值的格式等。而且某些表单还含有隐藏字段。因此使用curl提交表单一般需要我们分析网页源代码，甚至采用抓包工具等进行数据包的分析。</p>
@@ -397,6 +415,29 @@
 
     <div class="post-spread">
       
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
     </div>
   </div>
 
@@ -407,6 +448,10 @@
 
           
   <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2012/08/linux-curl-basic-usage-forms/"
+           data-title="Linux下cURL使用教程之五：curl基本使用之提交表单" data-url="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/">
+      </div>
     
   </div>
 
@@ -610,9 +655,30 @@
 
   
 
+  
+    
+  
 
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"stackeye"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
 
   
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
 
 
 
