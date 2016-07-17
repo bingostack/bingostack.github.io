@@ -348,6 +348,258 @@
             
               
                 
+                <a class="post-title-link" href="/2012/08/linux-curl-example-post-to-baidu-hi/" itemprop="url">
+                  Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-12T17:42:39+08:00" content="2012-08-12">
+              2012-08-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-example-post-to-baidu-hi/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-example-post-to-baidu-hi/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>前六篇之后，我们对curl的基本使用已经有了一定的了解。下面我们就在实际场景中使用我们的所学。<br>本篇实例目标为编写linux脚本,使用curl完成发布文章至百度空间。<br>下文将从百度空间登陆到发表文章，对每个过程的HTTP进行分析，并编写脚本实现。</p>
+<h2 id="工欲善其事，必先利其器"><a href="#工欲善其事，必先利其器" class="headerlink" title="工欲善其事，必先利其器"></a>工欲善其事，必先利其器</h2><p>抓包分析我们使用chrome自带的Developer Tools。<br>实际分析过程中最好把Developer Tools的Network标签左下角的“Preserve Log upon Navigation”选中，如下图圈中处：<br><img src="/img/developertoolspreserve.jpg" alt="Chrome Developer Tools Preserve Log upon Navigation"><br>单击变为红色即可。<br>此选项的作用在于当当前页面跳转到其他网页时，保存原来的日志记录。<br>默认不保存，比如在登陆成功一个网站后，自动跳转到其他网页，这样登陆网站过程中的记录都不保存。我们就没有办法对登陆过程进行具体分析。</p>
+<h2 id="POST登陆"><a href="#POST登陆" class="headerlink" title="POST登陆"></a>POST登陆</h2><h3 id="1-操作过程"><a href="#1-操作过程" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>登陆我们采用网址<code>https://passport.baidu.com/?login</code>，而不使用网址<code>http://hi.baidu.com/index.htm</code>或<code>http://hi.baidu.com/go/login</code> 右侧的登陆框。<br>这是因为后者可能因为百度空间改版等原因改变，而前者是百度账号的登陆界面，变化的几率要小。而且后者界面很多图片等元素，不利于我们抓包分析。</p>
+<h3 id="2-登陆过程分析"><a href="#2-登陆过程分析" class="headerlink" title="2. 登陆过程分析"></a>2. 登陆过程分析</h3><p>登陆成功后找到<code>/?login</code>的POST包，如下图：<br><img src="/img/DeveloperToolsBaiduLogin.jpg" alt="Developer Tools Baidu Login HTTP Analy"><br>主要显示了状态信息、请求头部（Request Headers）、POST数据（Form Data）和响应头部（Response Heades）。<br>Query String Parameters是对GET的参数的解析，即网址中的?login。一般网址中“?”后面的都应该是参数，具体请参考Linux下cURL使用教程之二：HTTP协议概述中“GET命令”一节。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-example-post-to-baidu-hi/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2012/08/linux-curl-basic-usage-upload-file/" itemprop="url">
+                  Linux下cURL使用教程之六：curl基本使用之HTTP文件上传
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-11T17:42:15+08:00" content="2012-08-11">
+              2012-08-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-basic-usage-upload-file/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-basic-usage-upload-file/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
+<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前，所有服务端代码通过php实现。</p>
+<ul>
+<li>file.php，显示文件上传表单：<figure class="highlight php"><table><tr><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;</div><div class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</div><div class="line">&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">This is a PHP File Upload Demo.&lt;br /&gt;</div><div class="line">Select a file <span class="keyword">and</span> Submit.&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;form action=<span class="string">"upload_file.php"</span> method=<span class="string">"post"</span></div><div class="line">enctype=<span class="string">"multipart/form-data"</span>&gt;</div><div class="line">&lt;label <span class="keyword">for</span>=<span class="string">"file"</span>&gt;Filename:&lt;/label&gt;</div><div class="line">&lt;input type=<span class="string">"file"</span> name=<span class="string">"file"</span> id=<span class="string">"file"</span> /&gt; </div><div class="line">&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"submit"</span> value=<span class="string">"Submit"</span> /&gt;</div><div class="line">&lt;/form&gt;</div><div class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-basic-usage-upload-file/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2012/08/linux-curl-basic-usage-forms/" itemprop="url">
                   Linux下cURL使用教程之五：curl基本使用之提交表单
                 </a>
@@ -1004,7 +1256,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
