@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="curl,linux curl,linux," />
 
 
 
@@ -84,22 +84,16 @@
 
 
 
-<meta name="description" content="说起来比较搞笑：去年下半年比较忙，比较烦，比较拖延。然后旧域名adeploy.com忘了续费。然后竟然被一个创业团队抢注拿去创业了。。是不是我太有眼光。。
-所有就有了现在的域名。
-网站采用hexo，建在github上。其实本身想用hugo的，毕竟拿go写的。但是试用了下，卡卡的真心无感。既然也做过一段时间的”伪前端”，那就接着nodejs吧。hexo好多模板真心业界良心。">
+<meta name="description" content="某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failedMore">
 <meta property="og:type" content="article">
-<meta property="og:title" content="新域名启用">
-<meta property="og:url" content="http://stackeye.com/2016/07/fresh-start/index.html">
+<meta property="og:title" content="Linux下cURL使用教程之十一：HTTPS及证书使用简介">
+<meta property="og:url" content="http://stackeye.com/2012/08/linux-curl-usage-https-cert/index.html">
 <meta property="og:site_name" content="StackEye">
-<meta property="og:description" content="说起来比较搞笑：去年下半年比较忙，比较烦，比较拖延。然后旧域名adeploy.com忘了续费。然后竟然被一个创业团队抢注拿去创业了。。是不是我太有眼光。。
-所有就有了现在的域名。
-网站采用hexo，建在github上。其实本身想用hugo的，毕竟拿go写的。但是试用了下，卡卡的真心无感。既然也做过一段时间的”伪前端”，那就接着nodejs吧。hexo好多模板真心业界良心。">
-<meta property="og:updated_time" content="2016-07-16T11:09:20.000Z">
+<meta property="og:description" content="某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failedMore">
+<meta property="og:updated_time" content="2016-07-18T05:36:39.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="新域名启用">
-<meta name="twitter:description" content="说起来比较搞笑：去年下半年比较忙，比较烦，比较拖延。然后旧域名adeploy.com忘了续费。然后竟然被一个创业团队抢注拿去创业了。。是不是我太有眼光。。
-所有就有了现在的域名。
-网站采用hexo，建在github上。其实本身想用hugo的，毕竟拿go写的。但是试用了下，卡卡的真心无感。既然也做过一段时间的”伪前端”，那就接着nodejs吧。hexo好多模板真心业界良心。">
+<meta name="twitter:title" content="Linux下cURL使用教程之十一：HTTPS及证书使用简介">
+<meta name="twitter:description" content="某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failedMore">
 
 
 
@@ -120,9 +114,9 @@
 
 
 
-  <link rel="canonical" href="http://stackeye.com/2016/07/fresh-start/"/>
+  <link rel="canonical" href="http://stackeye.com/2012/08/linux-curl-usage-https-cert/"/>
 
-  <title> 新域名启用 | StackEye </title>
+  <title> Linux下cURL使用教程之十一：HTTPS及证书使用简介 | StackEye </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -252,7 +246,7 @@
             
             
               
-                新域名启用
+                Linux下cURL使用教程之十一：HTTPS及证书使用简介
               
             
           </h1>
@@ -264,19 +258,38 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-07-16T11:06:18+08:00" content="2016-07-16">
-              2016-07-16
+            <time itemprop="dateCreated" datetime="2012-08-21T11:58:59+08:00" content="2012-08-21">
+              2012-08-21
             </time>
           </span>
 
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
           
 
           
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/07/fresh-start/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/fresh-start/" itemprop="commentsCount"></span>
+                <a href="/2012/08/linux-curl-usage-https-cert/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-usage-https-cert/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -299,9 +312,17 @@
       
 
       
-        <p>说起来比较搞笑：<br>去年下半年比较忙，比较烦，比较拖延。<br>然后旧域名adeploy.com忘了续费。<br>然后竟然被一个创业团队抢注拿去创业了。。<br>是不是我太有眼光。。</p>
-<p>所有就有了现在的域名。</p>
-<p>网站采用<a href="http://hexo.io" target="_blank" rel="external">hexo</a>，建在github上。<br>其实本身想用<a href="http://gohugo.io/" target="_blank" rel="external">hugo</a>的，毕竟拿go写的。但是试用了下，卡卡的真心无感。<br>既然也做过一段时间的”伪前端”，那就接着nodejs吧。<br>hexo好多模板真心业界良心。</p>
+        <p>某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:</div><div class="line">error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed</div><div class="line">More details here: http://curl.haxx.se/docs/sslcerts.html</div></pre></td></tr></table></figure></p>
+<p>此时就需要使用证书。<br>因此本篇只对curl相关选项做出介绍，详细原理请参考HTTPS协议。</p>
+<h2 id="使用到的选项"><a href="#使用到的选项" class="headerlink" title="使用到的选项"></a>使用到的选项</h2><h3 id="E-–cert-导入证书"><a href="#E-–cert-导入证书" class="headerlink" title="-E/–cert 导入证书"></a>-E/–cert 导入证书</h3><p><code>-E/--cert &lt;certificate[:password]&gt;</code>导入证书。curl默认使用PEM格式的证书。<br>一般我们从浏览器导出的cert都是X.509格式。可以使用openssl转化为PEM格式。<br><a id="more"></a></p>
+<h3 id="–cert-type-指定证书类型"><a href="#–cert-type-指定证书类型" class="headerlink" title="–cert-type 指定证书类型"></a>–cert-type 指定证书类型</h3><p><code>--cert-type &lt;type&gt;</code>指定证书类型，可以为PEM、 DER 或 ENG类型。</p>
+<h3 id="–cacert-指定CA证书"><a href="#–cacert-指定CA证书" class="headerlink" title="–cacert 指定CA证书"></a>–cacert 指定CA证书</h3><p><code>--cacert &lt;CA certificate&gt;</code><br>指定使用的CA证书。CA证书必须是PEM格式。<br>默认情况下，curl使用一个自带的CA文件。可以在<a href="http://curl.haxx.se/docs/caextract.html" target="_blank" rel="external">这里</a>下载curl提供的最新的CA证书。<br>curl通过读取环境变量CURL_CA_BUNDLE的值作为CA证书库（CA cert bundle）的路径。此选项优先级高于此环境变量被使用。</p>
+<h3 id="–capath-指定CA路径"><a href="#–capath-指定CA路径" class="headerlink" title="–capath 指定CA路径"></a>–capath 指定CA路径</h3><p><code>--capath &lt;CA certificate directory&gt;</code><br>指定使用的CA证书路径目录。证书必须为PEM格式，且此目录已被curl自带的c_rehash工具处理过。<br>在需要指定多个CA证书的时候，使用–capath指定CA目录更高效。</p>
+<h3 id="k-–insecure-跳过验证"><a href="#k-–insecure-跳过验证" class="headerlink" title="-k/–insecure 跳过验证"></a>-k/–insecure 跳过验证</h3><p><code>-k/--insecure</code><br>指定允许使用不安全的ssl连接传输。<br>所有的连接都是试图通过使用默认安装的CA证书库（CA certificate bundle）来验证是安全的。非安全的连接默认是不允许的。</p>
+<h3 id="指定私钥"><a href="#指定私钥" class="headerlink" title="指定私钥"></a>指定私钥</h3><p><code>--key &lt;key&gt;</code><br>指定私钥文件名。</p>
+<p><code>--key-type &lt;type&gt;</code><br>指定私钥文件类型，可以为DER、PEM 或 ENG。默认使用PEM。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://curl.haxx.se/docs/sslcerts.html" target="_blank" rel="external">Details on Server SSL Certificates</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，curl脚本HTTP相关部分告一段落。<br>后续会介绍些curl使用其他协议的例子，及在编程中使用libcurl库。</p>
 
       
     </div>
@@ -322,21 +343,31 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/curl/" rel="tag">#curl</a>
+          
+            <a href="/tags/linux-curl/" rel="tag">#linux curl</a>
+          
+            <a href="/tags/linux/" rel="tag">#linux</a>
+          
+        </div>
+      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2012/08/linux-curl-usage-https-cert/" rel="next" title="Linux下cURL使用教程之十一：HTTPS及证书使用简介">
-                <i class="fa fa-chevron-left"></i> Linux下cURL使用教程之十一：HTTPS及证书使用简介
+              <a href="/2012/08/linux-curl-usage-download-file/" rel="next" title="Linux下cURL使用教程之十：HTTP文件下载">
+                <i class="fa fa-chevron-left"></i> Linux下cURL使用教程之十：HTTP文件下载
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/08/curl-ftp-usage/" rel="prev" title="Linux下cURL使用教程之十二：ftp及其他协议">
-                Linux下cURL使用教程之十二：ftp及其他协议 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/07/fresh-start/" rel="prev" title="新域名启用">
+                新域名启用 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -386,8 +417,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/07/fresh-start/"
-           data-title="新域名启用" data-url="http://stackeye.com/2016/07/fresh-start/">
+      <div class="ds-thread" data-thread-key="2012/08/linux-curl-usage-https-cert/"
+           data-title="Linux下cURL使用教程之十一：HTTPS及证书使用简介" data-url="http://stackeye.com/2012/08/linux-curl-usage-https-cert/">
       </div>
     
   </div>
@@ -478,7 +509,7 @@
               
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用到的选项"><span class="nav-number">1.</span> <span class="nav-text">使用到的选项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#E-–cert-导入证书"><span class="nav-number">1.1.</span> <span class="nav-text">-E/–cert 导入证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#–cert-type-指定证书类型"><span class="nav-number">1.2.</span> <span class="nav-text">–cert-type 指定证书类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#–cacert-指定CA证书"><span class="nav-number">1.3.</span> <span class="nav-text">–cacert 指定CA证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#–capath-指定CA路径"><span class="nav-number">1.4.</span> <span class="nav-text">–capath 指定CA路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#k-–insecure-跳过验证"><span class="nav-number">1.5.</span> <span class="nav-text">-k/–insecure 跳过验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指定私钥"><span class="nav-number">1.6.</span> <span class="nav-text">指定私钥</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
           </div>
         </section>
