@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="curl,linux curl,linux," />
+  <meta name="keywords" content="curl,linux curl,linux,libcurl," />
 
 
 
@@ -84,22 +84,19 @@
 
 
 
-<meta name="description" content="随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；可能还需要模仿成一个正常浏览器的样子，或者使用代理；甚至需要上传或POST数据。
-而cURL就是HTTP脚本编程的利器。
-什么是cURLcURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端">
+<meta name="description" content="在Linux下cURL使用教程之十三：curl vs wget中我们谈到，curl是基于libcurl库实现的。而libcurl库是开源免费跨平台的，可用于多种语言。有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。
+官方提供了一些demo代码，大家下载查看。本篇文章我们只谈谈各种语言下的使用，及一些">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linux下cURL使用教程之一：cURL简介">
-<meta property="og:url" content="http://stackeye.com/2012/07/linux-curl-description/index.html">
+<meta property="og:title" content="Linux下cURL使用教程之十四：libcurl编程">
+<meta property="og:url" content="http://stackeye.com/2012/09/linux-curl-libcurl/index.html">
 <meta property="og:site_name" content="StackEye">
-<meta property="og:description" content="随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；可能还需要模仿成一个正常浏览器的样子，或者使用代理；甚至需要上传或POST数据。
-而cURL就是HTTP脚本编程的利器。
-什么是cURLcURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端">
-<meta property="og:updated_time" content="2016-07-16T12:21:22.000Z">
+<meta property="og:description" content="在Linux下cURL使用教程之十三：curl vs wget中我们谈到，curl是基于libcurl库实现的。而libcurl库是开源免费跨平台的，可用于多种语言。有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。
+官方提供了一些demo代码，大家下载查看。本篇文章我们只谈谈各种语言下的使用，及一些">
+<meta property="og:updated_time" content="2016-07-18T06:26:09.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Linux下cURL使用教程之一：cURL简介">
-<meta name="twitter:description" content="随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；可能还需要模仿成一个正常浏览器的样子，或者使用代理；甚至需要上传或POST数据。
-而cURL就是HTTP脚本编程的利器。
-什么是cURLcURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端">
+<meta name="twitter:title" content="Linux下cURL使用教程之十四：libcurl编程">
+<meta name="twitter:description" content="在Linux下cURL使用教程之十三：curl vs wget中我们谈到，curl是基于libcurl库实现的。而libcurl库是开源免费跨平台的，可用于多种语言。有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。
+官方提供了一些demo代码，大家下载查看。本篇文章我们只谈谈各种语言下的使用，及一些">
 
 
 
@@ -120,9 +117,9 @@
 
 
 
-  <link rel="canonical" href="http://stackeye.com/2012/07/linux-curl-description/"/>
+  <link rel="canonical" href="http://stackeye.com/2012/09/linux-curl-libcurl/"/>
 
-  <title> Linux下cURL使用教程之一：cURL简介 | StackEye </title>
+  <title> Linux下cURL使用教程之十四：libcurl编程 | StackEye </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -252,7 +249,7 @@
             
             
               
-                Linux下cURL使用教程之一：cURL简介
+                Linux下cURL使用教程之十四：libcurl编程
               
             
           </h1>
@@ -264,8 +261,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2012-07-28T11:49:44+08:00" content="2012-07-28">
-              2012-07-28
+            <time itemprop="dateCreated" datetime="2012-09-05T13:50:45+08:00" content="2012-09-05">
+              2012-09-05
             </time>
           </span>
 
@@ -294,8 +291,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2012/07/linux-curl-description/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/07/linux-curl-description/" itemprop="commentsCount"></span>
+                <a href="/2012/09/linux-curl-libcurl/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/09/linux-curl-libcurl/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -318,14 +315,14 @@
       
 
       
-        <p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
-<p>而cURL就是HTTP脚本编程的利器。</p>
-<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
-<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
-<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
-<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
-<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="external">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
-</ol>
+        <p>在<a href="http://127.0.0.1:4000/2012/09/curl-vs-wget/" target="_blank" rel="external">Linux下cURL使用教程之十三：curl vs wget</a>中我们谈到，curl是基于libcurl库实现的。<br>而libcurl库是开源免费跨平台的，可用于多种语言。<br>有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。</p>
+<p>官方提供了一些demo代码，大家下载查看。<br>本篇文章我们只谈谈各种语言下的使用，及一些参考。</p>
+<h2 id="C-C"><a href="#C-C" class="headerlink" title="C/C++"></a>C/C++</h2><p>C/C++语言下使用libcurl有些繁琐，但功能很强大、稳定高效。而且尤其C下本身开源库相比其它语言较少，因此libcurl库使用较多。<br>参考：<br><a href="http://curl.haxx.se/libcurl/c/libcurl-tutorial.html" target="_blank" rel="external">http://curl.haxx.se/libcurl/c/libcurl-tutorial.html</a><br><a href="http://curl.haxx.se/libcurl/c/" target="_blank" rel="external">http://curl.haxx.se/libcurl/c/</a></p>
+<h2 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h2><p>PHP的libcurl库使用较多。<br><a id="more"></a><br>参考：<br><a href="http://cn2.php.net/curl" target="_blank" rel="external">http://cn2.php.net/curl</a><br><a href="http://curl.haxx.se/libcurl/php/" target="_blank" rel="external">http://curl.haxx.se/libcurl/php/</a></p>
+<h2 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h2><p>python中也有curl库：PycURL。<br>但更易用使用更普遍的还是<a href="https://pypi.python.org/pypi/requests" target="_blank" rel="external">requests</a>。</p>
+<h2 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h2><p>Java下的curl库一度被抛弃：<a href="https://curl.haxx.se/libcurl/java/" target="_blank" rel="external">accessing libcurl from Java</a>。<br>不知道目前github上的版本是否稳定。<br>更建议使用apache httpclient(貌似现在叫做httpcomponents)，参考：<a href="http://hc.apache.org/" target="_blank" rel="external">Apache HttpComponents</a>。</p>
+<h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><p>如果作为日常请求工作使用，如在测试接口时，更建议使用带有GUI界面的postman，功能很强大，而且自带分组、回归等CI功能。<br>参考：<a href="http://www.getpostman.com/" target="_blank" rel="external">Postman | Supercharge your API workflow</a>。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>如果需要编写shell脚本进行功能更强大的CI测试，curl仍是首选。<br>此系列告一段落。</p>
 
       
     </div>
@@ -354,6 +351,8 @@
           
             <a href="/tags/linux/" rel="tag">#linux</a>
           
+            <a href="/tags/libcurl/" rel="tag">#libcurl</a>
+          
         </div>
       
 
@@ -361,12 +360,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2012/09/curl-vs-wget/" rel="next" title="Linux下cURL使用教程之十三：curl vs wget">
+                <i class="fa fa-chevron-left"></i> Linux下cURL使用教程之十三：curl vs wget
+              </a>
+            
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2012/07/linux-curl-http-protocol/" rel="prev" title="Linux下cURL使用教程之二：HTTP协议概述">
-                Linux下cURL使用教程之二：HTTP协议概述 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/07/fresh-start/" rel="prev" title="新域名启用">
+                新域名启用 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -416,8 +419,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2012/07/linux-curl-description/"
-           data-title="Linux下cURL使用教程之一：cURL简介" data-url="http://stackeye.com/2012/07/linux-curl-description/">
+      <div class="ds-thread" data-thread-key="2012/09/linux-curl-libcurl/"
+           data-title="Linux下cURL使用教程之十四：libcurl编程" data-url="http://stackeye.com/2012/09/linux-curl-libcurl/">
       </div>
     
   </div>
@@ -508,7 +511,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是cURL"><span class="nav-number">1.</span> <span class="nav-text">什么是cURL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cURL主要特点"><span class="nav-number">2.</span> <span class="nav-text">cURL主要特点</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#C-C"><span class="nav-number">1.</span> <span class="nav-text">C/C++</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PHP"><span class="nav-number">2.</span> <span class="nav-text">PHP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python"><span class="nav-number">3.</span> <span class="nav-text">Python</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java"><span class="nav-number">4.</span> <span class="nav-text">Java</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux"><span class="nav-number">5.</span> <span class="nav-text">Linux</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
           </div>
         </section>

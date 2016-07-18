@@ -245,6 +245,260 @@
             
               
                 
+                <a class="post-title-link" href="/2012/08/linux-curl-basic-usage-upload-file/" itemprop="url">
+                  Linux下cURL使用教程之六：curl基本使用之HTTP文件上传
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-11T17:42:15+08:00" content="2012-08-11">
+              2012-08-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-basic-usage-upload-file/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-basic-usage-upload-file/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
+<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前，所有服务端代码通过php实现。</p>
+<ul>
+<li>file.php，显示文件上传表单：<figure class="highlight php"><table><tr><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;</div><div class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</div><div class="line">&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">This is a PHP File Upload Demo.&lt;br /&gt;</div><div class="line">Select a file <span class="keyword">and</span> Submit.&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;form action=<span class="string">"upload_file.php"</span> method=<span class="string">"post"</span></div><div class="line">enctype=<span class="string">"multipart/form-data"</span>&gt;</div><div class="line">&lt;label <span class="keyword">for</span>=<span class="string">"file"</span>&gt;Filename:&lt;/label&gt;</div><div class="line">&lt;input type=<span class="string">"file"</span> name=<span class="string">"file"</span> id=<span class="string">"file"</span> /&gt; </div><div class="line">&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"submit"</span> value=<span class="string">"Submit"</span> /&gt;</div><div class="line">&lt;/form&gt;</div><div class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-basic-usage-upload-file/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2012/08/linux-curl-basic-usage-forms/" itemprop="url">
+                  Linux下cURL使用教程之五：curl基本使用之提交表单
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-03T09:44:49+08:00" content="2012-08-03">
+              2012-08-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-basic-usage-forms/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-basic-usage-forms/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>很多时候，我们想获得的内容或者想进行的操作，只有在登陆之后才有权限，此时就需要用到提交表单。<br>表单以HTML的形式呈现给用户，用户使用表单提交数据后，服务端获得表单数据进行处理，然后进行后续操作。比如我们登录的过程，登录的表单呈现给我们，输入用户名密码提交后，服务端获得用户名密码在数据库中查询，以查询结果判定密码正确与否。<br>向HTTP服务器提交数据常用的有GET和POST两种方法。下文针对这两种方法，结合实例说明curl的使用。</p>
+<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前篇，服务端所有代码通过php实现。</p>
+<ul>
+<li>post.php，显示表单用于POST提交数据：<figure class="highlight php"><table><tr><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;</div><div class="line">PHP POST Demo <span class="keyword">for</span> curl basic usage By Stackeye</div><div class="line">&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">This is a post form demo.&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;form action=<span class="string">"welcome.php"</span> method=<span class="string">"post"</span>&gt;</div><div class="line">Name: &lt;input type=<span class="string">"text"</span> name=<span class="string">"name"</span> /&gt;</div><div class="line">Age: &lt;input type=<span class="string">"text"</span> name=<span class="string">"age"</span> /&gt;</div><div class="line">&lt;input type=<span class="string">"submit"</span> /&gt;</div><div class="line">&lt;/form&gt;</div><div class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</div><div class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-basic-usage-forms/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2012/08/linux-curl-basic-usage-example/" itemprop="url">
                   Linux下cURL使用教程之四：curl基本使用实例
                 </a>
@@ -778,7 +1032,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-count">16</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -795,7 +1049,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
