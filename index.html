@@ -348,6 +348,261 @@
             
               
                 
+                <a class="post-title-link" href="/2012/08/linux-curl-basic-usage-proxy/" itemprop="url">
+                  Linux下cURL使用教程之九：代理的使用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-16T11:07:00+08:00" content="2012-08-16">
+              2012-08-16
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-basic-usage-proxy/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-basic-usage-proxy/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
+<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
+<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x 127.0.0.1:8086 <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure></p>
+<p>即可看到我们的IP变成了代理服务器的IP。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-basic-usage-proxy/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2012/08/linux-curl-example-115/" itemprop="url">
+                  Linux下cURL使用教程之八：curl基本使用实例之115网盘自动摇一摇脚本
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-15T11:06:38+08:00" content="2012-08-15">
+              2012-08-15
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-example-115/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-example-115/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>上一篇使用shell+curl的方式完成了登陆百度空间并发表文章。但是奈何shell脚本对大批量文字的处理太弱，因此脚本显得鸡肋。<br>而本篇则完成一个实际可用的脚本程序：115网盘自动摇一摇脚本。</p>
+<h2 id="115网盘简介"><a href="#115网盘简介" class="headerlink" title="115网盘简介"></a>115网盘简介</h2><p>115网盘容量和速度都算不错的。注册送15G，然后可通过每天摇一摇等方式获得容量。<br>免费会员每天可以摇一次，可以获得几十M到一百多M的空间，和几百“雨露”。雨露可用于升级，升级后增加空间，但是貌似现在没有了。<br>可以在淘宝上搜一下115账号的价格。<br>（注：当初写这个脚本的时候，还在网盘大战前后，如今的115早已不如当前，摇一摇这个功能早已消失。）</p>
+<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>登陆过程我们仍然使用Developer Tools分析。<br>简单的办法是使用谷歌官方的chrome浏览器或Firefox+Firebug。</p>
+<h2 id="登陆过程"><a href="#登陆过程" class="headerlink" title="登陆过程"></a>登陆过程</h2><p>登陆，使用Developer Tools抓包，很容易看到第一个POST包。</p>
+<h3 id="1、POST地址"><a href="#1、POST地址" class="headerlink" title="1、POST地址"></a>1、POST地址</h3><p><code>https://passport.115.com/?ac=login</code></p>
+<h3 id="2、三部分数据"><a href="#2、三部分数据" class="headerlink" title="2、三部分数据"></a>2、三部分数据</h3><ul>
+<li>Request Headers，没特殊需要注意的字段。</li>
+<li>Query String Parameters，没用。</li>
+<li>Form Data，有两个数据：用户名、密码，字段名分别为login[account]、login[passwd]，参数明文。
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-example-115/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2012/08/linux-curl-example-post-to-baidu-hi/" itemprop="url">
                   Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间
                 </a>
@@ -1256,7 +1511,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-count">10</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
