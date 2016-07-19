@@ -108,7 +108,7 @@
 <meta property="og:image" content="http://stackeye.com/img/git-branches.png">
 <meta property="og:image" content="http://stackeye.com/img/openstack-ci-process.png">
 <meta property="og:image" content="http://stackeye.com/img/openstack-ci-modules.png">
-<meta property="og:updated_time" content="2016-07-19T04:20:26.000Z">
+<meta property="og:updated_time" content="2016-07-19T08:11:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Openstack CI持续集成测试简介">
 <meta name="twitter:description" content="本文档主要对Openstack社区目前的CI测试环境及其中用到的各个组件进行介绍。
@@ -455,9 +455,9 @@
 <h3 id="稳定性测试"><a href="#稳定性测试" class="headerlink" title="稳定性测试"></a>稳定性测试</h3><p>可以通过改写Tempest实现，增加功能测试的时间、场景的复杂度，增加一定的负载，即可实现满足要求的稳定性测试。</p>
 <h3 id="性能-压力测试"><a href="#性能-压力测试" class="headerlink" title="性能/压力测试"></a>性能/压力测试</h3><p>目前有Rally、scalability testing项目去实现。因为对运行环境有要求、负载压力较大，而且可能包含调优工作（此时可能会改变部署环境等），所以虽然已集成到CI环境中，但后续可能需要单独进行测试。</p>
 <h3 id="其它测试"><a href="#其它测试" class="headerlink" title="其它测试"></a>其它测试</h3><p>很多项目中还在gate的测试中包含升级和数据库迁移测试（如turbo-hipster）。在原有数据量比较大的情况下，就需要考虑升级测试。<br>还有很多测试未包含，但是社区在不断完善加入新的测试。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><p>作为Openstack开发厂商，我们如何继承社区的CI框架到我们的开发过程中呢？</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><p>作为Openstack开发厂商，如何集成社区的CI框架到我们的开发过程中呢？</p>
 <ul>
-<li>部署在我们的环境中，测试我们的产品质量<br>Openstack社区有兼容性认证，修改后仍能通过社区测试用例即可获得此认证。<br>另外，为社区提交的patch都需要有严格全面的测试用例。<br>其它修改对于的测试用例需要自行编写维护。</li>
+<li>测试我们的产品质量<br>Openstack社区有兼容性认证，对社区版本做出修改后仍能通过社区测试用例即可获得此认证。<br>另外，为社区提交的patch都需要有严格全面的测试用例。<br>还可以考虑将社区的CI流程集成进自己的开发流程内，但修改对应的测试用例需要自行编写维护。</li>
 <li>为社区捐赠云主机加入社区的测试环境<br>可及时获得社区的修改，是否适用于我们的环境，并跟踪bug修改。<br>目前各大openstack公有云厂商都有参与。</li>
 </ul>
 <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><ul>
@@ -599,10 +599,10 @@
       <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="/images/avatar.gif"
+               src="/img/avatar.jpg"
                alt="Jacob" />
           <p class="site-author-name" itemprop="name">Jacob</p>
-          <p class="site-description motion-element" itemprop="description"></p>
+          <p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p>
         </div>
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
@@ -671,7 +671,7 @@
       <div class="footer-inner">
         <div class="copyright" >
   
-  &copy; 
+  &copy;  2012 - 
   <span itemprop="copyrightYear">2016</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
