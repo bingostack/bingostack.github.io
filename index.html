@@ -358,6 +358,136 @@
             
               
                 
+                <a class="post-title-link" href="/2014/06/openstack-ci/" itemprop="url">
+                  Openstack CI持续集成测试简介
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-06-26T09:30:40+08:00" content="2014-06-26">
+              2014-06-26
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/06/openstack-ci/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/06/openstack-ci/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>本文档主要对Openstack社区目前的CI测试环境及其中用到的各个组件进行介绍。</p>
+<h2 id="测试的分类及必要性"><a href="#测试的分类及必要性" class="headerlink" title="测试的分类及必要性"></a>测试的分类及必要性</h2><h3 id="测试的分类"><a href="#测试的分类" class="headerlink" title="测试的分类"></a>测试的分类</h3><p>测试的过程没太有太严格的分类标准，从使用的角度，我们可以从以下两个角度对测试进行分类。</p>
+<h4 id="按照测试过程分类"><a href="#按照测试过程分类" class="headerlink" title="按照测试过程分类"></a>按照测试过程分类</h4><p>软件测试大概分为单元测试、集成测试、系统测试、验收测试。以下为软件测试V型图：<br><img src="/img/testing-V.png" alt="软件测试V型图"></p>
+<ul>
+<li>一般由单元测试开始，集中对每一个程序单元进行测试，检查各个程序模块是否正确地实现了规定的功能。单元测试的测试对象为独立的模块，需要由开发完成。</li>
+<li>此外，开发阶段应该还需要通过代码评审等方式，进行静态测试。</li>
+<li>集成测试把已测试过的模块组装起来，主要对与设计相关的软件体系结构的构造进行测试，目的在于检验与软件设计相关的程序结构问题。系统测试把已经经过确认的软件纳入实际运行环境中，与其它系统成份组合在一起进行测试，验证软件的完整功能是否满足需求规格并可正常运行。此两个阶段应该由测试人员执行。</li>
+<li>验收测试主要由软件的实际用户在实际应用场景中执行，包含α测试和β测试。</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/06/openstack-ci/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2012/09/linux-curl-libcurl/" itemprop="url">
                   Linux下cURL使用教程之十四：libcurl编程
                 </a>
@@ -1348,131 +1478,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2012/08/linux-curl-example-post-to-baidu-hi/" itemprop="url">
-                  Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2012-08-12T17:42:39+08:00" content="2012-08-12">
-              2012-08-12
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/curl/" itemprop="url" rel="index">
-                    <span itemprop="name">curl</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2012/08/linux-curl-example-post-to-baidu-hi/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-example-post-to-baidu-hi/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>前六篇之后，我们对curl的基本使用已经有了一定的了解。下面我们就在实际场景中使用我们的所学。<br>本篇实例目标为编写linux脚本,使用curl完成发布文章至百度空间。<br>下文将从百度空间登陆到发表文章，对每个过程的HTTP进行分析，并编写脚本实现。</p>
-<h2 id="工欲善其事，必先利其器"><a href="#工欲善其事，必先利其器" class="headerlink" title="工欲善其事，必先利其器"></a>工欲善其事，必先利其器</h2><p>抓包分析我们使用chrome自带的Developer Tools。<br>实际分析过程中最好把Developer Tools的Network标签左下角的“Preserve Log upon Navigation”选中，如下图圈中处：<br><img src="/img/developertoolspreserve.jpg" alt="Chrome Developer Tools Preserve Log upon Navigation"><br>单击变为红色即可。<br>此选项的作用在于当当前页面跳转到其他网页时，保存原来的日志记录。<br>默认不保存，比如在登陆成功一个网站后，自动跳转到其他网页，这样登陆网站过程中的记录都不保存。我们就没有办法对登陆过程进行具体分析。</p>
-<h2 id="POST登陆"><a href="#POST登陆" class="headerlink" title="POST登陆"></a>POST登陆</h2><h3 id="1-操作过程"><a href="#1-操作过程" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>登陆我们采用网址<code>https://passport.baidu.com/?login</code>，而不使用网址<code>http://hi.baidu.com/index.htm</code>或<code>http://hi.baidu.com/go/login</code> 右侧的登陆框。<br>这是因为后者可能因为百度空间改版等原因改变，而前者是百度账号的登陆界面，变化的几率要小。而且后者界面很多图片等元素，不利于我们抓包分析。</p>
-<h3 id="2-登陆过程分析"><a href="#2-登陆过程分析" class="headerlink" title="2. 登陆过程分析"></a>2. 登陆过程分析</h3><p>登陆成功后找到<code>/?login</code>的POST包，如下图：<br><img src="/img/DeveloperToolsBaiduLogin.jpg" alt="Developer Tools Baidu Login HTTP Analy"><br>主要显示了状态信息、请求头部（Request Headers）、POST数据（Form Data）和响应头部（Response Heades）。<br>Query String Parameters是对GET的参数的解析，即网址中的?login。一般网址中“?”后面的都应该是参数，具体请参考Linux下cURL使用教程之二：HTTP协议概述中“GET命令”一节。<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2012/08/linux-curl-example-post-to-baidu-hi/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1518,7 +1523,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">16</span>
+              <span class="site-state-item-count">17</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1526,7 +1531,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1535,7 +1540,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">10</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
