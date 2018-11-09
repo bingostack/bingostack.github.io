@@ -1,1 +1,1788 @@
-<!doctype html><html class="theme-next mist use-motion"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"><link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css"><link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css"><link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css"><meta name="keywords" content="golang, curl, mysql, elasticsearch, elk, nosql, 后端工程师, 分布式, openstack"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1"><meta name="description" content="软件工程师的自我修养"><meta property="og:type" content="website"><meta property="og:title" content="StackEye"><meta property="og:url" content="http://stackeye.com/page/2/index.html"><meta property="og:site_name" content="StackEye"><meta property="og:description" content="软件工程师的自我修养"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="StackEye"><meta name="twitter:description" content="软件工程师的自我修养"><script type="text/javascript" id="hexo.configuration">var NexT=window.NexT||{},CONFIG={scheme:"Mist",sidebar:{position:"left",display:"post"},fancybox:!0,motion:!0,duoshuo:{userId:0,author:"博主"}}</script><link rel="canonical" href="http://stackeye.com/page/2/"><title> StackEye</title></head><body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans"><script type="text/javascript">var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><div class="container one-collumn sidebar-position-left page-home"><div class="headband"></div><header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-meta"><div class="custom-logo-site-title"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span> <span class="site-title">StackEye</span><span class="logo-line-after"><i></i></span></a></div><p class="site-subtitle">Long way to full stack!</p></div><div class="site-nav-toggle"> <button><span class="btn-bar"></span><span class="btn-bar"></span><span class="btn-bar"></span></button></div><nav class="site-nav"><ul id="menu" class="menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i><br> 首页</a></li><li class="menu-item menu-item-categories"><a href="/categories" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i><br> 分类</a></li><li class="menu-item menu-item-archives"><a href="/archives" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i><br> 归档</a></li><li class="menu-item menu-item-tags"><a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i><br> 标签</a></li></ul></nav></div></header><main id="main" class="main"><div class="main-inner"><div class="content-wrap"><div id="content" class="content"><section id="posts" class="posts-expand"><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2013/03/gateway-performance-test-others/" itemprop="url">网关类产品的性能测试之三：其它指标测试方法</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2013-03-22T13:47:21+08:00" content="2013-03-22">2013-03-22</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/Testing/" itemprop="url" rel="index"><span itemprop="name">Testing</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2013/03/gateway-performance-test-others/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2013/03/gateway-performance-test-others/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于<a href="https://www.ietf.org/rfc/rfc3511.txt">RFC3511</a>中的定义，并根据实际需求，更新或舍弃了部分指标项。</p><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p><ol><li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/">简介及性能指标介绍</a></li><li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/">RFC2544四项指标测试方法</a></li><li>其它指标测试方法 - 本篇</li><li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/">测试工具、注意事项及经验总结</a></li></ol><h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p><ul><li>性能测试，对产品负载压力承受能力的测试。</li><li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li><li>网关类产品，部署作为网关的设备及软件。</li><li>IDS，入侵检测系统</li><li>IPS，入侵防御系统</li><li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li><li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li><li>被测设备，devices under test，测试设备。</li></ul><h2 id="其它性能指标测试方法"><a href="#其它性能指标测试方法" class="headerlink" title="其它性能指标测试方法"></a>其它性能指标测试方法</h2><p>以下主要包括CPS、TPS、HTTP吞吐、TCP最大连接数及其它性能指标的测试方法。</p><div class="post-more-link text-center"> <a class="btn" href="/2013/03/gateway-performance-test-others/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2013/03/gateway-performance-test-rfc2544/" itemprop="url">网关类产品的性能测试之二：RFC2544四项指标测试方法</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2013-03-12T19:47:21+08:00" content="2013-03-12">2013-03-12</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/Testing/" itemprop="url" rel="index"><span itemprop="name">Testing</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2013/03/gateway-performance-test-rfc2544/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2013/03/gateway-performance-test-rfc2544/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>前面我们介绍了各性能指标项的含义，下面我们针对各性能指标项是如何测试的进行详细描述。<br>对于每家评测机构、客户和安全厂商，同一个性能指标在测试方法上可能有所区别。建议在测试之前首先了解客户的需求，了解客户的性能关注点在哪里，并根据实际的需求适当的调整测试方法。虽然RFC2544文档和RFC3511文档描述了相关的测试方法，但这样的测试方法并不一定能满足客户的需求，而且RFC 文档中对测试细节并没有太详细的描述。下面以我在实际测试中积累的经验和向业界学习到的知识，描述我理解的性能测试方法。</p><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p><ol><li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/">简介及性能指标介绍</a></li><li>RFC2544四项指标测试方法 - 本篇</li><li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/">其它指标测试方法</a></li><li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/">测试工具、注意事项及经验总结</a></li></ol><h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p><ul><li>性能测试，对产品负载压力承受能力的测试。</li><li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li><li>网关类产品，部署作为网关的设备及软件。</li><li>IDS，入侵检测系统</li><li>IPS，入侵防御系统</li><li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li><li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li><li>被测设备，devices under test，测试设备。</li></ul><h2 id="RFC2544四项值测试方法"><a href="#RFC2544四项值测试方法" class="headerlink" title="RFC2544四项值测试方法"></a>RFC2544四项值测试方法</h2><p>RFC2544文档对四项值的定义和测试方法描述还是比较全面的，但在细节上没有过多的描述。下面我将描述一下实际测试中总结的RFC2544四项值的性能测试方法。</p><div class="post-more-link text-center"> <a class="btn" href="/2013/03/gateway-performance-test-rfc2544/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2013/03/gateway-performance-test-desc/" itemprop="url">网关类产品的性能测试之一：简介及性能指标介绍</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2013-03-02T19:47:21+08:00" content="2013-03-02">2013-03-02</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/Testing/" itemprop="url" rel="index"><span itemprop="name">Testing</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2013/03/gateway-performance-test-desc/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2013/03/gateway-performance-test-desc/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p><ol><li>简介及性能指标介绍 - 本篇</li><li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/">RFC2544四项指标测试方法</a></li><li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/">其它指标测试方法</a></li><li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/">测试工具、注意事项及经验总结</a></li></ol><div class="post-more-link text-center"> <a class="btn" href="/2013/03/gateway-performance-test-desc/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2012/09/linux-curl-libcurl/" itemprop="url">Linux下cURL使用教程之十四：libcurl编程</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2012-09-05T13:50:45+08:00" content="2012-09-05">2012-09-05</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/curl/" itemprop="url" rel="index"><span itemprop="name">curl</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2012/09/linux-curl-libcurl/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2012/09/linux-curl-libcurl/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>在<a href="http://127.0.0.1:4000/2012/09/curl-vs-wget/">Linux下cURL使用教程之十三：curl vs wget</a>中我们谈到，curl是基于libcurl库实现的。<br>而libcurl库是开源免费跨平台的，可用于多种语言。<br>有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。</p><p>官方提供了一些demo代码，大家下载查看。<br>本篇文章我们只谈谈各种语言下的使用，及一些参考。</p><h2 id="C-C"><a href="#C-C" class="headerlink" title="C/C++"></a>C/C++</h2><p>C/C++语言下使用libcurl有些繁琐，但功能很强大、稳定高效。而且尤其C下本身开源库相比其它语言较少，因此libcurl库使用较多。<br>参考：<br><a href="http://curl.haxx.se/libcurl/c/libcurl-tutorial.html">http://curl.haxx.se/libcurl/c/libcurl-tutorial.html</a><br><a href="http://curl.haxx.se/libcurl/c/">http://curl.haxx.se/libcurl/c/</a></p><h2 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h2><p>PHP的libcurl库使用较多。<br></p><div class="post-more-link text-center"> <a class="btn" href="/2012/09/linux-curl-libcurl/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2012/09/curl-vs-wget/" itemprop="url">Linux下cURL使用教程之十三：curl vs wget</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2012-09-03T13:50:31+08:00" content="2012-09-03">2012-09-03</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/curl/" itemprop="url" rel="index"><span itemprop="name">curl</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2012/09/curl-vs-wget/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2012/09/curl-vs-wget/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>curl和wget有很多地方是相同的，很多场景下二者都可以使用。那面对一个复杂问题的时候，我们怎么决定使用哪个工具呢？本篇通过对二者进行比较，从而对此提供思路。<br>本篇主要参考<a href="http://daniel.haxx.se/docs/curl-vs-wget.html">curl官方的文档</a>，翻译加整理。</p><h2 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h2><ul><li>都是可通过FTP/HTTP/HTTPS协议下载文件的命令行工具；</li><li>都可以发送HTTP POST请求；</li><li>都支持cookie的使用；</li><li>都被设计为无界面（UI），可在如脚本中使用；</li><li>都是开源且免费的软件。</li></ul><div class="post-more-link text-center"> <a class="btn" href="/2012/09/curl-vs-wget/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2012/08/curl-ftp-usage/" itemprop="url">Linux下cURL使用教程之十二：ftp及其他协议</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2012-08-31T11:59:13+08:00" content="2012-08-31">2012-08-31</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/curl/" itemprop="url" rel="index"><span itemprop="name">curl</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2012/08/curl-ftp-usage/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2012/08/curl-ftp-usage/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>在<a href="http://stackeye.com/2012/07/linux-curl-description/">Linux下cURL使用教程之一：cURL简介</a>里，提到curl支持多种协议。本篇就以ftp协议为主，对curl对其他协议的操作进行简介。</p><h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>基本使用方法同HTTP没有区别：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl ftp://ftp.cisco.com/pub/mibs/</div></pre></td></tr></table></figure><p></p><p>只不过ftp一般会有用户名密码，所有在命令中要加上用户名密码：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -u ftpuser:ftppass -O ftp://ftp_server/index.php</div></pre></td></tr></table></figure><p></p><p>或者<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl ftp:// ftpuser:ftppass ftp://ftp_server/index.php</div></pre></td></tr></table></figure><p></p><h2 id="上传文件"><a href="#上传文件" class="headerlink" title="上传文件"></a>上传文件</h2><p>使用-T选项。具体请参考<a href="https://adeployblog.appspot.com/2012/08/11/linux-curl-basic-usage-upload-file.html">Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</a>。</p><div class="post-more-link text-center"> <a class="btn" href="/2012/08/curl-ftp-usage/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2012/08/linux-curl-usage-https-cert/" itemprop="url">Linux下cURL使用教程之十一：HTTPS及证书使用简介</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2012-08-21T11:58:59+08:00" content="2012-08-21">2012-08-21</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/curl/" itemprop="url" rel="index"><span itemprop="name">curl</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2012/08/linux-curl-usage-https-cert/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-usage-https-cert/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：<br></p><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:</div><div class="line">error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed</div><div class="line">More details here: http://curl.haxx.se/docs/sslcerts.html</div></pre></td></tr></table></figure><p></p><p>此时就需要使用证书。<br>因此本篇只对curl相关选项做出介绍，详细原理请参考HTTPS协议。</p><h2 id="使用到的选项"><a href="#使用到的选项" class="headerlink" title="使用到的选项"></a>使用到的选项</h2><h3 id="E-–cert-导入证书"><a href="#E-–cert-导入证书" class="headerlink" title="-E/–cert 导入证书"></a>-E/–cert 导入证书</h3><p><code>-E/--cert &lt;certificate[:password]&gt;</code>导入证书。curl默认使用PEM格式的证书。<br>一般我们从浏览器导出的cert都是X.509格式。可以使用openssl转化为PEM格式。<br></p><div class="post-more-link text-center"> <a class="btn" href="/2012/08/linux-curl-usage-https-cert/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2012/08/linux-curl-usage-download-file/" itemprop="url">Linux下cURL使用教程之十：HTTP文件下载</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2012-08-20T11:58:46+08:00" content="2012-08-20">2012-08-20</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/curl/" itemprop="url" rel="index"><span itemprop="name">curl</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2012/08/linux-curl-usage-download-file/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-usage-download-file/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>其实每次我们使用curl去打开一个url都是执行一次下载操作，因此我们甚至可以认为curl是一个下载工具。<br>而且curl的某些选项及特性，使得curl能完成非常强大的下载功能。<br>基本命令及一些有用的参数如下。</p><h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><p>使用<code>curl [URL...]</code>下载URL，并输出在终端。<br>可指定多个URL。多个URL时，下载内容同时在终端显示。</p><h2 id="–progress-bar-进度条"><a href="#–progress-bar-进度条" class="headerlink" title="-#/–progress-bar 进度条"></a>-#/–progress-bar 进度条</h2><p>添加参数<code>-#/--progress-bar</code>查看下载进度条。</p><h2 id="o-–output-输出文件"><a href="#o-–output-输出文件" class="headerlink" title="-o/–output 输出文件"></a>-o/–output 输出文件</h2><p>使用参数<code>-o/--output &lt;file&gt;</code>下载并保存至文件file。<br>可同时下载多个URL，每个-o对应一个URL。<br>如：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html http://www.a.com http://www.b.com</div></pre></td></tr></table></figure><p></p><p>会下载www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html http://www.a.com -o b.html http://www.b.com</div></pre></td></tr></table></figure><p></p><p>或者<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html -o b.html http://www.a.com http://www.b.com</div></pre></td></tr></table></figure><p></p><p>会分别下载两个URL至两个文件中。<br></p><div class="post-more-link text-center"> <a class="btn" href="/2012/08/linux-curl-usage-download-file/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2012/08/http-auth-schemes/" itemprop="url">HTTP认证模式</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2012-08-17T11:58:27+08:00" content="2012-08-17">2012-08-17</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/curl/" itemprop="url" rel="index"><span itemprop="name">curl</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2012/08/http-auth-schemes/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2012/08/http-auth-schemes/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在研究curl和httpclient，用到了HTTP认证相关的知识。<br>但是搜索之后发现，网上居然没有很全面的HTTP认证模式的介绍，尤其是中文的文章。<br>因此结合MS的<a href="http://msdn.microsoft.com/en-us/library/ms789031.aspx">Understanding HTTP Authentication</a>和<a href="http://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html">HttpClient Tutorial</a>翻译加个人理解写了一篇。</p><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本篇博文简介了几种HTTP认证模式。文章内容要求读者对HTTP请求、响应的基本结构，HTTP状态码和HTTP协议头有一定的了解。<br>请参考<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/">Linux下cURL使用教程之二：HTTP协议概述</a>。</p><h2 id="HTTP访问认证框架"><a href="#HTTP访问认证框架" class="headerlink" title="HTTP访问认证框架"></a>HTTP访问认证框架</h2><p>HTTP协议（RFC2616）定义了一个简单的访问认证模式框架。此框架假设有若干页面（被保护资源，也称作realm，区域），只能被特定的人访问，这些人可以在服务器要求时提供凭证。<br>当客户端如浏览器访问一个位于保护区域（protected realm）中的页面时，服务器返回包含401未认证状态码和www认证头（WWW-Authenticate header field）的响应。返回的认证头中必须含有至少一个适用于请求页面的认证要求（challenge）。<br>然后客户端发起第二次请求，此次请求在请求头中包含了试用于服务器认证要求的认证头域。<br>如果服务器接受了客户端提供的凭证，它将返回客户端请求的页面。否则，服务端会返回另一个401未认证响应以提示客户端认证失败。<br>具体认证响应头和请求头的内容取决于认证的方式。RFC2616中定义了两种广泛使用的认证模式：<br>HTTP基本认证（HTTP Basic authentication）和HTTP摘要认证（HTTP Digest authentication）。<br>此外常用的还有NTLM、SPNEGO（HTTP协商认证，HTTP Negotiate authentication，是其一种）和Kerberos认证方式。<br></p><div class="post-more-link text-center"> <a class="btn" href="/2012/08/http-auth-schemes/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2012/08/linux-curl-basic-usage-proxy/" itemprop="url">Linux下cURL使用教程之九：代理的使用</a></h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2012-08-16T11:07:00+08:00" content="2012-08-16">2012-08-16</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/curl/" itemprop="url" rel="index"><span itemprop="name">curl</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2012/08/linux-curl-basic-usage-proxy/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-basic-usage-proxy/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p><h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p><h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x 127.0.0.1:8086 <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure><p></p><p>即可看到我们的IP变成了代理服务器的IP。<br></p><div class="post-more-link text-center"> <a class="btn" href="/2012/08/linux-curl-basic-usage-proxy/#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></article></section><nav class="pagination"><a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a> <a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a></nav></div></div><div class="sidebar-toggle"><div class="sidebar-toggle-line-wrap"><span class="sidebar-toggle-line sidebar-toggle-line-first"></span><span class="sidebar-toggle-line sidebar-toggle-line-middle"></span><span class="sidebar-toggle-line sidebar-toggle-line-last"></span></div></div><aside id="sidebar" class="sidebar"><div class="sidebar-inner"><section class="site-overview sidebar-panel sidebar-panel-active"><div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person"> <img class="site-author-image" itemprop="image" src="/img/avatar.jpg" alt="Jacob"><p class="site-author-name" itemprop="name">Jacob</p><p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p></div><nav class="site-state motion-element"><div class="site-state-item site-state-posts"> <a href="/archives"><span class="site-state-item-count">28</span> <span class="site-state-item-name">日志</span></a></div><div class="site-state-item site-state-categories"> <a href="/categories"><span class="site-state-item-count">8</span> <span class="site-state-item-name">分类</span></a></div><div class="site-state-item site-state-tags"> <a href="/tags"><span class="site-state-item-count">37</span> <span class="site-state-item-name">标签</span></a></div></nav><div class="links-of-author motion-element"></div></section></div></aside></div></main><footer id="footer" class="footer"><div class="footer-inner"><div class="copyright"> &copy; 2012 - <span itemprop="copyrightYear">2016</span><span class="with-love"><i class="fa fa-heart"></i></span> <span class="author" itemprop="copyrightHolder">Jacob</span></div><div class="powered-by"> 由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动</div><div class="theme-info"> 主题 - <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div></div></footer><div class="back-to-top"><i class="fa fa-arrow-up"></i></div></div><script type="text/javascript">"[object Function]"!==Object.prototype.toString.call(window.Promise)&&(window.Promise=null)</script><script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script><script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script><script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script><script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script><script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script><script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script><script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script><script type="text/javascript">var duoshuoQuery={short_name:"stackeye"};!function(){var t=document.createElement("script");t.type="text/javascript",t.async=!0,t.id="duoshuo-script",t.src=("https:"==document.location.protocol?"https:":"http:")+"//static.duoshuo.com/embed.js",t.charset="UTF-8",(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(t)}()</script><script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script><script src="/js/src/hook-duoshuo.js"></script></body></html>
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="golang, curl, mysql, elasticsearch, elk, nosql, 后端工程师, 分布式, openstack" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="软件工程师的自我修养">
+<meta property="og:type" content="website">
+<meta property="og:title" content="KV Guru">
+<meta property="og:url" content="http://kvguru.com/page/2/index.html">
+<meta property="og:site_name" content="KV Guru">
+<meta property="og:description" content="软件工程师的自我修养">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="KV Guru">
+<meta name="twitter:description" content="软件工程师的自我修养">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://kvguru.com/page/2/"/>
+
+  <title> KV Guru </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left 
+   page-home 
+ ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">KV Guru</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Long way to full stack!</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+  <section id="posts" class="posts-expand">
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2013/09/auto-testing-summary/" itemprop="url">
+                  自动化测试实践：自动化测试的思考总结
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2013-09-24T15:41:37+08:00" content="2013-09-24">
+              2013-09-24
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Testing/" itemprop="url" rel="index">
+                    <span itemprop="name">Testing</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2013/09/auto-testing-summary/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2013/09/auto-testing-summary/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>目前所在的团队一直主要负责部门产品的自动化测试方案。团队在自动化测试方面已经有了几年的探索，但直到最近才真正发挥作用大大提升了产品的测试效率，在这个过程中走了很多的弯路。<br>以下是我这一个阶段以来做自动化测试的思考及总结，有一些大的方向上的讨论，也有一些细节的探讨，希望给大家参考。</p>
+<h2 id="关于要不要做"><a href="#关于要不要做" class="headerlink" title="关于要不要做"></a>关于要不要做</h2><p>相信还有很多人对自动化测试有疑问，或者因为种种原因不愿意引入自动化测试。以下总结了一些反对自动化测试的论点：</p>
+<ul>
+<li>自动化实现较难<br>一般领域内都有可用的自动化测试框架，是这个领域内大家在自动化测试领域探索后的经验总结。在使用正确框架的基础上，自动化测试的实现并不复杂。</li>
+<li>自动化成本太高<br>下文中将会详细解释，如果设计合理，并有正确的预期，自动化的收益远大于成本。</li>
+<li>项目规模较小，没必要做自动化测试<br>以我们自动化项目的经验，越早做自动化测试，越容易实现，成功率越高。因此可以说成本越低，受益越高。</li>
+<li>会限制产品的灵活性<br>需求的频繁变更确实是自动化的灾难。但一般如果需求需要频繁变更，往往预示着其它问题。</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2013/09/auto-testing-summary/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2013/04/gateway-performance-test-summary/" itemprop="url">
+                  网关类产品的性能测试之四：测试工具、注意事项及经验总结
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2013-04-03T17:18:25+08:00" content="2013-04-03">
+              2013-04-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Testing/" itemprop="url" rel="index">
+                    <span itemprop="name">Testing</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2013/04/gateway-performance-test-summary/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2013/04/gateway-performance-test-summary/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>前面我们介绍了各性能指标项的测试方法。本篇主要概述测试工具、测试拓扑及经验总结。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p>
+<ol>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/">简介及性能指标介绍</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/">RFC2544四项指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/">其它指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/">测试工具、注意事项及经验总结</a></li>
+</ol>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>被测设备，devices under test，测试设备。</li>
+</ul>
+<h2 id="性能测试工具"><a href="#性能测试工具" class="headerlink" title="性能测试工具"></a>性能测试工具</h2><p>对于网关类产品，一般要求的性能值比较高，因此测试一般使用专用的硬件设备。<br>常用硬件设备有IAXA等。<br>常用的测试软件有：</p>
+<ul>
+<li><a href="https://iperf.fr/">iperf</a></li>
+<li><a href="http://jmeter.apache.org/">Jmeter</a>使用Java编写，主要用于软件的性能测试，但也可扩展用于网络性能测试。机器配置足够的情况下，流量可打到上百M。</li>
+<li><a href="http://tomahawk.sourceforge.net/">tomahawk</a>是一个回放数据包的工具，也可完成部分性能测试。</li>
+<li>而软件的性能测试常用的LoadRunner，一般难以用于网络的性能测试。</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2013/04/gateway-performance-test-summary/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2013/03/gateway-performance-test-others/" itemprop="url">
+                  网关类产品的性能测试之三：其它指标测试方法
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2013-03-22T13:47:21+08:00" content="2013-03-22">
+              2013-03-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Testing/" itemprop="url" rel="index">
+                    <span itemprop="name">Testing</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2013/03/gateway-performance-test-others/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2013/03/gateway-performance-test-others/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于<a href="https://www.ietf.org/rfc/rfc3511.txt">RFC3511</a>中的定义，并根据实际需求，更新或舍弃了部分指标项。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p>
+<ol>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/">简介及性能指标介绍</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/">RFC2544四项指标测试方法</a></li>
+<li>其它指标测试方法 - 本篇</li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/">测试工具、注意事项及经验总结</a></li>
+</ol>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>被测设备，devices under test，测试设备。</li>
+</ul>
+<h2 id="其它性能指标测试方法"><a href="#其它性能指标测试方法" class="headerlink" title="其它性能指标测试方法"></a>其它性能指标测试方法</h2><p>以下主要包括CPS、TPS、HTTP吞吐、TCP最大连接数及其它性能指标的测试方法。</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2013/03/gateway-performance-test-others/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2013/03/gateway-performance-test-rfc2544/" itemprop="url">
+                  网关类产品的性能测试之二：RFC2544四项指标测试方法
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2013-03-12T19:47:21+08:00" content="2013-03-12">
+              2013-03-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Testing/" itemprop="url" rel="index">
+                    <span itemprop="name">Testing</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2013/03/gateway-performance-test-rfc2544/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2013/03/gateway-performance-test-rfc2544/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>前面我们介绍了各性能指标项的含义，下面我们针对各性能指标项是如何测试的进行详细描述。<br>对于每家评测机构、客户和安全厂商，同一个性能指标在测试方法上可能有所区别。建议在测试之前首先了解客户的需求，了解客户的性能关注点在哪里，并根据实际的需求适当的调整测试方法。虽然RFC2544文档和RFC3511文档描述了相关的测试方法，但这样的测试方法并不一定能满足客户的需求，而且RFC 文档中对测试细节并没有太详细的描述。下面以我在实际测试中积累的经验和向业界学习到的知识，描述我理解的性能测试方法。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p>
+<ol>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/">简介及性能指标介绍</a></li>
+<li>RFC2544四项指标测试方法 - 本篇</li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/">其它指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/">测试工具、注意事项及经验总结</a></li>
+</ol>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>被测设备，devices under test，测试设备。</li>
+</ul>
+<h2 id="RFC2544四项值测试方法"><a href="#RFC2544四项值测试方法" class="headerlink" title="RFC2544四项值测试方法"></a>RFC2544四项值测试方法</h2><p>RFC2544文档对四项值的定义和测试方法描述还是比较全面的，但在细节上没有过多的描述。下面我将描述一下实际测试中总结的RFC2544四项值的性能测试方法。</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2013/03/gateway-performance-test-rfc2544/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2013/03/gateway-performance-test-desc/" itemprop="url">
+                  网关类产品的性能测试之一：简介及性能指标介绍
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2013-03-02T19:47:21+08:00" content="2013-03-02">
+              2013-03-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Testing/" itemprop="url" rel="index">
+                    <span itemprop="name">Testing</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2013/03/gateway-performance-test-desc/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2013/03/gateway-performance-test-desc/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
+<ol>
+<li>简介及性能指标介绍 - 本篇</li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/">RFC2544四项指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/">其它指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/">测试工具、注意事项及经验总结</a></li>
+</ol>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2013/03/gateway-performance-test-desc/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2012/09/linux-curl-libcurl/" itemprop="url">
+                  Linux下cURL使用教程之十四：libcurl编程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-09-05T13:50:45+08:00" content="2012-09-05">
+              2012-09-05
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/09/linux-curl-libcurl/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/09/linux-curl-libcurl/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>在<a href="http://127.0.0.1:4000/2012/09/curl-vs-wget/">Linux下cURL使用教程之十三：curl vs wget</a>中我们谈到，curl是基于libcurl库实现的。<br>而libcurl库是开源免费跨平台的，可用于多种语言。<br>有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。</p>
+<p>官方提供了一些demo代码，大家下载查看。<br>本篇文章我们只谈谈各种语言下的使用，及一些参考。</p>
+<h2 id="C-C"><a href="#C-C" class="headerlink" title="C/C++"></a>C/C++</h2><p>C/C++语言下使用libcurl有些繁琐，但功能很强大、稳定高效。而且尤其C下本身开源库相比其它语言较少，因此libcurl库使用较多。<br>参考：<br><a href="http://curl.haxx.se/libcurl/c/libcurl-tutorial.html">http://curl.haxx.se/libcurl/c/libcurl-tutorial.html</a><br><a href="http://curl.haxx.se/libcurl/c/">http://curl.haxx.se/libcurl/c/</a></p>
+<h2 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h2><p>PHP的libcurl库使用较多。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/09/linux-curl-libcurl/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2012/09/curl-vs-wget/" itemprop="url">
+                  Linux下cURL使用教程之十三：curl vs wget
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-09-03T13:50:31+08:00" content="2012-09-03">
+              2012-09-03
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/09/curl-vs-wget/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/09/curl-vs-wget/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>curl和wget有很多地方是相同的，很多场景下二者都可以使用。那面对一个复杂问题的时候，我们怎么决定使用哪个工具呢？本篇通过对二者进行比较，从而对此提供思路。<br>本篇主要参考<a href="http://daniel.haxx.se/docs/curl-vs-wget.html">curl官方的文档</a>，翻译加整理。</p>
+<h2 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h2><ul>
+<li>都是可通过FTP/HTTP/HTTPS协议下载文件的命令行工具；</li>
+<li>都可以发送HTTP POST请求；</li>
+<li>都支持cookie的使用；</li>
+<li>都被设计为无界面（UI），可在如脚本中使用；</li>
+<li>都是开源且免费的软件。</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/09/curl-vs-wget/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2012/08/curl-ftp-usage/" itemprop="url">
+                  Linux下cURL使用教程之十二：ftp及其他协议
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-31T11:59:13+08:00" content="2012-08-31">
+              2012-08-31
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/curl-ftp-usage/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/curl-ftp-usage/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>在<a href="http://stackeye.com/2012/07/linux-curl-description/">Linux下cURL使用教程之一：cURL简介</a>里，提到curl支持多种协议。本篇就以ftp协议为主，对curl对其他协议的操作进行简介。</p>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>基本使用方法同HTTP没有区别：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl ftp://ftp.cisco.com/pub/mibs/</div></pre></td></tr></table></figure></p>
+<p>只不过ftp一般会有用户名密码，所有在命令中要加上用户名密码：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -u ftpuser:ftppass -O ftp://ftp_server/index.php</div></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl ftp:// ftpuser:ftppass ftp://ftp_server/index.php</div></pre></td></tr></table></figure></p>
+<h2 id="上传文件"><a href="#上传文件" class="headerlink" title="上传文件"></a>上传文件</h2><p>使用-T选项。具体请参考<a href="https://adeployblog.appspot.com/2012/08/11/linux-curl-basic-usage-upload-file.html">Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</a>。
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/curl-ftp-usage/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2012/08/linux-curl-usage-https-cert/" itemprop="url">
+                  Linux下cURL使用教程之十一：HTTPS及证书使用简介
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-21T11:58:59+08:00" content="2012-08-21">
+              2012-08-21
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-usage-https-cert/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-usage-https-cert/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:</div><div class="line">error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed</div><div class="line">More details here: http://curl.haxx.se/docs/sslcerts.html</div></pre></td></tr></table></figure></p>
+<p>此时就需要使用证书。<br>因此本篇只对curl相关选项做出介绍，详细原理请参考HTTPS协议。</p>
+<h2 id="使用到的选项"><a href="#使用到的选项" class="headerlink" title="使用到的选项"></a>使用到的选项</h2><h3 id="E-–cert-导入证书"><a href="#E-–cert-导入证书" class="headerlink" title="-E/–cert 导入证书"></a>-E/–cert 导入证书</h3><p><code>-E/--cert &lt;certificate[:password]&gt;</code>导入证书。curl默认使用PEM格式的证书。<br>一般我们从浏览器导出的cert都是X.509格式。可以使用openssl转化为PEM格式。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-usage-https-cert/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2012/08/linux-curl-usage-download-file/" itemprop="url">
+                  Linux下cURL使用教程之十：HTTP文件下载
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-20T11:58:46+08:00" content="2012-08-20">
+              2012-08-20
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-usage-download-file/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-usage-download-file/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>其实每次我们使用curl去打开一个url都是执行一次下载操作，因此我们甚至可以认为curl是一个下载工具。<br>而且curl的某些选项及特性，使得curl能完成非常强大的下载功能。<br>基本命令及一些有用的参数如下。</p>
+<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><p>使用<code>curl [URL...]</code>下载URL，并输出在终端。<br>可指定多个URL。多个URL时，下载内容同时在终端显示。</p>
+<h2 id="–progress-bar-进度条"><a href="#–progress-bar-进度条" class="headerlink" title="-#/–progress-bar 进度条"></a>-#/–progress-bar 进度条</h2><p>添加参数<code>-#/--progress-bar</code>查看下载进度条。</p>
+<h2 id="o-–output-输出文件"><a href="#o-–output-输出文件" class="headerlink" title="-o/–output 输出文件"></a>-o/–output 输出文件</h2><p>使用参数<code>-o/--output &lt;file&gt;</code>下载并保存至文件file。<br>可同时下载多个URL，每个-o对应一个URL。<br>如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html http://www.a.com http://www.b.com</div></pre></td></tr></table></figure></p>
+<p>会下载www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html http://www.a.com -o b.html http://www.b.com</div></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html -o b.html http://www.a.com http://www.b.com</div></pre></td></tr></table></figure></p>
+<p>会分别下载两个URL至两个文件中。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/08/linux-curl-usage-download-file/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+
+          
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="Jacob" />
+          <p class="site-author-name" itemprop="name">Jacob</p>
+          <p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">30</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jacob</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"stackeye"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

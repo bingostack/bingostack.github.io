@@ -1,4 +1,90 @@
-<!doctype html><html class="theme-next mist use-motion"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"><link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css"><link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css"><link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css"><meta name="keywords" content="性能测试,ips,NGFW,防火墙,spi firewall,CPS,TPS,"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1"><meta name="description" content="本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于RFC3511中的定义，并根据实际需求，更新或舍弃了部分指标项。
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="性能测试,ips,NGFW,防火墙,spi firewall,CPS,TPS," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于RFC3511中的定义，并根据实际需求，更新或舍弃了部分指标项。
 目录本系列分为以下四部分：
 
 简介及性能指标介绍
@@ -9,7 +95,12 @@ RFC2544四项指标测试方法
 术语介绍文章中会涉及到一些术语，现总结如下，供参考。
 
 性能测试，对产品负载压力承受能力的测试。
-RFC，"><meta property="og:type" content="article"><meta property="og:title" content="网关类产品的性能测试之三：其它指标测试方法"><meta property="og:url" content="http://stackeye.com/2013/03/gateway-performance-test-others/index.html"><meta property="og:site_name" content="StackEye"><meta property="og:description" content="本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于RFC3511中的定义，并根据实际需求，更新或舍弃了部分指标项。
+RFC，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网关类产品的性能测试之三：其它指标测试方法">
+<meta property="og:url" content="http://kvguru.com/2013/03/gateway-performance-test-others/index.html">
+<meta property="og:site_name" content="KV Guru">
+<meta property="og:description" content="本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于RFC3511中的定义，并根据实际需求，更新或舍弃了部分指标项。
 目录本系列分为以下四部分：
 
 简介及性能指标介绍
@@ -20,7 +111,11 @@ RFC2544四项指标测试方法
 术语介绍文章中会涉及到一些术语，现总结如下，供参考。
 
 性能测试，对产品负载压力承受能力的测试。
-RFC，"><meta property="og:updated_time" content="2016-07-23T09:18:02.000Z"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="网关类产品的性能测试之三：其它指标测试方法"><meta name="twitter:description" content="本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于RFC3511中的定义，并根据实际需求，更新或舍弃了部分指标项。
+RFC，">
+<meta property="og:updated_time" content="2016-08-11T02:53:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="网关类产品的性能测试之三：其它指标测试方法">
+<meta name="twitter:description" content="本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于RFC3511中的定义，并根据实际需求，更新或舍弃了部分指标项。
 目录本系列分为以下四部分：
 
 简介及性能指标介绍
@@ -31,4 +126,629 @@ RFC2544四项指标测试方法
 术语介绍文章中会涉及到一些术语，现总结如下，供参考。
 
 性能测试，对产品负载压力承受能力的测试。
-RFC，"><script type="text/javascript" id="hexo.configuration">var NexT=window.NexT||{},CONFIG={scheme:"Mist",sidebar:{position:"left",display:"post"},fancybox:!0,motion:!0,duoshuo:{userId:0,author:"博主"}}</script><link rel="canonical" href="http://stackeye.com/2013/03/gateway-performance-test-others/"><title> 网关类产品的性能测试之三：其它指标测试方法 | StackEye</title></head><body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans"><script type="text/javascript">var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><div class="container one-collumn sidebar-position-left page-post-detail"><div class="headband"></div><header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-meta"><div class="custom-logo-site-title"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span> <span class="site-title">StackEye</span><span class="logo-line-after"><i></i></span></a></div><p class="site-subtitle">Long way to full stack!</p></div><div class="site-nav-toggle"> <button><span class="btn-bar"></span><span class="btn-bar"></span><span class="btn-bar"></span></button></div><nav class="site-nav"><ul id="menu" class="menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i><br> 首页</a></li><li class="menu-item menu-item-categories"><a href="/categories" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i><br> 分类</a></li><li class="menu-item menu-item-archives"><a href="/archives" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i><br> 归档</a></li><li class="menu-item menu-item-tags"><a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i><br> 标签</a></li></ul></nav></div></header><main id="main" class="main"><div class="main-inner"><div class="content-wrap"><div id="content" class="content"><div id="posts" class="posts-expand"><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> 网关类产品的性能测试之三：其它指标测试方法</h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2013-03-22T13:47:21+08:00" content="2013-03-22">2013-03-22</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/Testing/" itemprop="url" rel="index"><span itemprop="name">Testing</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2013/03/gateway-performance-test-others/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2013/03/gateway-performance-test-others/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="external">RFC3511</a>中的定义，并根据实际需求，更新或舍弃了部分指标项。</p><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p><ol><li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/">简介及性能指标介绍</a></li><li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/">RFC2544四项指标测试方法</a></li><li>其它指标测试方法 - 本篇</li><li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/">测试工具、注意事项及经验总结</a></li></ol><h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p><ul><li>性能测试，对产品负载压力承受能力的测试。</li><li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li><li>网关类产品，部署作为网关的设备及软件。</li><li>IDS，入侵检测系统</li><li>IPS，入侵防御系统</li><li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li><li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li><li>被测设备，devices under test，测试设备。</li></ul><h2 id="其它性能指标测试方法"><a href="#其它性能指标测试方法" class="headerlink" title="其它性能指标测试方法"></a>其它性能指标测试方法</h2><p>以下主要包括CPS、TPS、HTTP吞吐、TCP最大连接数及其它性能指标的测试方法。</p><a id="more"></a><h2 id="TCP每秒新建（CPS）"><a href="#TCP每秒新建（CPS）" class="headerlink" title="TCP每秒新建（CPS）"></a>TCP每秒新建（CPS）</h2><p>CPS测试的目的是确定最大的TCP连接建立速度。在RFC3511文档中对TCP每秒新建的测试方法进行了定义，同时也明确了测试过程中得参数设置。但在实际评测或客户验证时，对于CPS的配置却有一些出入。这里需要我们注意的事项请参见下列说明。</p><ol><li>TCP每秒新建的参数配置，应根据客户或评测机构的实际情况进行配置。<br>有的客户在测试CPS时，只关注TCP层的建立速度，使TCP连接建立成功即可，此关注的实际是TCP连接三次握手的过程（SYN，SYN ACK ，ACK），而且连接处于OPEN状态。而有的客户关注的是TCP的完整链接状态：包括三次握手建立、持续和关闭；而且在关闭过程中，又可以选择发送TCP FIN或者RST报文的方式。因此，在测试CPS前应与客户沟通测试的参数设置。</li><li>在RFC3511文档中，描述了在测试CPS时，采用HTTP1.1的协议，并且响应Get请求。<br>而在有些评测机构中，在测试CPS时确实会采用HTTP1.0甚至TCP或其它基于TCP的协议进行测试。无论是否采用HTTP协议，对于CPS的测试过程基本没有影响，只是多了一个GET请求和应答。但传输的文件大小将会占用被测设备很大的系统资源，从而导致测试结果偏小。在RFC3511中，没有明确应答数据的大小，所以这里我们可以设置为1byte甚至更小。</li><li>在测试过程中，应采用反复搜索的方式，以确定被测设备可以接受的TCP连接的最大请求速率。测试周期建议在10分钟以上。</li><li>如上文所述，基于使用协议的不同，CPS可以分为L4（传输层）CPS和L7（应用层）CPS。而且大部分的厂商和客户都基本认同这两种CPS的叫法。</li></ol><h2 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h2><p>TPS是指最大HTTP传输速率，考察被测设备的应用层处理能力。在RFC3511文档中要求协议使用HTTP1.0或者HTTP1.1。整个过程包括TCP三次握手以后执行HTTP事务请求（GET或者POST），并且得到答应，然后关闭TCP连接。需要注意的事项请参见下列说明。</p><ol><li>HTTP1.0和HTTP1.1协议的区别<br>在HTTP1.0 协议中，每对请求/应答都使用一个新的连接。每次请求都需要客户端与服务器建立一个TCP连接，服务器收到请求并且返回应答后，会立即断开TCP连接。<br>而HTTP1.1协议是可以保持这种连接状态，是可持久的。在一个TCP连接上可以传输多个HTTP请求/应答。当传输完成后，必须采用三次握手或四次握手的方法关闭链接（FIN，ACK，FIN ACK，ACK ） 。</li><li>请求/应答的文件大小<br>在RFC3511文档中没有明确说明文件的大小及类型。在测试TPS前一定要向客户或评测机构了解要求的请求文件的大小及类型。有些机构中采用1 字节或者100字节的文件，而有些机构则采用1K字节或者4K字节，文件类型也多种多样。所以，应多与客户或者评测机构进行实际的沟通。<br>建议采用文件大小为1K字节、文件类型为文本文件；当采用HTTP1.0 协议时，建议Get 1次；当采用HTTP1.1协议时，建议Get 10次或者更多。</li><li>通过1可以看到，在测试TPS时，采用HTTP1.0协议或采用HTTP1.1协议测试同一款被测设备，会得到两种不同的测试结果<br>因为HTTP协议本身的原因，使得在传输过程中得到的事务数会有所不同。理论上讲，HTTP1.1 协议的传输事务数要高于HTTP1.0协议。但这并不能反映HTTP1.1 的每秒连接数要高于HTTP1.0的每秒连接数。<br>同时需要注意到，测试HTTP TPS时如果采用HTTP1.0，其实和TCP的L7 CPS的性能一样。从测试方法和测试过程中看，两者基本没有区别。<br>所以，在测试HTTP TPS时，一定要了解客户的关注重点，而且要与客户沟通采用哪个版本的HTTP协议。</li></ol><h2 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h2><p>在RFC3511文档中没有明确描述HTTP有效吞吐量的测试方法，但通过TPS的测试方法，我们可以根据要求来编写HTTP有效吞吐量的方法。需要注意的事项请参见下列说明。</p><ol><li>在TPS节，我们知道了HTTP1.0和HTTP1.1之间的区别<br>在测试HTTP有效吞吐量时，应减少TCP的建立和关闭连接的消耗和延迟。所以在测试HTTP有效吞吐量时，建议采用HTTP1.1协议。</li><li>在测试HTTP有效吞吐量时，建议采用请求/应答的模式<br>而且在HTTP1.1协议中，可以执行8个或8个以上的请求命令（GET）。请求的文件大小建议为64K字节的文本文件。当然，在实际测试过程中请求文件的大小及类型，应与客户或评测机构进行沟通。当请求命令越多，请求的文件越大，那么HTTP的吞吐量也就越大。</li></ol><h2 id="最大TCP并发连接数"><a href="#最大TCP并发连接数" class="headerlink" title="最大TCP并发连接数"></a>最大TCP并发连接数</h2><p>在RFC3511文档中描述的最大TCP并发连接数测试，是采用一种反复搜索机制进行，在每次反复过程中以低于被测设备所能承受的连接速率发送不同数量的并发连接，直至得出被测设备的最大TCP并发连接数。需要注意的事项请参见下列说明。</p><ol><li>在测试最大TCP并发连接数所采用的协议<br>有些客户或厂商为了追求更高的数值，在测试此项时采用TCP层协议。而一些评测机构或客户要求在测试最大TCP并发连接数时采用HTTP协议，并且要求有请求/答应机制。</li><li>在测试最大TCP并发连接数时使用应用层协议(HTTP)，请求/应答的传输文件大小会直接影响测试结果<br>如果应用层流量很大，被测设备会使用很大的系统资源去处理包转发或包检查等，从而导致一些请求无法被处理，引起测试结果偏小；反之测试结果会偏大。这里建议当使用HTTP协议进行测试时，请求的文件不应过大，应在1Byte左右。</li><li>在测试最大TCP并发连接数时，无论采用TCP协议还是采用应用层协议，都应考虑实际测试需要<br>从1中我们知道，采用TCP协议进行测试对被测设备的压力要小，并且每条连接中的负载也比较小，被测设备在转发或处理时比较容易，从而很容易达到测试的数目要求。但这并不是说采用TCP协议就是没有意义的，它从另一角度反映了被测设备能维持TCP连接的最大数量。<br>而如2中采用HTTP协议进行测试，会加大被测设备的压力，使得占用被测设备的资源去处理包转发或包检查。而且请求文件大小的不同，会引起测试结果发生偏差。在实际测试过程中，我们应与客户或评测机构进行沟通，从而测试出被测设备的真实能力，是否满足其要求。</li></ol><h2 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h2><p>如上，我们可以看出在TCP或应用层测试中，主要包括<strong>三个重要的指标</strong>：每秒新建、有效吞吐量和最大并发连接数。<br>其实应用层的性能测试，无论是FTP协议、Mail协议还是其它的应用协议都离不开这三个测试指标项。所以，在对其它应用层协议进行测试时，也应像HTTP协议测试一样：明确测试文件的大小，明确每条链接的负载，明确每个请求/应答的过程等。测试过程、测试方法及测试结果的计算衡量基本都与HTTP测试类似。这就要求测试人员对应用层协议要有一定的理解，甚至对每个关键字的作用要有初步的判定。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍了TCP/HTTP层的性能指标的测试方法，并由此扩展到其它所有需要的应用层的性能测试方法。</p><h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul><li><a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="external">RFC3511</a></li></ul></div><div></div><div></div><footer class="post-footer"><div class="post-tags"> <a href="/tags/性能测试/" rel="tag">#性能测试</a> <a href="/tags/ips/" rel="tag">#ips</a> <a href="/tags/NGFW/" rel="tag">#NGFW</a> <a href="/tags/防火墙/" rel="tag">#防火墙</a> <a href="/tags/spi-firewall/" rel="tag">#spi firewall</a> <a href="/tags/CPS/" rel="tag">#CPS</a> <a href="/tags/TPS/" rel="tag">#TPS</a></div><div class="post-nav"><div class="post-nav-next post-nav-item"><a href="/2013/03/gateway-performance-test-rfc2544/" rel="next" title="网关类产品的性能测试之二：RFC2544四项指标测试方法"><i class="fa fa-chevron-left"></i> 网关类产品的性能测试之二：RFC2544四项指标测试方法</a></div><div class="post-nav-prev post-nav-item"> <a href="/2013/04/gateway-performance-test-summary/" rel="prev" title="网关类产品的性能测试之四：测试工具、注意事项及经验总结">网关类产品的性能测试之四：测试工具、注意事项及经验总结<i class="fa fa-chevron-right"></i></a></div></div></footer></article><div class="post-spread"><div class="jiathis_style"><a class="jiathis_button_tsina"></a><a class="jiathis_button_tqq"></a><a class="jiathis_button_weixin"></a><a class="jiathis_button_cqq"></a><a class="jiathis_button_douban"></a><a class="jiathis_button_renren"></a><a class="jiathis_button_qzone"></a><a class="jiathis_button_kaixin001"></a><a class="jiathis_button_copy"></a><a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a><a class="jiathis_counter_style"></a></div><script type="text/javascript">var jiathis_config={hideMore:!1}</script><script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script></div></div></div><div class="comments" id="comments"><div class="ds-thread" data-thread-key="2013/03/gateway-performance-test-others/" data-title="网关类产品的性能测试之三：其它指标测试方法" data-url="http://stackeye.com/2013/03/gateway-performance-test-others/"></div></div></div><div class="sidebar-toggle"><div class="sidebar-toggle-line-wrap"><span class="sidebar-toggle-line sidebar-toggle-line-first"></span><span class="sidebar-toggle-line sidebar-toggle-line-middle"></span><span class="sidebar-toggle-line sidebar-toggle-line-last"></span></div></div><aside id="sidebar" class="sidebar"><div class="sidebar-inner"><ul class="sidebar-nav motion-element"><li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap"> 文章目录</li><li class="sidebar-nav-overview" data-target="site-overview"> 站点概览</li></ul><section class="site-overview sidebar-panel"><div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person"> <img class="site-author-image" itemprop="image" src="/img/avatar.jpg" alt="Jacob"><p class="site-author-name" itemprop="name">Jacob</p><p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p></div><nav class="site-state motion-element"><div class="site-state-item site-state-posts"> <a href="/archives"><span class="site-state-item-count">28</span> <span class="site-state-item-name">日志</span></a></div><div class="site-state-item site-state-categories"> <a href="/categories"><span class="site-state-item-count">8</span> <span class="site-state-item-name">分类</span></a></div><div class="site-state-item site-state-tags"> <a href="/tags"><span class="site-state-item-count">37</span> <span class="site-state-item-name">标签</span></a></div></nav><div class="links-of-author motion-element"></div></section><section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active"><div class="post-toc"><div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#目录"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#术语介绍"><span class="nav-number">2.</span> <span class="nav-text">术语介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它性能指标测试方法"><span class="nav-number">3.</span> <span class="nav-text">其它性能指标测试方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP每秒新建（CPS）"><span class="nav-number">4.</span> <span class="nav-text">TCP每秒新建（CPS）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP的每秒处理事务数（TPS）"><span class="nav-number">5.</span> <span class="nav-text">HTTP的每秒处理事务数（TPS）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP有效吞吐量（HTTP-Good-Throughput）"><span class="nav-number">6.</span> <span class="nav-text">HTTP有效吞吐量（HTTP Good Throughput）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最大TCP并发连接数"><span class="nav-number">7.</span> <span class="nav-text">最大TCP并发连接数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它性能指标项"><span class="nav-number">8.</span> <span class="nav-text">其它性能指标项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考索引"><span class="nav-number">10.</span> <span class="nav-text">参考索引</span></a></li></ol></div></div></section></div></aside></div></main><footer id="footer" class="footer"><div class="footer-inner"><div class="copyright"> &copy; 2012 - <span itemprop="copyrightYear">2016</span><span class="with-love"><i class="fa fa-heart"></i></span> <span class="author" itemprop="copyrightHolder">Jacob</span></div><div class="powered-by"> 由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动</div><div class="theme-info"> 主题 - <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div></div></footer><div class="back-to-top"><i class="fa fa-arrow-up"></i></div></div><script type="text/javascript">"[object Function]"!==Object.prototype.toString.call(window.Promise)&&(window.Promise=null)</script><script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script><script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script><script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script><script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script><script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script><script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script><script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script><script type="text/javascript">var duoshuoQuery={short_name:"stackeye"};!function(){var t=document.createElement("script");t.type="text/javascript",t.async=!0,t.id="duoshuo-script",t.src=("https:"==document.location.protocol?"https:":"http:")+"//static.duoshuo.com/embed.js",t.charset="UTF-8",(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(t)}()</script><script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script><script src="/js/src/hook-duoshuo.js"></script></body></html>
+RFC，">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://kvguru.com/2013/03/gateway-performance-test-others/"/>
+
+  <title> 网关类产品的性能测试之三：其它指标测试方法 | KV Guru </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">KV Guru</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Long way to full stack!</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                网关类产品的性能测试之三：其它指标测试方法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2013-03-22T13:47:21+08:00" content="2013-03-22">
+              2013-03-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Testing/" itemprop="url" rel="index">
+                    <span itemprop="name">Testing</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2013/03/gateway-performance-test-others/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2013/03/gateway-performance-test-others/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="external">RFC3511</a>中的定义，并根据实际需求，更新或舍弃了部分指标项。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p>
+<ol>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/" target="_blank" rel="external">简介及性能指标介绍</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="external">RFC2544四项指标测试方法</a></li>
+<li>其它指标测试方法 - 本篇</li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="external">测试工具、注意事项及经验总结</a></li>
+</ol>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>被测设备，devices under test，测试设备。</li>
+</ul>
+<h2 id="其它性能指标测试方法"><a href="#其它性能指标测试方法" class="headerlink" title="其它性能指标测试方法"></a>其它性能指标测试方法</h2><p>以下主要包括CPS、TPS、HTTP吞吐、TCP最大连接数及其它性能指标的测试方法。</p>
+<a id="more"></a>
+<h2 id="TCP每秒新建（CPS）"><a href="#TCP每秒新建（CPS）" class="headerlink" title="TCP每秒新建（CPS）"></a>TCP每秒新建（CPS）</h2><p>CPS测试的目的是确定最大的TCP连接建立速度。在RFC3511文档中对TCP每秒新建的测试方法进行了定义，同时也明确了测试过程中得参数设置。但在实际评测或客户验证时，对于CPS的配置却有一些出入。这里需要我们注意的事项请参见下列说明。</p>
+<ol>
+<li>TCP每秒新建的参数配置，应根据客户或评测机构的实际情况进行配置。<br>有的客户在测试CPS时，只关注TCP层的建立速度，使TCP连接建立成功即可，此关注的实际是TCP连接三次握手的过程（SYN，SYN ACK ，ACK），而且连接处于OPEN状态。而有的客户关注的是TCP的完整链接状态：包括三次握手建立、持续和关闭；而且在关闭过程中，又可以选择发送TCP FIN或者RST报文的方式。因此，在测试CPS前应与客户沟通测试的参数设置。</li>
+<li>在RFC3511文档中，描述了在测试CPS时，采用HTTP1.1的协议，并且响应Get请求。<br>而在有些评测机构中，在测试CPS时确实会采用HTTP1.0甚至TCP或其它基于TCP的协议进行测试。无论是否采用HTTP协议，对于CPS的测试过程基本没有影响，只是多了一个GET请求和应答。但传输的文件大小将会占用被测设备很大的系统资源，从而导致测试结果偏小。在RFC3511中，没有明确应答数据的大小，所以这里我们可以设置为1byte甚至更小。</li>
+<li>在测试过程中，应采用反复搜索的方式，以确定被测设备可以接受的TCP连接的最大请求速率。测试周期建议在10分钟以上。</li>
+<li>如上文所述，基于使用协议的不同，CPS可以分为L4（传输层）CPS和L7（应用层）CPS。而且大部分的厂商和客户都基本认同这两种CPS的叫法。</li>
+</ol>
+<h2 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h2><p>TPS是指最大HTTP传输速率，考察被测设备的应用层处理能力。在RFC3511文档中要求协议使用HTTP1.0或者HTTP1.1。整个过程包括TCP三次握手以后执行HTTP事务请求（GET或者POST），并且得到答应，然后关闭TCP连接。需要注意的事项请参见下列说明。</p>
+<ol>
+<li>HTTP1.0和HTTP1.1协议的区别<br>在HTTP1.0 协议中，每对请求/应答都使用一个新的连接。每次请求都需要客户端与服务器建立一个TCP连接，服务器收到请求并且返回应答后，会立即断开TCP连接。<br>而HTTP1.1协议是可以保持这种连接状态，是可持久的。在一个TCP连接上可以传输多个HTTP请求/应答。当传输完成后，必须采用三次握手或四次握手的方法关闭链接（FIN，ACK，FIN ACK，ACK ） 。</li>
+<li>请求/应答的文件大小<br>在RFC3511文档中没有明确说明文件的大小及类型。在测试TPS前一定要向客户或评测机构了解要求的请求文件的大小及类型。有些机构中采用1 字节或者100字节的文件，而有些机构则采用1K字节或者4K字节，文件类型也多种多样。所以，应多与客户或者评测机构进行实际的沟通。<br>建议采用文件大小为1K字节、文件类型为文本文件；当采用HTTP1.0 协议时，建议Get 1次；当采用HTTP1.1协议时，建议Get 10次或者更多。</li>
+<li>通过1可以看到，在测试TPS时，采用HTTP1.0协议或采用HTTP1.1协议测试同一款被测设备，会得到两种不同的测试结果<br>因为HTTP协议本身的原因，使得在传输过程中得到的事务数会有所不同。理论上讲，HTTP1.1 协议的传输事务数要高于HTTP1.0协议。但这并不能反映HTTP1.1 的每秒连接数要高于HTTP1.0的每秒连接数。<br>同时需要注意到，测试HTTP TPS时如果采用HTTP1.0，其实和TCP的L7 CPS的性能一样。从测试方法和测试过程中看，两者基本没有区别。<br>所以，在测试HTTP TPS时，一定要了解客户的关注重点，而且要与客户沟通采用哪个版本的HTTP协议。</li>
+</ol>
+<h2 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h2><p>在RFC3511文档中没有明确描述HTTP有效吞吐量的测试方法，但通过TPS的测试方法，我们可以根据要求来编写HTTP有效吞吐量的方法。需要注意的事项请参见下列说明。</p>
+<ol>
+<li>在TPS节，我们知道了HTTP1.0和HTTP1.1之间的区别<br>在测试HTTP有效吞吐量时，应减少TCP的建立和关闭连接的消耗和延迟。所以在测试HTTP有效吞吐量时，建议采用HTTP1.1协议。</li>
+<li>在测试HTTP有效吞吐量时，建议采用请求/应答的模式<br>而且在HTTP1.1协议中，可以执行8个或8个以上的请求命令（GET）。请求的文件大小建议为64K字节的文本文件。当然，在实际测试过程中请求文件的大小及类型，应与客户或评测机构进行沟通。当请求命令越多，请求的文件越大，那么HTTP的吞吐量也就越大。</li>
+</ol>
+<h2 id="最大TCP并发连接数"><a href="#最大TCP并发连接数" class="headerlink" title="最大TCP并发连接数"></a>最大TCP并发连接数</h2><p>在RFC3511文档中描述的最大TCP并发连接数测试，是采用一种反复搜索机制进行，在每次反复过程中以低于被测设备所能承受的连接速率发送不同数量的并发连接，直至得出被测设备的最大TCP并发连接数。需要注意的事项请参见下列说明。</p>
+<ol>
+<li>在测试最大TCP并发连接数所采用的协议<br>有些客户或厂商为了追求更高的数值，在测试此项时采用TCP层协议。而一些评测机构或客户要求在测试最大TCP并发连接数时采用HTTP协议，并且要求有请求/答应机制。</li>
+<li>在测试最大TCP并发连接数时使用应用层协议(HTTP)，请求/应答的传输文件大小会直接影响测试结果<br>如果应用层流量很大，被测设备会使用很大的系统资源去处理包转发或包检查等，从而导致一些请求无法被处理，引起测试结果偏小；反之测试结果会偏大。这里建议当使用HTTP协议进行测试时，请求的文件不应过大，应在1Byte左右。</li>
+<li>在测试最大TCP并发连接数时，无论采用TCP协议还是采用应用层协议，都应考虑实际测试需要<br>从1中我们知道，采用TCP协议进行测试对被测设备的压力要小，并且每条连接中的负载也比较小，被测设备在转发或处理时比较容易，从而很容易达到测试的数目要求。但这并不是说采用TCP协议就是没有意义的，它从另一角度反映了被测设备能维持TCP连接的最大数量。<br>而如2中采用HTTP协议进行测试，会加大被测设备的压力，使得占用被测设备的资源去处理包转发或包检查。而且请求文件大小的不同，会引起测试结果发生偏差。在实际测试过程中，我们应与客户或评测机构进行沟通，从而测试出被测设备的真实能力，是否满足其要求。</li>
+</ol>
+<h2 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h2><p>如上，我们可以看出在TCP或应用层测试中，主要包括<strong>三个重要的指标</strong>：每秒新建、有效吞吐量和最大并发连接数。<br>其实应用层的性能测试，无论是FTP协议、Mail协议还是其它的应用协议都离不开这三个测试指标项。所以，在对其它应用层协议进行测试时，也应像HTTP协议测试一样：明确测试文件的大小，明确每条链接的负载，明确每个请求/应答的过程等。测试过程、测试方法及测试结果的计算衡量基本都与HTTP测试类似。这就要求测试人员对应用层协议要有一定的理解，甚至对每个关键字的作用要有初步的判定。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍了TCP/HTTP层的性能指标的测试方法，并由此扩展到其它所有需要的应用层的性能测试方法。</p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="external">RFC3511</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/性能测试/" rel="tag">#性能测试</a>
+          
+            <a href="/tags/ips/" rel="tag">#ips</a>
+          
+            <a href="/tags/NGFW/" rel="tag">#NGFW</a>
+          
+            <a href="/tags/防火墙/" rel="tag">#防火墙</a>
+          
+            <a href="/tags/spi-firewall/" rel="tag">#spi firewall</a>
+          
+            <a href="/tags/CPS/" rel="tag">#CPS</a>
+          
+            <a href="/tags/TPS/" rel="tag">#TPS</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2013/03/gateway-performance-test-rfc2544/" rel="next" title="网关类产品的性能测试之二：RFC2544四项指标测试方法">
+                <i class="fa fa-chevron-left"></i> 网关类产品的性能测试之二：RFC2544四项指标测试方法
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2013/04/gateway-performance-test-summary/" rel="prev" title="网关类产品的性能测试之四：测试工具、注意事项及经验总结">
+                网关类产品的性能测试之四：测试工具、注意事项及经验总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2013/03/gateway-performance-test-others/"
+           data-title="网关类产品的性能测试之三：其它指标测试方法" data-url="http://kvguru.com/2013/03/gateway-performance-test-others/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="Jacob" />
+          <p class="site-author-name" itemprop="name">Jacob</p>
+          <p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">30</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#目录"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#术语介绍"><span class="nav-number">2.</span> <span class="nav-text">术语介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它性能指标测试方法"><span class="nav-number">3.</span> <span class="nav-text">其它性能指标测试方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP每秒新建（CPS）"><span class="nav-number">4.</span> <span class="nav-text">TCP每秒新建（CPS）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP的每秒处理事务数（TPS）"><span class="nav-number">5.</span> <span class="nav-text">HTTP的每秒处理事务数（TPS）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP有效吞吐量（HTTP-Good-Throughput）"><span class="nav-number">6.</span> <span class="nav-text">HTTP有效吞吐量（HTTP Good Throughput）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最大TCP并发连接数"><span class="nav-number">7.</span> <span class="nav-text">最大TCP并发连接数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它性能指标项"><span class="nav-number">8.</span> <span class="nav-text">其它性能指标项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考索引"><span class="nav-number">10.</span> <span class="nav-text">参考索引</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jacob</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"stackeye"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

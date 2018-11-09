@@ -1,4 +1,723 @@
-<!doctype html><html class="theme-next mist use-motion"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"><link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css"><link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css"><link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css"><meta name="keywords" content="curl,linux curl,linux,"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1"><meta name="description" content="这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。因此，实际应用中，我们会经常使用到代理。本篇着重讲述在curl命令行中对代理的使用。
-代理环境本篇中，我们将代理分为HTTP代理和socks代理。可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为127.0.0.1"><meta property="og:type" content="article"><meta property="og:title" content="Linux下cURL使用教程之九：代理的使用"><meta property="og:url" content="http://stackeye.com/2012/08/linux-curl-basic-usage-proxy/index.html"><meta property="og:site_name" content="StackEye"><meta property="og:description" content="这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。因此，实际应用中，我们会经常使用到代理。本篇着重讲述在curl命令行中对代理的使用。
-代理环境本篇中，我们将代理分为HTTP代理和socks代理。可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为127.0.0.1"><meta property="og:updated_time" content="2016-07-18T03:54:42.000Z"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Linux下cURL使用教程之九：代理的使用"><meta name="twitter:description" content="这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。因此，实际应用中，我们会经常使用到代理。本篇着重讲述在curl命令行中对代理的使用。
-代理环境本篇中，我们将代理分为HTTP代理和socks代理。可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为127.0.0.1"><script type="text/javascript" id="hexo.configuration">var NexT=window.NexT||{},CONFIG={scheme:"Mist",sidebar:{position:"left",display:"post"},fancybox:!0,motion:!0,duoshuo:{userId:0,author:"博主"}}</script><link rel="canonical" href="http://stackeye.com/2012/08/linux-curl-basic-usage-proxy/"><title> Linux下cURL使用教程之九：代理的使用 | StackEye</title></head><body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans"><script type="text/javascript">var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><div class="container one-collumn sidebar-position-left page-post-detail"><div class="headband"></div><header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-meta"><div class="custom-logo-site-title"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span> <span class="site-title">StackEye</span><span class="logo-line-after"><i></i></span></a></div><p class="site-subtitle">Long way to full stack!</p></div><div class="site-nav-toggle"> <button><span class="btn-bar"></span><span class="btn-bar"></span><span class="btn-bar"></span></button></div><nav class="site-nav"><ul id="menu" class="menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i><br> 首页</a></li><li class="menu-item menu-item-categories"><a href="/categories" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i><br> 分类</a></li><li class="menu-item menu-item-archives"><a href="/archives" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i><br> 归档</a></li><li class="menu-item menu-item-tags"><a href="/tags" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i><br> 标签</a></li></ul></nav></div></header><main id="main" class="main"><div class="main-inner"><div class="content-wrap"><div id="content" class="content"><div id="posts" class="posts-expand"><article class="post post-type-normal" itemscope itemtype="http://schema.org/Article"><header class="post-header"><h1 class="post-title" itemprop="name headline"> Linux下cURL使用教程之九：代理的使用</h1><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time itemprop="dateCreated" datetime="2012-08-16T11:07:00+08:00" content="2012-08-16">2012-08-16</time></span> <span class="post-category">&nbsp; | &nbsp;<span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope itemtype="https://schema.org/Thing"><a href="/categories/curl/" itemprop="url" rel="index"><span itemprop="name">curl</span></a></span></span> <span class="post-comments-count">&nbsp; | &nbsp;<a href="/2012/08/linux-curl-basic-usage-proxy/#comments" itemprop="discussionUrl"><span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-basic-usage-proxy/" itemprop="commentsCount"></span></a></span></div></header><div class="post-body" itemprop="articleBody"><p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p><h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p><h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x 127.0.0.1:8086 <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure><p></p><p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p><p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p><p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（<a href="http://），或使用内嵌的用户名密码（见下节）。" target="_blank" rel="external">http://），或使用内嵌的用户名密码（见下节）。</a></p><p>5、如果有多个-x使用，只有最后一个有效。</p><p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p><h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x proxy.xxx.com:8080 -U username:password <span class="_">-e</span> http://www.ip138.com/ \</div><div class="line">http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure><p></p><p>此语句等价于使用内嵌用户名密码的形式：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> <span class="_">-e</span> http://www.ip138.com/ \</div><div class="line">http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure><p></p><p>注：</p><ul><li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li><li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com <span class="_">-e</span> http://www.ip138.com/ \</div><div class="line">http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure></li></ul><p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p><p>3、同-x，如果有多个-U使用，只有最后一个有效。</p><h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p><ol><li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p></li><li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p></li><li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p></li><li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p></li><li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p></li></ol><h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p><h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p><p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br></p><figure class="highlight php"><table><tr><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</div><div class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</div><div class="line"><span class="meta">?&gt;</span></div></pre></td></tr></table></figure><p></p><p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">ssh -D 8086 10.1.1.2</div></pre></td></tr></table></figure><p></p><p>开启转发，搭建socks代理<br>3）机器B<br>执行<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl http://10.1.1.2/ip.php</div></pre></td></tr></table></figure><p></p><p>可看到本机IP为10.1.1.3。<br>执行<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</div></pre></td></tr></table></figure><p></p><p>可看到代理IP为10.1.1.2。</p><h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p><h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p><h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p><h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p><h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p><h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line"><span class="meta">#!/bin/sh</span></div><div class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</div><div class="line">curl <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></div></pre></td></tr></table></figure><p></p><p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p><p>其它常用相关环境变量如下：</p><ul><li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li><li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li><li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li><li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li></ul><p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">!/bin/sh</div><div class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</div><div class="line"><span class="built_in">export</span> no_proxy=ip138.com</div><div class="line">curl <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></div></pre></td></tr></table></figure><p></p><p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p><h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br></p><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line"><span class="meta">#!/bin/sh</span></div><div class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</div><div class="line">curl --noproxy ip138.com <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></div></pre></td></tr></table></figure><p></p><p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p></div><div></div><div></div><footer class="post-footer"><div class="post-tags"> <a href="/tags/curl/" rel="tag">#curl</a> <a href="/tags/linux-curl/" rel="tag">#linux curl</a> <a href="/tags/linux/" rel="tag">#linux</a></div><div class="post-nav"><div class="post-nav-next post-nav-item"><a href="/2012/08/linux-curl-example-115/" rel="next" title="Linux下cURL使用教程之八：curl基本使用实例之115网盘自动摇一摇脚本"><i class="fa fa-chevron-left"></i> Linux下cURL使用教程之八：curl基本使用实例之115网盘自动摇一摇脚本</a></div><div class="post-nav-prev post-nav-item"> <a href="/2012/08/http-auth-schemes/" rel="prev" title="HTTP认证模式">HTTP认证模式<i class="fa fa-chevron-right"></i></a></div></div></footer></article><div class="post-spread"><div class="jiathis_style"><a class="jiathis_button_tsina"></a><a class="jiathis_button_tqq"></a><a class="jiathis_button_weixin"></a><a class="jiathis_button_cqq"></a><a class="jiathis_button_douban"></a><a class="jiathis_button_renren"></a><a class="jiathis_button_qzone"></a><a class="jiathis_button_kaixin001"></a><a class="jiathis_button_copy"></a><a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a><a class="jiathis_counter_style"></a></div><script type="text/javascript">var jiathis_config={hideMore:!1}</script><script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script></div></div></div><div class="comments" id="comments"><div class="ds-thread" data-thread-key="2012/08/linux-curl-basic-usage-proxy/" data-title="Linux下cURL使用教程之九：代理的使用" data-url="http://stackeye.com/2012/08/linux-curl-basic-usage-proxy/"></div></div></div><div class="sidebar-toggle"><div class="sidebar-toggle-line-wrap"><span class="sidebar-toggle-line sidebar-toggle-line-first"></span><span class="sidebar-toggle-line sidebar-toggle-line-middle"></span><span class="sidebar-toggle-line sidebar-toggle-line-last"></span></div></div><aside id="sidebar" class="sidebar"><div class="sidebar-inner"><ul class="sidebar-nav motion-element"><li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap"> 文章目录</li><li class="sidebar-nav-overview" data-target="site-overview"> 站点概览</li></ul><section class="site-overview sidebar-panel"><div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person"> <img class="site-author-image" itemprop="image" src="/img/avatar.jpg" alt="Jacob"><p class="site-author-name" itemprop="name">Jacob</p><p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p></div><nav class="site-state motion-element"><div class="site-state-item site-state-posts"> <a href="/archives"><span class="site-state-item-count">28</span> <span class="site-state-item-name">日志</span></a></div><div class="site-state-item site-state-categories"> <a href="/categories"><span class="site-state-item-count">8</span> <span class="site-state-item-name">分类</span></a></div><div class="site-state-item site-state-tags"> <a href="/tags"><span class="site-state-item-count">37</span> <span class="site-state-item-name">标签</span></a></div></nav><div class="links-of-author motion-element"></div></section><section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active"><div class="post-toc"><div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#代理环境"><span class="nav-number">1.</span> <span class="nav-text">代理环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选项-x-–proxy"><span class="nav-number">2.</span> <span class="nav-text">选项-x/–proxy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选项-U-–proxy-user"><span class="nav-number">3.</span> <span class="nav-text">选项-U/–proxy-user</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#认证方式类选项"><span class="nav-number">4.</span> <span class="nav-text">认证方式类选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#socks代理类选项"><span class="nav-number">5.</span> <span class="nav-text">socks代理类选项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-socks4-lt-host-port-gt"><span class="nav-number">5.1.</span> <span class="nav-text">1. --socks4<host [:port]></host></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-socks4a-lt-host-port-gt"><span class="nav-number">5.2.</span> <span class="nav-text">2. --socks4a<host [:port]></host></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-socks5-lt-host-port-gt"><span class="nav-number">5.3.</span> <span class="nav-text">3. --socks5<host [:port]></host></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-socks5-hostname-lt-host-port-gt"><span class="nav-number">5.4.</span> <span class="nav-text">4. --socks5-hostname<host [:port]></host></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-socks5-gssapi-service-lt-servicename-gt"><span class="nav-number">5.5.</span> <span class="nav-text">5. --socks5-gssapi-service<servicename></servicename></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-socks5-gssapi-nec"><span class="nav-number">5.6.</span> <span class="nav-text">6. --socks5-gssapi-nec</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境变量及相关选项"><span class="nav-number">6.</span> <span class="nav-text">环境变量及相关选项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-环境变量"><span class="nav-number">6.1.</span> <span class="nav-text">1. 环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-命令选项"><span class="nav-number">6.2.</span> <span class="nav-text">2. 命令选项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div></div></section></div></aside></div></main><footer id="footer" class="footer"><div class="footer-inner"><div class="copyright"> &copy; 2012 - <span itemprop="copyrightYear">2016</span><span class="with-love"><i class="fa fa-heart"></i></span> <span class="author" itemprop="copyrightHolder">Jacob</span></div><div class="powered-by"> 由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动</div><div class="theme-info"> 主题 - <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div></div></footer><div class="back-to-top"><i class="fa fa-arrow-up"></i></div></div><script type="text/javascript">"[object Function]"!==Object.prototype.toString.call(window.Promise)&&(window.Promise=null)</script><script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script><script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script><script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script><script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script><script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script><script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script><script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script><script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script><script type="text/javascript">var duoshuoQuery={short_name:"stackeye"};!function(){var t=document.createElement("script");t.type="text/javascript",t.async=!0,t.id="duoshuo-script",t.src=("https:"==document.location.protocol?"https:":"http:")+"//static.duoshuo.com/embed.js",t.charset="UTF-8",(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(t)}()</script><script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script><script src="/js/src/hook-duoshuo.js"></script></body></html>
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="curl,linux curl,linux," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。因此，实际应用中，我们会经常使用到代理。本篇着重讲述在curl命令行中对代理的使用。
+代理环境本篇中，我们将代理分为HTTP代理和socks代理。可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为127.0.0.1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux下cURL使用教程之九：代理的使用">
+<meta property="og:url" content="http://kvguru.com/2012/08/linux-curl-basic-usage-proxy/index.html">
+<meta property="og:site_name" content="KV Guru">
+<meta property="og:description" content="这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。因此，实际应用中，我们会经常使用到代理。本篇着重讲述在curl命令行中对代理的使用。
+代理环境本篇中，我们将代理分为HTTP代理和socks代理。可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为127.0.0.1">
+<meta property="og:updated_time" content="2016-08-11T02:53:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux下cURL使用教程之九：代理的使用">
+<meta name="twitter:description" content="这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。因此，实际应用中，我们会经常使用到代理。本篇着重讲述在curl命令行中对代理的使用。
+代理环境本篇中，我们将代理分为HTTP代理和socks代理。可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为127.0.0.1">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://kvguru.com/2012/08/linux-curl-basic-usage-proxy/"/>
+
+  <title> Linux下cURL使用教程之九：代理的使用 | KV Guru </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">KV Guru</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Long way to full stack!</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Linux下cURL使用教程之九：代理的使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-08-16T11:07:00+08:00" content="2012-08-16">
+              2012-08-16
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/08/linux-curl-basic-usage-proxy/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-basic-usage-proxy/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
+<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
+<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x 127.0.0.1:8086 <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure></p>
+<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
+<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
+<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（<a href="http://），或使用内嵌的用户名密码（见下节）。" target="_blank" rel="external">http://），或使用内嵌的用户名密码（见下节）。</a></p>
+<p>5、如果有多个-x使用，只有最后一个有效。</p>
+<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
+<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x proxy.xxx.com:8080 -U username:password <span class="_">-e</span> http://www.ip138.com/ \</div><div class="line">http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure></p>
+<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> <span class="_">-e</span> http://www.ip138.com/ \</div><div class="line">http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure></p>
+<p>注：</p>
+<ul>
+<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
+<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com <span class="_">-e</span> http://www.ip138.com/ \</div><div class="line">http://iframe.ip138.com/city.asp</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
+<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
+<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
+<ol>
+<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
+</li>
+<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
+</li>
+<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
+</li>
+<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
+</li>
+<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
+</li>
+</ol>
+<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
+<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
+<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</div><div class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</div><div class="line"><span class="meta">?&gt;</span></div></pre></td></tr></table></figure></p>
+<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">ssh -D 8086 10.1.1.2</div></pre></td></tr></table></figure></p>
+<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl http://10.1.1.2/ip.php</div></pre></td></tr></table></figure></p>
+<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</div></pre></td></tr></table></figure></p>
+<p>可看到代理IP为10.1.1.2。</p>
+<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
+<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
+<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
+<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
+<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
+<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line"><span class="meta">#!/bin/sh</span></div><div class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</div><div class="line">curl <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></div></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
+<p>其它常用相关环境变量如下：</p>
+<ul>
+<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
+<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
+</ul>
+<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">!/bin/sh</div><div class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</div><div class="line"><span class="built_in">export</span> no_proxy=ip138.com</div><div class="line">curl <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></div></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line"><span class="meta">#!/bin/sh</span></div><div class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</div><div class="line">curl --noproxy ip138.com <span class="_">-e</span> http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></div></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/curl/" rel="tag">#curl</a>
+          
+            <a href="/tags/linux-curl/" rel="tag">#linux curl</a>
+          
+            <a href="/tags/linux/" rel="tag">#linux</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2012/08/linux-curl-example-115/" rel="next" title="Linux下cURL使用教程之八：curl基本使用实例之115网盘自动摇一摇脚本">
+                <i class="fa fa-chevron-left"></i> Linux下cURL使用教程之八：curl基本使用实例之115网盘自动摇一摇脚本
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2012/08/http-auth-schemes/" rel="prev" title="HTTP认证模式">
+                HTTP认证模式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2012/08/linux-curl-basic-usage-proxy/"
+           data-title="Linux下cURL使用教程之九：代理的使用" data-url="http://kvguru.com/2012/08/linux-curl-basic-usage-proxy/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="Jacob" />
+          <p class="site-author-name" itemprop="name">Jacob</p>
+          <p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">30</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#代理环境"><span class="nav-number">1.</span> <span class="nav-text">代理环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选项-x-–proxy"><span class="nav-number">2.</span> <span class="nav-text">选项-x/–proxy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选项-U-–proxy-user"><span class="nav-number">3.</span> <span class="nav-text">选项-U/–proxy-user</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#认证方式类选项"><span class="nav-number">4.</span> <span class="nav-text">认证方式类选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#socks代理类选项"><span class="nav-number">5.</span> <span class="nav-text">socks代理类选项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-socks4-lt-host-port-gt"><span class="nav-number">5.1.</span> <span class="nav-text">1. --socks4 <host[:port]></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-socks4a-lt-host-port-gt"><span class="nav-number">5.2.</span> <span class="nav-text">2. --socks4a <host[:port]></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-socks5-lt-host-port-gt"><span class="nav-number">5.3.</span> <span class="nav-text">3. --socks5 <host[:port]></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-socks5-hostname-lt-host-port-gt"><span class="nav-number">5.4.</span> <span class="nav-text">4. --socks5-hostname <host[:port]></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-socks5-gssapi-service-lt-servicename-gt"><span class="nav-number">5.5.</span> <span class="nav-text">5. --socks5-gssapi-service <servicename></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-socks5-gssapi-nec"><span class="nav-number">5.6.</span> <span class="nav-text">6. --socks5-gssapi-nec</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境变量及相关选项"><span class="nav-number">6.</span> <span class="nav-text">环境变量及相关选项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-环境变量"><span class="nav-number">6.1.</span> <span class="nav-text">1. 环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-命令选项"><span class="nav-number">6.2.</span> <span class="nav-text">2. 命令选项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jacob</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"stackeye"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

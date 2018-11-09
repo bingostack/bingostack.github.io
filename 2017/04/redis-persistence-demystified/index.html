@@ -1,0 +1,678 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="redis,nosql," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="本文主要是对antirez博客的翻译。其实nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。
+首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解密Redis持久化">
+<meta property="og:url" content="http://kvguru.com/2017/04/redis-persistence-demystified/index.html">
+<meta property="og:site_name" content="KV Guru">
+<meta property="og:description" content="本文主要是对antirez博客的翻译。其实nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。
+首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久">
+<meta property="og:updated_time" content="2017-04-22T10:45:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="解密Redis持久化">
+<meta name="twitter:description" content="本文主要是对antirez博客的翻译。其实nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。
+首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://kvguru.com/2017/04/redis-persistence-demystified/"/>
+
+  <title> 解密Redis持久化 | KV Guru </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">KV Guru</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Long way to full stack!</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                解密Redis持久化
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-04-22T17:01:46+08:00" content="2017-04-22">
+              2017-04-22
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/NoSQL/" itemprop="url" rel="index">
+                    <span itemprop="name">NoSQL</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/04/redis-persistence-demystified/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/04/redis-persistence-demystified/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要是对<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="external">antirez博客</a>的翻译。其实<a href="http://blog.nosqlfan.com/html/3813.html" target="_blank" rel="external">nosqlfan</a>已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。</p>
+<p>首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久化的工作原理，Redis的持久化如何可靠，以及与其它数据库的对比。</p>
+<h2 id="操作系统和磁盘"><a href="#操作系统和磁盘" class="headerlink" title="操作系统和磁盘"></a>操作系统和磁盘</h2><h3 id="写操作的流程"><a href="#写操作的流程" class="headerlink" title="写操作的流程"></a>写操作的流程</h3><p>我们应该考虑的第一件事是对于数据库的持久化，我们的期望是什么。因此我们将一个简单的写操作中发生的事情可视化：</p>
+<ol>
+<li>客户端发送写命令到数据库（数据库在客户端内存中）</li>
+<li>数据库接收到写操作（数据在服务器内存中）</li>
+<li>数据库调用系统调用，将数据写入磁盘（数据在内核缓冲区中）</li>
+<li>操作系统将写缓冲区的数据转移到磁盘控制器上（数据在磁盘缓存中）</li>
+<li>磁盘控制器真正将数据写入到物理介质（数据真正落在磁盘上）</li>
+</ol>
+<a id="more"></a>
+<blockquote>
+<p>注意：以上是一个各方面简单化的版本，因为实际有更多的cache和buffer。<br>步骤2经常被实现为数据库内部的一个复杂缓存系统。写操作也经常被不同的线程或进程处理。然而数据库或早或晚要将数据写入磁盘，而这就是我们关心的。也就是说，内存中的数据在某个节点必须要被传输到内核（步骤3）。<br>另外一个大的细节省略在步骤3.现实要更复杂，因为大多数高级操作系统内核实现了不同级别的缓存，其中通常包含文件系统级别的chache和一个略小一些的buffer cache。</p>
+</blockquote>
+<h3 id="故障分析"><a href="#故障分析" class="headerlink" title="故障分析"></a>故障分析</h3><p>在这个流程中什么时候我们的写操作才是安全的呢？</p>
+<p>如果我们考虑一个仅涉及数据库软件的失效（例如进程被管理员杀掉或崩溃），而不涉及操作系统内核，那成功执行完成步骤3的写操作就被认为是安全的。也就是在write这个系统调用（或其它用于将数据转移到内核的系统调用）返回成功后。在此步骤之后，即使数据库进程崩溃，内核仍然会负责将数据转移到磁盘控制器。</p>
+<p>如果我们考虑一个更灾难性的事件，如电力中断，只有在步骤5执行完成后我们才是安全的。也就是在数据真正被转移到物理设备中时。</p>
+<p>我们可以总结为，数据安全的重要阶段位于步骤3、4、5：</p>
+<h3 id="POSIX-API"><a href="#POSIX-API" class="headerlink" title="POSIX API"></a>POSIX API</h3><h3 id="我们无法控制的部分"><a href="#我们无法控制的部分" class="headerlink" title="我们无法控制的部分"></a>我们无法控制的部分</h3><h3 id="数据损坏"><a href="#数据损坏" class="headerlink" title="数据损坏"></a>数据损坏</h3><h2 id="Redis持久化实现"><a href="#Redis持久化实现" class="headerlink" title="Redis持久化实现"></a>Redis持久化实现</h2><h3 id="RDB快照"><a href="#RDB快照" class="headerlink" title="RDB快照"></a>RDB快照</h3><h3 id="AOF文件"><a href="#AOF文件" class="headerlink" title="AOF文件"></a>AOF文件</h3><h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><h4 id="appendfsync-no"><a href="#appendfsync-no" class="headerlink" title="appendfsync no"></a>appendfsync no</h4><h4 id="appendfsync-everysec"><a href="#appendfsync-everysec" class="headerlink" title="appendfsync everysec"></a>appendfsync everysec</h4><h4 id="appendfsync-always"><a href="#appendfsync-always" class="headerlink" title="appendfsync always"></a>appendfsync always</h4><h4 id="为什么pipeline不同"><a href="#为什么pipeline不同" class="headerlink" title="为什么pipeline不同"></a>为什么pipeline不同</h4><h4 id="AOF和Redis事务"><a href="#AOF和Redis事务" class="headerlink" title="AOF和Redis事务"></a>AOF和Redis事务</h4><h3 id="与PostgreSQL和MySQL的对比"><a href="#与PostgreSQL和MySQL的对比" class="headerlink" title="与PostgreSQL和MySQL的对比"></a>与PostgreSQL和MySQL的对比</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h2 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h2><h2 id="附录：关于重启阶段的笔记"><a href="#附录：关于重启阶段的笔记" class="headerlink" title="附录：关于重启阶段的笔记"></a>附录：关于重启阶段的笔记</h2>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag">#redis</a>
+          
+            <a href="/tags/nosql/" rel="tag">#nosql</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/07/how-to-be-a-good-tech-leader/" rel="next" title="如何成为一个好的技术Leader">
+                <i class="fa fa-chevron-left"></i> 如何成为一个好的技术Leader
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/04/redis-persistence-demystified/"
+           data-title="解密Redis持久化" data-url="http://kvguru.com/2017/04/redis-persistence-demystified/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="Jacob" />
+          <p class="site-author-name" itemprop="name">Jacob</p>
+          <p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">30</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#操作系统和磁盘"><span class="nav-number">1.</span> <span class="nav-text">操作系统和磁盘</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#写操作的流程"><span class="nav-number">1.1.</span> <span class="nav-text">写操作的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#故障分析"><span class="nav-number">1.2.</span> <span class="nav-text">故障分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#POSIX-API"><span class="nav-number">1.3.</span> <span class="nav-text">POSIX API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#我们无法控制的部分"><span class="nav-number">1.4.</span> <span class="nav-text">我们无法控制的部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据损坏"><span class="nav-number">1.5.</span> <span class="nav-text">数据损坏</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis持久化实现"><span class="nav-number">2.</span> <span class="nav-text">Redis持久化实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB快照"><span class="nav-number">2.1.</span> <span class="nav-text">RDB快照</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF文件"><span class="nav-number">2.2.</span> <span class="nav-text">AOF文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF重写"><span class="nav-number">2.3.</span> <span class="nav-text">AOF重写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF持久化"><span class="nav-number">2.4.</span> <span class="nav-text">AOF持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#appendfsync-no"><span class="nav-number">2.4.1.</span> <span class="nav-text">appendfsync no</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#appendfsync-everysec"><span class="nav-number">2.4.2.</span> <span class="nav-text">appendfsync everysec</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#appendfsync-always"><span class="nav-number">2.4.3.</span> <span class="nav-text">appendfsync always</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么pipeline不同"><span class="nav-number">2.4.4.</span> <span class="nav-text">为什么pipeline不同</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AOF和Redis事务"><span class="nav-number">2.4.5.</span> <span class="nav-text">AOF和Redis事务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#与PostgreSQL和MySQL的对比"><span class="nav-number">2.5.</span> <span class="nav-text">与PostgreSQL和MySQL的对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Credits"><span class="nav-number">4.</span> <span class="nav-text">Credits</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录：关于重启阶段的笔记"><span class="nav-number">5.</span> <span class="nav-text">附录：关于重启阶段的笔记</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jacob</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"stackeye"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
