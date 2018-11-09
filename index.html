@@ -258,6 +258,137 @@
             
               
                 
+                <a class="post-title-link" href="/2018/04/tcp-keepalive/" itemprop="url">
+                  TCP的KeepAlive使用简介
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2018-04-12T11:42:45+08:00" content="2018-04-12">
+              2018-04-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/网络编程/" itemprop="url" rel="index">
+                    <span itemprop="name">网络编程</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2018/04/tcp-keepalive/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2018/04/tcp-keepalive/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>在现代应用系统实现中，我们一般使用长连接与服务端进行交互，以减少建立连接的开销。同时使用连接池，维护特定数量的连接以备随时使用。<br>但是在NAT等有中间设备的情况下，长连接很可能因为某些原因被断开。从而导致连接池失去应有的作用。</p>
+<p>基于这些需求，就需要使用TCP的keepalive功能。它能提供一种自动、高效、可灵活配置，相比应用层心跳包更轻量的连接保活方式。</p>
+<h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>当我们需要对外提供服务的时候，尤其是KV存储这种对稳定性更高的中间件服务，一般会使用VIP, 而不是让用户直连：</p>
+<ul>
+<li>减少变更时对用户的影响：如proxy替换、扩容、维护</li>
+<li>高可用：更方便的高可用，用户无需探活健康检查等</li>
+<li>隐藏拓扑细节：更高的安全性</li>
+</ul>
+<p>使用VIP时需要注意的是，长时间idle的连接会被reset。原因是LVS一般配置为保持连接有时间限制，如果超过此时间后连接上一直没有报文，LVS就会发送RST报文断开链接。这么做的原因是为了节省连接资源，也避免攻击。<br>但是在实际使用场景中，用户一般使用资源池维护长连接。在连接池中预留部分多余连接是合理的，此部分连接应该保证长期有效。</p>
+<p>这就需要用到<strong>TCP的keepalive</strong>功能。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2018/04/tcp-keepalive/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2017/04/redis-persistence-demystified/" itemprop="url">
                   解密Redis持久化
                 </a>
@@ -1378,143 +1509,11 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2014/06/openstack-ci/" itemprop="url">
-                  Openstack CI持续集成测试简介
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-06-26T09:30:40+08:00" content="2014-06-26">
-              2014-06-26
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/openstack/" itemprop="url" rel="index">
-                    <span itemprop="name">openstack</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2014/06/openstack-ci/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/06/openstack-ci/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>本文档主要对Openstack社区目前的CI测试环境及其中用到的各个组件进行介绍。</p>
-<h2 id="测试的分类及必要性"><a href="#测试的分类及必要性" class="headerlink" title="测试的分类及必要性"></a>测试的分类及必要性</h2><h3 id="测试的分类"><a href="#测试的分类" class="headerlink" title="测试的分类"></a>测试的分类</h3><p>测试的过程没太有太严格的分类标准，从使用的角度，我们可以从以下两个角度对测试进行分类。</p>
-<h4 id="按照测试过程分类"><a href="#按照测试过程分类" class="headerlink" title="按照测试过程分类"></a>按照测试过程分类</h4><p>软件测试大概分为单元测试、集成测试、系统测试、验收测试。以下为软件测试V型图：<br><img src="/img/testing-V.png" alt="软件测试V型图"></p>
-<ul>
-<li>一般由单元测试开始，集中对每一个程序单元进行测试，检查各个程序模块是否正确地实现了规定的功能。单元测试的测试对象为独立的模块，需要由开发完成。</li>
-<li>此外，开发阶段应该还需要通过代码评审等方式，进行静态测试。</li>
-<li>集成测试把已测试过的模块组装起来，主要对与设计相关的软件体系结构的构造进行测试，目的在于检验与软件设计相关的程序结构问题。系统测试把已经经过确认的软件纳入实际运行环境中，与其它系统成份组合在一起进行测试，验证软件的完整功能是否满足需求规格并可正常运行。此两个阶段应该由测试人员执行。</li>
-<li>在软件的迭代过程中，需要不断重复测试以验证bug修改及新功能添加，这称之为回归测试。</li>
-<li>为了快速验证一个新版本，可挑选部分重要测试用例（如出错后会导致阻断其它测试用例的用例）用来验证，称之为冒烟测试(Smoke Test)或接收测试。</li>
-<li>验收测试主要由软件的实际用户在实际应用场景中执行，包含α测试和β测试。</li>
-</ul>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2014/06/openstack-ci/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1555,7 +1554,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">30</span>
+              <span class="site-state-item-count">31</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1563,7 +1562,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1572,7 +1571,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-count">47</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

@@ -258,6 +258,138 @@
             
               
                 
+                <a class="post-title-link" href="/2014/06/openstack-ci/" itemprop="url">
+                  Openstack CI持续集成测试简介
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2014-06-26T09:30:40+08:00" content="2014-06-26">
+              2014-06-26
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/openstack/" itemprop="url" rel="index">
+                    <span itemprop="name">openstack</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2014/06/openstack-ci/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2014/06/openstack-ci/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>本文档主要对Openstack社区目前的CI测试环境及其中用到的各个组件进行介绍。</p>
+<h2 id="测试的分类及必要性"><a href="#测试的分类及必要性" class="headerlink" title="测试的分类及必要性"></a>测试的分类及必要性</h2><h3 id="测试的分类"><a href="#测试的分类" class="headerlink" title="测试的分类"></a>测试的分类</h3><p>测试的过程没太有太严格的分类标准，从使用的角度，我们可以从以下两个角度对测试进行分类。</p>
+<h4 id="按照测试过程分类"><a href="#按照测试过程分类" class="headerlink" title="按照测试过程分类"></a>按照测试过程分类</h4><p>软件测试大概分为单元测试、集成测试、系统测试、验收测试。以下为软件测试V型图：<br><img src="/img/testing-V.png" alt="软件测试V型图"></p>
+<ul>
+<li>一般由单元测试开始，集中对每一个程序单元进行测试，检查各个程序模块是否正确地实现了规定的功能。单元测试的测试对象为独立的模块，需要由开发完成。</li>
+<li>此外，开发阶段应该还需要通过代码评审等方式，进行静态测试。</li>
+<li>集成测试把已测试过的模块组装起来，主要对与设计相关的软件体系结构的构造进行测试，目的在于检验与软件设计相关的程序结构问题。系统测试把已经经过确认的软件纳入实际运行环境中，与其它系统成份组合在一起进行测试，验证软件的完整功能是否满足需求规格并可正常运行。此两个阶段应该由测试人员执行。</li>
+<li>在软件的迭代过程中，需要不断重复测试以验证bug修改及新功能添加，这称之为回归测试。</li>
+<li>为了快速验证一个新版本，可挑选部分重要测试用例（如出错后会导致阻断其它测试用例的用例）用来验证，称之为冒烟测试(Smoke Test)或接收测试。</li>
+<li>验收测试主要由软件的实际用户在实际应用场景中执行，包含α测试和β测试。</li>
+</ul>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2014/06/openstack-ci/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2013/09/auto-testing-summary/" itemprop="url">
                   自动化测试实践：自动化测试的思考总结
                 </a>
@@ -1429,139 +1561,11 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2012/08/linux-curl-usage-download-file/" itemprop="url">
-                  Linux下cURL使用教程之十：HTTP文件下载
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2012-08-20T11:58:46+08:00" content="2012-08-20">
-              2012-08-20
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/curl/" itemprop="url" rel="index">
-                    <span itemprop="name">curl</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2012/08/linux-curl-usage-download-file/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2012/08/linux-curl-usage-download-file/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>其实每次我们使用curl去打开一个url都是执行一次下载操作，因此我们甚至可以认为curl是一个下载工具。<br>而且curl的某些选项及特性，使得curl能完成非常强大的下载功能。<br>基本命令及一些有用的参数如下。</p>
-<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><p>使用<code>curl [URL...]</code>下载URL，并输出在终端。<br>可指定多个URL。多个URL时，下载内容同时在终端显示。</p>
-<h2 id="–progress-bar-进度条"><a href="#–progress-bar-进度条" class="headerlink" title="-#/–progress-bar 进度条"></a>-#/–progress-bar 进度条</h2><p>添加参数<code>-#/--progress-bar</code>查看下载进度条。</p>
-<h2 id="o-–output-输出文件"><a href="#o-–output-输出文件" class="headerlink" title="-o/–output 输出文件"></a>-o/–output 输出文件</h2><p>使用参数<code>-o/--output &lt;file&gt;</code>下载并保存至文件file。<br>可同时下载多个URL，每个-o对应一个URL。<br>如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html http://www.a.com http://www.b.com</div></pre></td></tr></table></figure></p>
-<p>会下载www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html http://www.a.com -o b.html http://www.b.com</div></pre></td></tr></table></figure></p>
-<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">curl -o a.html -o b.html http://www.a.com http://www.b.com</div></pre></td></tr></table></figure></p>
-<p>会分别下载两个URL至两个文件中。<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2012/08/linux-curl-usage-download-file/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1602,7 +1606,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">30</span>
+              <span class="site-state-item-count">31</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1610,7 +1614,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1619,7 +1623,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-count">47</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
