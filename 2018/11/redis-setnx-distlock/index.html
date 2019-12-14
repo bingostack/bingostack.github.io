@@ -106,7 +106,7 @@
 使用zookeeper等分布式协调系统实现
 
 其中redis简便灵活，高可用分布式，且支持持久化。本文即介绍基于redi">
-<meta property="og:updated_time" content="2019-12-14T02:54:02.000Z">
+<meta property="og:updated_time" content="2019-12-14T02:58:44.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用redis实现分布式锁的正确姿势">
 <meta name="twitter:description" content="锁是我们在实现大多数系统时绕不过的话题。一旦有竞态条件出现，任何不经保护的操作，都可能带来问题。
@@ -358,9 +358,9 @@
       
 
       
-        <p>锁是我们在实现大多数系统时绕不过的话题。一旦有竞态条件出现，任何不经保护的操作，都可能带来问题。</p>
+        <p>锁是我们在实现大多数系统时绕不过的话题。一旦有<strong>竞态条件</strong>出现，任何不经保护的操作，都可能带来问题。</p>
 <p>而现代系统大多为分布式系统，这就引入了分布式锁，要求具有在分布各处的服务上保护资源的能力。</p>
-<p>而实现分布式锁，目前大多有以下3种方式：</p>
+<p>而实现<strong>分布式锁</strong>，目前大多有以下<strong>3种方式</strong>：</p>
 <ul>
 <li>使用数据库实现</li>
 <li>使用redis等缓存系统实现</li>
