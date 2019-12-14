@@ -258,6 +258,136 @@
             
               
                 
+                <a class="post-title-link" href="/2012/07/linux-curl-http-protocol/" itemprop="url">
+                  Linux下cURL使用教程之二：HTTP协议概述
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2012-07-28T19:12:10+08:00" content="2012-07-28">
+              2012-07-28
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/curl/" itemprop="url" rel="index">
+                    <span itemprop="name">curl</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2012/07/linux-curl-http-protocol/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2012/07/linux-curl-http-protocol/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>虽然cURL支持多种协议，但日常我们最常用的还是HTTP协议，下文中着重介绍HTTP的相关使用方法，因此我们要对HTTP协议有所了解。</p>
+<blockquote>
+<p>HTTP，超文本传送协议，通过因特网传送万维网文档的数据传送协议。</p>
+</blockquote>
+<p>我们访问一个网页的实际过程如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">客户端C===HTTP请求===&gt;服务端S：GET index.html http/1.1</div><div class="line">客户端C&lt;==HTTP响应====服务端S：HTTP/1.1 200 OK HTML文件内容</div></pre></td></tr></table></figure></p>
+<p>HTTP协议本身是个无状态协议，它不像其他基于会话的协议那样去不断追踪、记忆事务处理过程。而它要做的就只是简单的：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">连接=&gt;发起HTTP请求(HTTP Request)=&gt;得到HTTP响应(HTTP Response)=&gt;断开连接</div></pre></td></tr></table></figure></p>
+<p>而平常我们通过浏览器浏览网页这个过程，浏览器自动完成发送HTTP请求及对服务端应答的数据进行解析的工作，从而将网页呈现给我们。</p>
+<p>我们使用cURL要做的就是模仿浏览器的动作，因此要对HTTP请求的格式进行进一步的解析。</p>
+<h2 id="HTTP请求"><a href="#HTTP请求" class="headerlink" title="HTTP请求"></a>HTTP请求</h2><p>在你向HTTP服务器请求一个资源（比如简单的使用浏览器打开一个网页），TCP三次握手建立连接后，HTTP请求发出。<br>HTTP请求信息由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">l 请求行(Request Line)</div><div class="line">l 请求头(Request Header)</div><div class="line">l 请求正文(Message Body)</div></pre></td></tr></table></figure></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2012/07/linux-curl-http-protocol/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2012/07/linux-curl-description/" itemprop="url">
                   Linux下cURL使用教程之一：cURL简介
                 </a>
@@ -406,7 +536,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">31</span>
+              <span class="site-state-item-count">32</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -423,7 +553,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">47</span>
+                <span class="site-state-item-count">49</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -460,7 +590,7 @@
         <div class="copyright" >
   
   &copy;  2012 - 
-  <span itemprop="copyrightYear">2018</span>
+  <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

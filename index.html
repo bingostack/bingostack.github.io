@@ -258,6 +258,136 @@
             
               
                 
+                <a class="post-title-link" href="/2018/11/redis-setnx-distlock/" itemprop="url">
+                  使用redis实现分布式锁的正确姿势
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2018-11-12T17:15:52+08:00" content="2018-11-12">
+              2018-11-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/NoSQL/" itemprop="url" rel="index">
+                    <span itemprop="name">NoSQL</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2018/11/redis-setnx-distlock/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/11/redis-setnx-distlock/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>锁是我们在实现大多数系统时绕不过的话题。一旦有竞态条件出现，任何不经保护的操作，都可能带来问题。</p>
+<p>而现代系统大多为分布式系统，这就引入了分布式锁，要求具有在分布各处的服务上保护资源的能力。</p>
+<p>而实现分布式锁，目前大多有以下3种方式：</p>
+<ul>
+<li>使用数据库实现</li>
+<li>使用redis等缓存系统实现</li>
+<li>使用zookeeper等分布式协调系统实现</li>
+</ul>
+<p>其中redis简便灵活，高可用分布式，且支持持久化。本文即介绍基于redis实现分布式锁。<br>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2018/11/redis-setnx-distlock/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2018/04/tcp-keepalive/" itemprop="url">
                   TCP的KeepAlive使用简介
                 </a>
@@ -327,15 +457,16 @@
 
       
         
-          <p>在现代应用系统实现中，我们一般使用长连接与服务端进行交互，以减少建立连接的开销。同时使用连接池，维护特定数量的连接以备随时使用。<br>但是在NAT等有中间设备的情况下，长连接很可能因为某些原因被断开。从而导致连接池失去应有的作用。</p>
-<p>基于这些需求，就需要使用TCP的keepalive功能。它能提供一种自动、高效、可灵活配置，相比应用层心跳包更轻量的连接保活方式。</p>
+          <p>在现代应用系统实现中，我们一般使用长连接与服务端进行交互，以减少建立连接的开销。<br>同时使用连接池，维护特定数量的连接以备随时使用。<br>但是在NAT等有中间设备的情况下，长连接很可能因为某些原因被断开。<br>从而导致连接池失去应有的作用。</p>
+<p>基于这些需求，就需要使用TCP的keepalive功能。<br>它能提供一种自动、高效、可灵活配置，相比应用层心跳包更轻量的连接保活方式。</p>
 <h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>当我们需要对外提供服务的时候，尤其是KV存储这种对稳定性更高的中间件服务，一般会使用VIP, 而不是让用户直连：</p>
 <ul>
 <li>减少变更时对用户的影响：如proxy替换、扩容、维护</li>
 <li>高可用：更方便的高可用，用户无需探活健康检查等</li>
 <li>隐藏拓扑细节：更高的安全性</li>
 </ul>
-<p>使用VIP时需要注意的是，长时间idle的连接会被reset。原因是LVS一般配置为保持连接有时间限制，如果超过此时间后连接上一直没有报文，LVS就会发送RST报文断开链接。这么做的原因是为了节省连接资源，也避免攻击。<br>但是在实际使用场景中，用户一般使用资源池维护长连接。在连接池中预留部分多余连接是合理的，此部分连接应该保证长期有效。</p>
+<p>使用VIP时需要注意的是，长时间idle的连接会被reset。<br>原因是LVS一般配置为保持连接有时间限制，如果超过此时间后连接上一直没有报文，LVS就会发送RST报文断开链接。<br>这么做的原因是为了节省连接资源，也避免攻击。</p>
+<p>但是在实际使用场景中，用户一般使用资源池维护长连接。<br>在连接池中预留部分多余连接是合理的，此部分连接应该保证长期有效。</p>
 <p>这就需要用到<strong>TCP的keepalive</strong>功能。<br>
           <div class="post-more-link text-center">
             <a class="btn" href="/2018/04/tcp-keepalive/#more" rel="contents">
@@ -1374,141 +1505,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2014/08/rpmbuild-in-action/" itemprop="url">
-                  rpmbuild实战
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2014-08-19T20:40:01+08:00" content="2014-08-19">
-              2014-08-19
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/openstack/" itemprop="url" rel="index">
-                    <span itemprop="name">openstack</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2014/08/rpmbuild-in-action/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2014/08/rpmbuild-in-action/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在生产环境下，未确保软件版本的可靠及软件的稳定性，我们一般不使用源码安装软件。一般会根据os的不同，选择apt-get或yum安装软件。<br>本文主要讲解如何使用rpmbuild工具制作rpm包。并以Openstack为例，讲述了Openstack打包的过程。</p>
-<h2 id="RPM基础知识"><a href="#RPM基础知识" class="headerlink" title="RPM基础知识"></a>RPM基础知识</h2><p>本节主要分析是什么以及为什么的问题。<br>以及常用的rpm和yum命令。</p>
-<h3 id="RPM包管理是什么？"><a href="#RPM包管理是什么？" class="headerlink" title="RPM包管理是什么？"></a>RPM包管理是什么？</h3><p>RPM全称是RedHat Package Manager，是红帽系Linux默认使用的软件管理方法。主要包括centos、fedora、rhel等Linux分支。<br>其格式为Linux标准（LSB），是数据库驱动的包管理解决方案。<br>配合软件源，在centos系操作系统下，使用yum命令（最新版本应该是逐渐向dnf过渡）可以很容易的解决软件安装时的版本依赖问题。</p>
-<h3 id="为什么使用RPM包管理？"><a href="#为什么使用RPM包管理？" class="headerlink" title="为什么使用RPM包管理？"></a>为什么使用RPM包管理？</h3><p>RPM包管理的优点如下：</p>
-<ul>
-<li>易于分发，安装、卸载、升级</li>
-<li>自动依赖跟踪，结合yum自动解决依赖问题</li>
-<li>自带包验证，保证安装的正确性</li>
-<li>保存软件包安装的一致性</li>
-<li>易于保持对系统安装包的跟踪管理</li>
-</ul>
-<h3 id="基本RPM命令"><a href="#基本RPM命令" class="headerlink" title="基本RPM命令"></a>基本RPM命令</h3><p>我们可以直接使用rpm命令，对软件包进行一些操作。</p>
-<ul>
-<li>安装<br><code>rpm –ivh &lt;package_name&gt;</code><br><code>--nodeps</code>忽略依赖问题，一般仅用于测试
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2014/08/rpmbuild-in-action/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1554,7 +1550,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">31</span>
+              <span class="site-state-item-count">32</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1571,7 +1567,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">47</span>
+                <span class="site-state-item-count">49</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -1608,7 +1604,7 @@
         <div class="copyright" >
   
   &copy;  2012 - 
-  <span itemprop="copyrightYear">2018</span>
+  <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

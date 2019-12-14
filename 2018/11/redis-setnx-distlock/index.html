@@ -1,0 +1,727 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="redis,setnx,distributed lock," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="锁是我们在实现大多数系统时绕不过的话题。一旦有竞态条件出现，任何不经保护的操作，都可能带来问题。
+而现代系统大多为分布式系统，这就引入了分布式锁，要求具有在分布各处的服务上保护资源的能力。
+而实现分布式锁，目前大多有以下3种方式：
+
+使用数据库实现
+使用redis等缓存系统实现
+使用zookeeper等分布式协调系统实现
+
+其中redis简便灵活，高可用分布式，且支持持久化。本文即介绍基于redi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用redis实现分布式锁的正确姿势">
+<meta property="og:url" content="http://kvguru.com/2018/11/redis-setnx-distlock/index.html">
+<meta property="og:site_name" content="KV Guru">
+<meta property="og:description" content="锁是我们在实现大多数系统时绕不过的话题。一旦有竞态条件出现，任何不经保护的操作，都可能带来问题。
+而现代系统大多为分布式系统，这就引入了分布式锁，要求具有在分布各处的服务上保护资源的能力。
+而实现分布式锁，目前大多有以下3种方式：
+
+使用数据库实现
+使用redis等缓存系统实现
+使用zookeeper等分布式协调系统实现
+
+其中redis简便灵活，高可用分布式，且支持持久化。本文即介绍基于redi">
+<meta property="og:updated_time" content="2019-12-14T02:41:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用redis实现分布式锁的正确姿势">
+<meta name="twitter:description" content="锁是我们在实现大多数系统时绕不过的话题。一旦有竞态条件出现，任何不经保护的操作，都可能带来问题。
+而现代系统大多为分布式系统，这就引入了分布式锁，要求具有在分布各处的服务上保护资源的能力。
+而实现分布式锁，目前大多有以下3种方式：
+
+使用数据库实现
+使用redis等缓存系统实现
+使用zookeeper等分布式协调系统实现
+
+其中redis简便灵活，高可用分布式，且支持持久化。本文即介绍基于redi">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://kvguru.com/2018/11/redis-setnx-distlock/"/>
+
+  <title> 使用redis实现分布式锁的正确姿势 | KV Guru </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9c95a77f4ec2c33edff8095251aef97d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">KV Guru</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Long way to full stack!</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                使用redis实现分布式锁的正确姿势
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2018-11-12T17:15:52+08:00" content="2018-11-12">
+              2018-11-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/NoSQL/" itemprop="url" rel="index">
+                    <span itemprop="name">NoSQL</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2018/11/redis-setnx-distlock/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/11/redis-setnx-distlock/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>锁是我们在实现大多数系统时绕不过的话题。一旦有竞态条件出现，任何不经保护的操作，都可能带来问题。</p>
+<p>而现代系统大多为分布式系统，这就引入了分布式锁，要求具有在分布各处的服务上保护资源的能力。</p>
+<p>而实现分布式锁，目前大多有以下3种方式：</p>
+<ul>
+<li>使用数据库实现</li>
+<li>使用redis等缓存系统实现</li>
+<li>使用zookeeper等分布式协调系统实现</li>
+</ul>
+<p>其中redis简便灵活，高可用分布式，且支持持久化。本文即介绍基于redis实现分布式锁。<br><a id="more"></a></p>
+<h2 id="setnx语义"><a href="#setnx语义" class="headerlink" title="setnx语义"></a>setnx语义</h2><p>使用redis实现分布式锁，根本原理是setnx指令。其语义如下：</p>
+<p><code>SETNX key value</code></p>
+<blockquote>
+<p>如果key不存在，则设置key值为value（同set）；如果key已经存在，则不执行赋值操作。并使用不同的返回值标识。<a href="https://redis.io/commands/setnx" target="_blank" rel="external">官网文档</a></p>
+</blockquote>
+<p>还可以通过set命令的nx选项使用：<br><code>SET key value [expiration EX seconds|PX milliseconds] [NX|XX]</code></p>
+<blockquote>
+<p>NX - 仅在key不存在时执行赋值操作。<a href="https://redis.io/commands/set" target="_blank" rel="external">官网文档</a><br>而如下文所述，通过SET的NX选项使用，可同时使用其它选项，如EX/PX设置超时时间，是更好的方式。</p>
+</blockquote>
+<h2 id="setnx实现分布式锁"><a href="#setnx实现分布式锁" class="headerlink" title="setnx实现分布式锁"></a>setnx实现分布式锁</h2><p>下面我们对比下几种具体实现方式。</p>
+<h3 id="方案1：setnx-delete"><a href="#方案1：setnx-delete" class="headerlink" title="方案1：setnx+delete"></a>方案1：setnx+delete</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">setnx lock_a random_value</div><div class="line">// do sth</div><div class="line">delete lock_a</div></pre></td></tr></table></figure></p>
+<p>此实现方式的问题在于：一旦服务获取锁之后，因某种原因挂掉，则锁一直无法自动释放。从而导致死锁。</p>
+<h3 id="方案2：setnx-setex"><a href="#方案2：setnx-setex" class="headerlink" title="方案2：setnx + setex"></a>方案2：setnx + setex</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">setnx lock_a random_value</div><div class="line">setex lock_a 10 random_value // 10s超时</div><div class="line">// do sth</div><div class="line">delete lock_a</div></pre></td></tr></table></figure></p>
+<p>按需设置超时时间。此方案解决了方案1死锁的问题，但同时引入了新的死锁问题：<br>如果setnx之后、setex之前服务挂掉，会陷入死锁。<br>根本原因为setnx/setex分为了两个步骤，非原子操作。</p>
+<h3 id="方案3：set-nx-px"><a href="#方案3：set-nx-px" class="headerlink" title="方案3：set nx px"></a>方案3：set nx px</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">SET lock_a random_value NX PX 10000 // 10s超时</div><div class="line">// do sth</div><div class="line">delete lock_a</div></pre></td></tr></table></figure></p>
+<p>此方案通过set的NX/PX选项，将加锁、设置超时两个步骤合并为一个原子操作，从而解决方案1、2的问题。(PX与EX选项的语义相同，差异仅在单位。)<br>此方案目前大多数sdk、redis部署方案都支持，因此是<strong>推荐使用的方式</strong>。<br>但此方案也有如下问题：</p>
+<ul>
+<li>如果锁被错误的释放（如超时），或被错误的抢占，或因redis问题等导致锁丢失，无法很快的感知到。</li>
+</ul>
+<h3 id="方案4：set-key-randomvalue-nx-px"><a href="#方案4：set-key-randomvalue-nx-px" class="headerlink" title="方案4：set key randomvalue nx px"></a>方案4：set key randomvalue nx px</h3><p>方案4在3的基础上，增加对 value 的检查，只解除自己加的锁。<br>类似于 CAS，不过是 compare-and-delete。<br>此方案 redis 原生命令不支持，为保证原子性，需要通过lua脚本实现:。</p>
+<p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">SET lock_a random_value NX PX 10000</div><div class="line">// do sth</div><div class="line">eval &quot;if redis.call(&apos;get&apos;,KEYS[1]) == ARGV[1] then return redis.call(&apos;del&apos;,KEYS[1]) else return 0 end&quot; 1 lock_a random_value</div></pre></td></tr></table></figure></p>
+<p>此方案更严谨：即使因为某些异常导致锁被错误的抢占，也能部分保证锁的正确释放。并且在释放锁时能检测到锁是否被错误抢占、错误释放，从而进行特殊处理。</p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="超时时间"><a href="#超时时间" class="headerlink" title="超时时间"></a>超时时间</h3><p>从上述描述可看出，<strong>超时时间</strong>是一个比较重要的变量：</p>
+<ul>
+<li>超时时间不能太短，否则在任务执行完成前就自动释放了锁，导致资源暴露在锁保护之外。</li>
+<li>超时时间不能太长，否则会导致意外死锁后长时间的等待。除非人为接入处理。</li>
+</ul>
+<p>因此建议是根据任务内容，合理衡量超时时间，将超时时间设置为任务内容的几倍即可。<br>如果实在无法确定而又要求比较严格，可以采用定期 setex/expire 更新超时时间实现。</p>
+<h3 id="重试"><a href="#重试" class="headerlink" title="重试"></a>重试</h3><p>如果拿不到锁，建议根据任务性质、业务形式进行轮询等待。<br>等待次数需要参考任务执行时间。</p>
+<h3 id="与redis事务的比较"><a href="#与redis事务的比较" class="headerlink" title="与redis事务的比较"></a>与redis事务的比较</h3><p>setnx 使用更为灵活方案。multi/exec 的事务实现形式更为复杂。<br>且部分redis集群方案(如codis)，不支持multi/exec 事务。</p>
+<h2 id="golang-demo"><a href="#golang-demo" class="headerlink" title="golang demo"></a>golang demo</h2><p>基于 redigo简单实例代码如下。<br><figure class="highlight go"><table><tr><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"sync"</span></div><div class="line">	<span class="string">"time"</span></div><div class="line"></div><div class="line">	<span class="string">"github.com/garyburd/redigo/redis"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">getLock</span><span class="params">(redisAddr, lockKey <span class="keyword">string</span>, ex <span class="keyword">uint</span>, retry <span class="keyword">int</span>)</span> <span class="title">error</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> retry &lt;= <span class="number">0</span> &#123;</div><div class="line">		retry = <span class="number">10</span></div><div class="line">	&#125;</div><div class="line">	conn, err := redis.DialTimeout(<span class="string">"tcp"</span>, redisAddr, time.Minute, time.Minute, time.Minute)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(<span class="string">"conn to redis failed, err:%v"</span>, err)</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">defer</span> conn.Close()</div><div class="line">	ts := time.Now() <span class="comment">// as random value</span></div><div class="line">	<span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= retry; i++ &#123;</div><div class="line">		<span class="keyword">if</span> i &gt; <span class="number">1</span> &#123; <span class="comment">// sleep if not first time</span></div><div class="line">			time.Sleep(time.Second)</div><div class="line">		&#125;</div><div class="line">		v, err := conn.Do(<span class="string">"SET"</span>, lockKey, ts, <span class="string">"EX"</span>, retry, <span class="string">"NX"</span>)</div><div class="line">		<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">if</span> v == <span class="literal">nil</span> &#123;</div><div class="line">				fmt.Println(<span class="string">"get lock failed, retry times:"</span>, i)</div><div class="line">			&#125; <span class="keyword">else</span> &#123;</div><div class="line">				fmt.Println(<span class="string">"get lock success"</span>)</div><div class="line">				<span class="keyword">break</span></div><div class="line">			&#125;</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			fmt.Println(<span class="string">"get lock failed with err:"</span>, err)</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">if</span> i &gt;= retry &#123;</div><div class="line">			err = fmt.Errorf(<span class="string">"get lock failed with max retry times."</span>)</div><div class="line">			<span class="keyword">return</span> err</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">unLock</span><span class="params">(redisAddr, lockKey <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</div><div class="line">	conn, err := redis.DialTimeout(<span class="string">"tcp"</span>, redisAddr, time.Minute, time.Minute, time.Minute)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(<span class="string">"conn to redis failed, err:%v"</span>, err)</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">defer</span> conn.Close()</div><div class="line">	v, err := redis.Bool(conn.Do(<span class="string">"DEL"</span>, lockKey))</div><div class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">if</span> v &#123;</div><div class="line">			fmt.Println(<span class="string">"unLock success"</span>)</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			fmt.Println(<span class="string">"unLock failed"</span>)</div><div class="line">			<span class="keyword">return</span> fmt.Errorf(<span class="string">"unLock failed"</span>)</div><div class="line">		&#125;</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		fmt.Println(<span class="string">"unLock failed, err:"</span>, err)</div><div class="line">		<span class="keyword">return</span> err</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	RedisAddr = <span class="string">"127.0.0.1:3000"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> wg sync.WaitGroup</div><div class="line"></div><div class="line">	key := <span class="string">"lock_demo"</span></div><div class="line"></div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</div><div class="line">		wg.Add(<span class="number">1</span>)</div><div class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(id <span class="keyword">int</span>)</span></span> &#123;</div><div class="line">			<span class="keyword">defer</span> wg.Done()</div><div class="line">			time.Sleep(time.Second)</div><div class="line">			<span class="comment">// getLock</span></div><div class="line">			err := getLock(RedisAddr, key, <span class="number">10</span>, <span class="number">10</span>)</div><div class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] get lock failed:%v"</span>, id, err))</div><div class="line">				<span class="keyword">return</span></div><div class="line">			&#125;</div><div class="line">			<span class="comment">// sleep for random</span></div><div class="line">			<span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">5</span>; j++ &#123;</div><div class="line">				time.Sleep(time.Second)</div><div class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] hold lock for %ds"</span>, id, j+<span class="number">1</span>))</div><div class="line">			&#125;</div><div class="line">			<span class="comment">// unLock</span></div><div class="line">			err = unLock(RedisAddr, key)</div><div class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] unlock failed:%v"</span>, id, err))</div><div class="line">			&#125;</div><div class="line">			fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] done"</span>, id))</div><div class="line">		&#125;(i)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	wg.Wait()</div><div class="line">	fmt.Println(<span class="string">"demo is done!"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://redis.io/commands/setex" target="_blank" rel="external">setex 命令</a><br><a href="https://redis.io/commands/set" target="_blank" rel="external">set 命令</a><br><a href="https://redis.io/topics/distlock" target="_blank" rel="external">Distributed locks with Redis</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag">#redis</a>
+          
+            <a href="/tags/setnx/" rel="tag">#setnx</a>
+          
+            <a href="/tags/distributed-lock/" rel="tag">#distributed lock</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/tcp-keepalive/" rel="next" title="TCP的KeepAlive使用简介">
+                <i class="fa fa-chevron-left"></i> TCP的KeepAlive使用简介
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="Jacob" />
+          <p class="site-author-name" itemprop="name">Jacob</p>
+          <p class="site-description motion-element" itemprop="description">软件工程师的自我修养</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">32</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">49</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#setnx语义"><span class="nav-number">1.</span> <span class="nav-text">setnx语义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#setnx实现分布式锁"><span class="nav-number">2.</span> <span class="nav-text">setnx实现分布式锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#方案1：setnx-delete"><span class="nav-number">2.1.</span> <span class="nav-text">方案1：setnx+delete</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方案2：setnx-setex"><span class="nav-number">2.2.</span> <span class="nav-text">方案2：setnx + setex</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方案3：set-nx-px"><span class="nav-number">2.3.</span> <span class="nav-text">方案3：set nx px</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方案4：set-key-randomvalue-nx-px"><span class="nav-number">2.4.</span> <span class="nav-text">方案4：set key randomvalue nx px</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意事项"><span class="nav-number">3.</span> <span class="nav-text">注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#超时时间"><span class="nav-number">3.1.</span> <span class="nav-text">超时时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重试"><span class="nav-number">3.2.</span> <span class="nav-text">重试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#与redis事务的比较"><span class="nav-number">3.3.</span> <span class="nav-text">与redis事务的比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#golang-demo"><span class="nav-number">4.</span> <span class="nav-text">golang demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2012 - 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jacob</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+    <script type="text/javascript">
+      var disqus_shortname = 'kv-guru';
+      var disqus_identifier = '2018/11/redis-setnx-distlock/';
+      var disqus_title = "使用redis实现分布式锁的正确姿势";
+      var disqus_url = 'http://kvguru.com/2018/11/redis-setnx-distlock/';
+
+      function run_disqus_script(disqus_script){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }
+
+      run_disqus_script('count.js');
+      
+        run_disqus_script('embed.js');
+      
+    </script>
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

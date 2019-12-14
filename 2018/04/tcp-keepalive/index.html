@@ -94,7 +94,7 @@
 <meta property="og:description" content="在现代应用系统实现中，我们一般使用长连接与服务端进行交互，以减少建立连接的开销。同时使用连接池，维护特定数量的连接以备随时使用。但是在NAT等有中间设备的情况下，长连接很可能因为某些原因被断开。从而导致连接池失去应有的作用。
 基于这些需求，就需要使用TCP的keepalive功能。它能提供一种自动、高效、可灵活配置，相比应用层心跳包更轻量的连接保活方式。
 背景介绍当我们需要对外提供服务的时候，尤其">
-<meta property="og:updated_time" content="2018-11-09T04:10:25.000Z">
+<meta property="og:updated_time" content="2018-11-09T05:19:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP的KeepAlive使用简介">
 <meta name="twitter:description" content="在现代应用系统实现中，我们一般使用长连接与服务端进行交互，以减少建立连接的开销。同时使用连接池，维护特定数量的连接以备随时使用。但是在NAT等有中间设备的情况下，长连接很可能因为某些原因被断开。从而导致连接池失去应有的作用。
@@ -328,15 +328,16 @@
       
 
       
-        <p>在现代应用系统实现中，我们一般使用长连接与服务端进行交互，以减少建立连接的开销。同时使用连接池，维护特定数量的连接以备随时使用。<br>但是在NAT等有中间设备的情况下，长连接很可能因为某些原因被断开。从而导致连接池失去应有的作用。</p>
-<p>基于这些需求，就需要使用TCP的keepalive功能。它能提供一种自动、高效、可灵活配置，相比应用层心跳包更轻量的连接保活方式。</p>
+        <p>在现代应用系统实现中，我们一般使用长连接与服务端进行交互，以减少建立连接的开销。<br>同时使用连接池，维护特定数量的连接以备随时使用。<br>但是在NAT等有中间设备的情况下，长连接很可能因为某些原因被断开。<br>从而导致连接池失去应有的作用。</p>
+<p>基于这些需求，就需要使用TCP的keepalive功能。<br>它能提供一种自动、高效、可灵活配置，相比应用层心跳包更轻量的连接保活方式。</p>
 <h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>当我们需要对外提供服务的时候，尤其是KV存储这种对稳定性更高的中间件服务，一般会使用VIP, 而不是让用户直连：</p>
 <ul>
 <li>减少变更时对用户的影响：如proxy替换、扩容、维护</li>
 <li>高可用：更方便的高可用，用户无需探活健康检查等</li>
 <li>隐藏拓扑细节：更高的安全性</li>
 </ul>
-<p>使用VIP时需要注意的是，长时间idle的连接会被reset。原因是LVS一般配置为保持连接有时间限制，如果超过此时间后连接上一直没有报文，LVS就会发送RST报文断开链接。这么做的原因是为了节省连接资源，也避免攻击。<br>但是在实际使用场景中，用户一般使用资源池维护长连接。在连接池中预留部分多余连接是合理的，此部分连接应该保证长期有效。</p>
+<p>使用VIP时需要注意的是，长时间idle的连接会被reset。<br>原因是LVS一般配置为保持连接有时间限制，如果超过此时间后连接上一直没有报文，LVS就会发送RST报文断开链接。<br>这么做的原因是为了节省连接资源，也避免攻击。</p>
+<p>但是在实际使用场景中，用户一般使用资源池维护长连接。<br>在连接池中预留部分多余连接是合理的，此部分连接应该保证长期有效。</p>
 <p>这就需要用到<strong>TCP的keepalive</strong>功能。<br><a id="more"></a></p>
 <h2 id="实现细节"><a href="#实现细节" class="headerlink" title="实现细节"></a>实现细节</h2><h3 id="相关参数"><a href="#相关参数" class="headerlink" title="相关参数"></a>相关参数</h3><p>具体可以通过man 7 tcp查看。</p>
 <p>Linux中有三相关配置项，可使用<code>sysctl -a</code> 查看：<br><figure class="highlight plain"><table><tr><td class="code"><pre><div class="line"># 以下单位都为秒</div><div class="line">net.ipv4.tcp_keepalive_time = 7200 # 表示在这个时间之后没有数据时启动探测报文</div><div class="line">net.ipv4.tcp_keepalive_intvl = 75  # 前一个探测报文和后一个探测报文之间的时间间隔</div><div class="line">net.ipv4.tcp_keepalive_probes = 9  # 探测的最大次数</div></pre></td></tr></table></figure></p>
@@ -438,6 +439,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2018/11/redis-setnx-distlock/" rel="prev" title="使用redis实现分布式锁的正确姿势">
+                使用redis实现分布式锁的正确姿势 <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -534,7 +539,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">31</span>
+              <span class="site-state-item-count">32</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -551,7 +556,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">47</span>
+                <span class="site-state-item-count">49</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -599,7 +604,7 @@
         <div class="copyright" >
   
   &copy;  2012 - 
-  <span itemprop="copyrightYear">2018</span>
+  <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
