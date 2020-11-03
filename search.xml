@@ -21,4 +21,81 @@
         <tag>linux</tag>
       </tags>
   </entry>
+  <entry>
+    <title>SQLAlchemy简介及在OpenStack中的使用</title>
+    <url>/2015/07/sqlalchemy-intro/</url>
+    <content><![CDATA[<p>SQLAlchemy是Python编程语言下的一款开源软件，提供了SQL工具包及对象关系映射(ORM)工具。</p>
+<h2 id="web编程之orm"><a href="#web编程之orm" class="headerlink" title="web编程之orm"></a>web编程之orm</h2><p>在编写web服务时，我们通常使用orm，而不是直接使用SQL与数据库进行交互。<br>如果使用Django等比较全面的框架，可以选择默认的ORM。但如果选择flask等轻量级框架，则需要自己选择ORM。同时，自己选择使用ORM也带来了更大的灵活性。<br><a id="more"></a></p>
+<h3 id="orm是什么"><a href="#orm是什么" class="headerlink" title="orm是什么"></a>orm是什么</h3><p>以下节选自wikipeida：</p>
+<blockquote>
+<p>Object-relational mapping (ORM, O/RM, and O/R mapping tool) in computer science is a programming technique for converting data between incompatible type systems in object-oriented programming languages.</p>
+</blockquote>
+<p>以下节选自百度百科：</p>
+<blockquote>
+<p>对象关系映射（英语：Object Relation Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。</p>
+</blockquote>
+<p>实际项目中，我们主要使用orm作为与数据库等进行实际交互的工具。</p>
+<h3 id="为什么使用orm"><a href="#为什么使用orm" class="headerlink" title="为什么使用orm"></a>为什么使用orm</h3><p>与直接使用sql访问数据库相比，其有以下好处：</p>
+<ul>
+<li>代码的简洁性，对存储层的通用封装<br>使用orm，操作数据库往往仅需要简单的几条语句，使代码变得简洁。</li>
+<li>数据源的兼容性<br>orm往往对多种数据库、数据源进行通用的封装，从而使得编写一套代码，适用于不同的数据源变得可能。</li>
+<li>操作的安全性<br>直接使用sql操作数据库，往往会因为开发人员疏忽引入sql注入等安全问题。而使用orm，能避免此问题。</li>
+<li>操作语句的高效性<br>orm的封装是众多开发人员智慧的结晶，其中往往已经对生成的sql语句进行了优化，使得一般语句的性能比较高效，而开发人员不需要再去考虑性能问题。但orm一般是通用的解决方案，无法针对所有场景进行优化，特殊场景下其生成的sql语句可能会非常低效，因此需要在实际使用时进行监控并酌情优化。</li>
+</ul>
+<h2 id="简介及特性"><a href="#简介及特性" class="headerlink" title="简介及特性"></a>简介及特性</h2><p>SQLAlchemy的特性主要如下：</p>
+<ul>
+<li>Mature, High Performing Architecture DBA Approved</li>
+<li>Non-Opinionated</li>
+<li>Unit Of Work</li>
+<li>Function-based query construction Modular and Extensible</li>
+<li>Separate mapping and class design …</li>
+</ul>
+<p>See: <a href="http://www.sqlalchemy.org/features.html" target="_blank" rel="noopener">http://www.sqlalchemy.org/features.html</a></p>
+<h2 id="安装及使用"><a href="#安装及使用" class="headerlink" title="安装及使用"></a>安装及使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>开发环境推荐使用pip安装，同时注意版本问题。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install sqlalchemy</span><br></pre></td></tr></table></figure></p>
+<p>生产环境推荐使用rpm/deb安装，同时注意版本问题。<br>rpm - 版本兼容问题<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum install SQLAlchemy</span><br><span class="line">apt-get install SQLAlchemy</span><br></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>支持的2种方式:</p>
+<ul>
+<li>SQL Expression Language (core)</li>
+<li>Object Relational Mapper (orm)</li>
+</ul>
+<h2 id="Core方式"><a href="#Core方式" class="headerlink" title="Core方式"></a>Core方式</h2><p>(raw sql、sql expression)<br>对于绝大多数应用, 推荐使用SqlAlchemy. 即使是使用raw sql,<br>SqlAlchemy 也可以带来如下好处:</p>
+<ul>
+<li>内建数据库连接池</li>
+<li>强大的log功能</li>
+</ul>
+<p>SqlAlchemy的sql expression和raw sql的比较:</p>
+<ul>
+<li>sql expression 写法是纯python代码, 阅读性更好</li>
+<li>raw sql 比 sql expression 更灵活, 如果SQL很复杂, 更有优势了</li>
+</ul>
+<h3 id="Connect"><a href="#Connect" class="headerlink" title="Connect"></a>Connect</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">engine_str = <span class="string">"mysql:mysql://root:root@localhost/django_sqla"</span></span><br><span class="line">engine = create_engine(engine_str, echo=<span class="literal">True</span>)</span><br><span class="line">conn = engine.connect()</span><br></pre></td></tr></table></figure>
+<h3 id="Metadata"><a href="#Metadata" class="headerlink" title="Metadata"></a>Metadata</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Table objects <span class="keyword">and</span> its children <span class="keyword">as</span> metadata Table Column(String, Integer…)</span><br><span class="line">Create tables within the engine</span><br></pre></td></tr></table></figure>
+<h3 id="Insert-expression"><a href="#Insert-expression" class="headerlink" title="Insert expression"></a>Insert expression</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ins2=users.insert() <span class="comment">#anexpression</span></span><br><span class="line">result2 = conn.execute(ins2, id=<span class="number">2</span>, name=’wendy’, fullname=’Wendy Williams’) <span class="comment"># execute</span></span><br><span class="line">Multiple inserts: conn.execute(ins2, a_list)</span><br></pre></td></tr></table></figure>
+<h3 id="Update"><a href="#Update" class="headerlink" title="Update"></a>Update</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">users.update().values(&#123;…&#125;).where(…)</span><br></pre></td></tr></table></figure>
+<h3 id="Delete"><a href="#Delete" class="headerlink" title="Delete"></a>Delete</h3><p>同上</p>
+<h3 id="Select"><a href="#Select" class="headerlink" title="Select"></a>Select</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s = select([users]) <span class="keyword">or</span> s = users.select()</span><br><span class="line">result = conn.execute(s)</span><br><span class="line">result.fetchone()</span><br><span class="line">result.close()</span><br></pre></td></tr></table></figure>
+<h3 id="text"><a href="#text" class="headerlink" title="text"></a>text</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">sqlalchemy allows using string</span><br><span class="line">s = text(“””Hello”””)</span><br></pre></td></tr></table></figure>
+<h2 id="orm方式"><a href="#orm方式" class="headerlink" title="orm方式"></a>orm方式</h2><h3 id="Declare-a-Mapping"><a href="#Declare-a-Mapping" class="headerlink" title="Declare a Mapping"></a>Declare a Mapping</h3><p>declarative_base: define classes and mapping to tables<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base = declarative_base()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = ‘users’</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure></p>
+<h3 id="MetaData"><a href="#MetaData" class="headerlink" title="MetaData"></a>MetaData</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base.metadata.create_all(engine)</span><br></pre></td></tr></table></figure>
+<h3 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h3><p>事务<br>using session to handle orm’s action<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=engine)</span><br><span class="line">session = Session()</span><br></pre></td></tr></table></figure></p>
+<h3 id="Connection-pool"><a href="#Connection-pool" class="headerlink" title="Connection pool"></a>Connection pool</h3><h3 id="Add-insert"><a href="#Add-insert" class="headerlink" title="Add(insert)"></a>Add(insert)</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ed_user = User(<span class="string">'ed'</span>, <span class="string">'Ed Jones'</span>, <span class="string">'edspassword'</span>)</span><br><span class="line">session.add(ed_user)</span><br><span class="line">session.add_all([...])</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+<h3 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result = session.query(User).filter(User.name==‘ed<span class="string">')</span></span><br><span class="line"><span class="string">result[0].name, result[0][0]</span></span><br></pre></td></tr></table></figure>
+<h3 id="Relationship"><a href="#Relationship" class="headerlink" title="Relationship"></a>Relationship</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span><span class="params">(Base)</span></span></span><br><span class="line">__tablename__ = ‘addresses’</span><br><span class="line">...</span><br><span class="line">user_id = Column(Integer, ForeignKey(<span class="string">'users.id'</span>)) user = relationship(<span class="string">"User"</span>,</span><br><span class="line">backref=backref(<span class="string">'addresses'</span>, order_by=id))</span><br></pre></td></tr></table></figure>
+<h2 id="迁移"><a href="#迁移" class="headerlink" title="迁移"></a>迁移</h2><p>Alembic<br><a href="http://blog.csdn.net/ying_593254979/article/details/10189799" target="_blank" rel="noopener">参考</a></p>
+<h2 id="OpenStack中的使用"><a href="#OpenStack中的使用" class="headerlink" title="OpenStack中的使用"></a>OpenStack中的使用</h2><p>wsgi框架+SQLAlchemy</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>版本兼容问题<br>rpmbuild</p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://en.wikipedia.org/wiki/Object-relational_mapping" target="_blank" rel="noopener">orm in wiki</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>web</tag>
+        <tag>orm</tag>
+        <tag>sqlalchemy</tag>
+      </tags>
+  </entry>
 </search>
