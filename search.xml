@@ -99,149 +99,24 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之九：代理的使用</title>
-    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
-    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
-<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
-<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
-<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
-<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
-<p>5、如果有多个-x使用，只有最后一个有效。</p>
-<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
-<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>注：</p>
+    <title>HTTP认证模式</title>
+    <url>/2012/08/http-auth-schemes/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在研究curl和httpclient，用到了HTTP认证相关的知识。<br>但是搜索之后发现，网上居然没有很全面的HTTP认证模式的介绍，尤其是中文的文章。<br>因此结合MS的<a href="http://msdn.microsoft.com/en-us/library/ms789031.aspx" target="_blank" rel="noopener">Understanding HTTP Authentication</a>和<a href="http://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html" target="_blank" rel="noopener">HttpClient Tutorial</a>翻译加个人理解写了一篇。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本篇博文简介了几种HTTP认证模式。文章内容要求读者对HTTP请求、响应的基本结构，HTTP状态码和HTTP协议头有一定的了解。<br>请参考<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">Linux下cURL使用教程之二：HTTP协议概述</a>。</p>
+<h2 id="HTTP访问认证框架"><a href="#HTTP访问认证框架" class="headerlink" title="HTTP访问认证框架"></a>HTTP访问认证框架</h2><p>HTTP协议（RFC2616）定义了一个简单的访问认证模式框架。此框架假设有若干页面（被保护资源，也称作realm，区域），只能被特定的人访问，这些人可以在服务器要求时提供凭证。<br>当客户端如浏览器访问一个位于保护区域（protected realm）中的页面时，服务器返回包含401未认证状态码和www认证头（WWW-Authenticate header field）的响应。返回的认证头中必须含有至少一个适用于请求页面的认证要求（challenge）。<br>然后客户端发起第二次请求，此次请求在请求头中包含了试用于服务器认证要求的认证头域。<br>如果服务器接受了客户端提供的凭证，它将返回客户端请求的页面。否则，服务端会返回另一个401未认证响应以提示客户端认证失败。<br>具体认证响应头和请求头的内容取决于认证的方式。RFC2616中定义了两种广泛使用的认证模式：<br>HTTP基本认证（HTTP  Basic authentication）和HTTP摘要认证（HTTP Digest authentication）。<br>此外常用的还有NTLM、SPNEGO（HTTP协商认证，HTTP Negotiate authentication，是其一种）和Kerberos认证方式。<br><a id="more"></a></p>
+<h2 id="认证模式"><a href="#认证模式" class="headerlink" title="认证模式"></a>认证模式</h2><h3 id="1-基本认证Basic-Access-Authentication"><a href="#1-基本认证Basic-Access-Authentication" class="headerlink" title="1. 基本认证Basic Access Authentication"></a>1. 基本认证Basic Access Authentication</h3><p>基本认证是基于用户名密码的。<br>服务端的401响应中包含一个认证要求（authentication challenge），此认证要求中含有“Basic”关键字和一个用以表明访问的被保护资源名称的“名称=值”对，如下：<br><code>WWW-Authenticate: Basic realm=&quot;Protected page&quot;</code><br>如果你使用的浏览器，浏览器在接收到401响应时，将会弹出窗口让你输入用户名密码，然后发送认证请求。认证请求中同样包含”Basic”关键字，此外还有Base64编码后的用户名密码，如下：<br><code>Authorization: Basic QWRlcGxveSdzIGJsb2c=</code><br>服务器将用户名密码解码后比对，成功匹配后即认证成功。<br>因为Base64不算是一种加密方法：无密钥的可逆加密，任何人都可解密（百度搜索一下”在线解码“一大堆）。因此基本认证被认为是明文传输，安全性不好。极易出现密码被窃听和重放攻击等安全性问题。<br>如果资源需要更高强度的保护，请使用其他认证方法。</p>
+<h3 id="2-摘要认证HTTP-Digest-authentication"><a href="#2-摘要认证HTTP-Digest-authentication" class="headerlink" title="2. 摘要认证HTTP Digest authentication"></a>2. 摘要认证HTTP Digest authentication</h3><p>摘要认证被设计用来弥补基本认证的缺点。摘要认证基于请求-响应（challenge-response）模式，而且使用了哈希加密算法（常用为MD5），从而某些程度上解决了基本认证安全性的问题。<br>服务器返回的初始401响应的www认证头（WWW-Authenticate header）中多出了一个称为nonce的随机数的字段。服务端保证每个401响应中的nonce值唯一。如：<br><code>Authorization: Digest username=&quot;admin&quot;, realm=&quot;HiPER&quot;</code><br>接下来的客户端响应中将包含由用户名、密码、nonce和其他信息组成的数据的哈希值（如使用MD5加密）。所有被加密的数据服务端也具有，因此服务端执行同样加密过程。如果二者一直则认证成功。<br>因为如MD5等哈希加密算法是不可逆的，因此用户名密码明文无法被窃听破解。因为服务器对同一个nonce的请求只接受一次客户端请求，从而能避免重放攻击。<br>但是，digest的安全性也有缺点：</p>
 <ul>
-<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
-<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
-</li>
+<li>只有密码密码被加密，而客户端最终请求的被保护资源是明文传送的，可被窃听</li>
+<li>客户端无法确认服务端的正确身份，缺少对服务端的认证方式</li>
+<li>近年来，随着计算机性能的提高等因素，传统高强度加密算法的破解已成可能。而MD5更是已有破解方法。</li>
 </ul>
-<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
-<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
-<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
-<ol>
-<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
-</li>
-<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
-</li>
-<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
-</li>
-<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
-</li>
-<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
-</li>
-</ol>
-<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
-<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
-<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
-<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
-<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
-<p>可看到代理IP为10.1.1.2。</p>
-<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
-<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
-<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
-<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
-<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
-<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
-<p>其它常用相关环境变量如下：</p>
-<ul>
-<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
-<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
-<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
-<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
-</ul>
-<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
-<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之五：curl基本使用之提交表单</title>
-    <url>/2012/08/linux-curl-basic-usage-forms/</url>
-    <content><![CDATA[<p>很多时候，我们想获得的内容或者想进行的操作，只有在登陆之后才有权限，此时就需要用到提交表单。<br>表单以HTML的形式呈现给用户，用户使用表单提交数据后，服务端获得表单数据进行处理，然后进行后续操作。比如我们登录的过程，登录的表单呈现给我们，输入用户名密码提交后，服务端获得用户名密码在数据库中查询，以查询结果判定密码正确与否。<br>向HTTP服务器提交数据常用的有GET和POST两种方法。下文针对这两种方法，结合实例说明curl的使用。</p>
-<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前篇，服务端所有代码通过php实现。</p>
-<ul>
-<li>post.php，显示表单用于POST提交数据：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP POST Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a post form demo.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;form action=<span class="string">"welcome.php"</span> method=<span class="string">"post"</span>&gt;</span><br><span class="line">Name: &lt;input type=<span class="string">"text"</span> name=<span class="string">"name"</span> /&gt;</span><br><span class="line">Age: &lt;input type=<span class="string">"text"</span> name=<span class="string">"age"</span> /&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<a id="more"></a>
-<ul>
-<li>welcome.php，处理POST或GET的数据并显示：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP Form Demo.&lt;br /&gt;</span><br><span class="line">It can parse both GET <span class="keyword">and</span> POST data.&lt;br /&gt;</span><br><span class="line">This is a &lt;strong&gt;</span><br><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="keyword">if</span>(count($_POST) &gt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"POST"</span>;</span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"GET"</span>; </span><br><span class="line"><span class="meta">?&gt;</span>&lt;/strong&gt; Request.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">Welcome &lt;strong&gt;<span class="meta">&lt;?php</span> <span class="keyword">echo</span> $_REQUEST[<span class="string">"name"</span>]; <span class="meta">?&gt;</span>&lt;/strong&gt;.&lt;br /&gt;</span><br><span class="line">You are &lt;strong&gt;<span class="meta">&lt;?php</span> <span class="keyword">echo</span> $_REQUEST[<span class="string">"age"</span>]; <span class="meta">?&gt;</span>&lt;/strong&gt; years old.</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="跟踪表单提交的过程"><a href="#跟踪表单提交的过程" class="headerlink" title="跟踪表单提交的过程"></a>跟踪表单提交的过程</h2><p>提交表单的过程比GET网页的过程要复杂些。GET一个网页一般只会对Referer、User-Agent等字段进行限制。而提交表单的过程，需要知道提交的数据的字段名称、字段值的格式等。而且某些表单还含有隐藏字段。因此使用curl提交表单一般需要我们分析网页源代码，甚至采用抓包工具等进行数据包的分析。</p>
-<p>我们分析的一般都是HTTP协议，chrome自带的Developer Tools可以更容易的分析HTTP协议，因此我们使用此工具（Firefox上的Firebug插件提供类似功能）。<br>以下分析基于chrome浏览器。Firefox浏览器需要自行安装firebug插件。</p>
-<p>使用chrome打开网页（注意360急速浏览器下要使用“极速模式”，不要使用“兼容模式”），然后右键“审核元素”即可，如下图：<br><img src="/img/developertools.jpg" alt="chrome developer tools"><br>几个比较重要的tab页：</p>
-<ul>
-<li>Element标签用于显示当前元素，如想看到一个按钮的源码，对按钮右键审核元素即可看到。</li>
-<li>Network标签用于显示数据包，对于协议的分析，我们最常用此标签。</li>
-</ul>
-<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><h3 id="1-d-data-lt-data-gt"><a href="#1-d-data-lt-data-gt" class="headerlink" title="1. -d/--data &lt;data&gt;"></a>1. <code>-d/--data &lt;data&gt;</code></h3><p>指定HTTP请求时发送的数据（主要为POST请求），使用和用户通过浏览器提交表单时一样的方式。使用的content-type是<code>application/x-www-form-urlencoded</code>。<br>相当于<code>--data-ascii</code>。发送纯粹二进制的数据（data purely binary），需要使用<code>--data-binary</code>。URL-encode编码要发送的数据，需要使用<code>--data-urlencode</code>。<br>当有多个-d时，curl会自动将发送的数据段是用“&amp;”符号拼接，如：<code>-d name=Stackeye -d age=100</code>将自动拼接为name=Stackeye&amp;age=100作为post数据块（post chunk）发送。<br>如果想指定文件中的内容，可以使用-d @filename的形式。如文件foobar中内容为<code>name=Stackeye</code>，使用-d @foobar即可达到<code>-d name=Stackeye</code>一样的效果（只有第一个=作为特殊字符）。从文件读入时要注意=、@等特殊字符的异常情况。<br>而-d @-可以指定要发送的内容来自标准输入（stdin）。如执行<code>curl -d @- http://127.0.0.1/welcome.php</code>，在终端输入数据后回车、Ctrl+D后达到相同效果。<br>对于文件的使用，对于其他类似选项适用。<br>但<code>-d/--data</code>不会对数据进行url编码，而实际场景中我们最常用的还是发送url编码后的数据。</p>
-<h3 id="2-data-urlencode-lt-data-gt"><a href="#2-data-urlencode-lt-data-gt" class="headerlink" title="2. --data-urlencode &lt;data&gt;"></a>2. <code>--data-urlencode &lt;data&gt;</code></h3><p>使用URL-encode编码要发送的数据。除此之外，其余同-d。<br>-d选项默认是不会对要发送数据进行编码的，在旧版本没有<code>--data-urlencode</code>选项的curl时，要发送编码的数据，必须手动对数据进行编码，或者将数据存放在编码的文件中。<br>比如要发送数据为”Stackeye blog”，必须手动把空格变为”%20”：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -d name=Stackeye%20blog -d age=100 http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
-<p>而<code>--data-urlencode</code>自动完成此过程:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --data-urlencode name=Stackeye%20blog --data-urlencode age=100 \</span><br><span class="line">http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
-<p>wireshark抓包后显示如下：<br><img src="/img/curl_encode.jpg" alt="curl urlencode post数据抓包"><br>在我们的程序中，直接使用-d发送需urlencode编码的数据（一般为除字母数字外的其他字符，如空格，汉字等），程序也会正常处理，那我们为什么还需要使用-<code>-data-urlencode</code>呢？原因如下：</p>
-<ul>
-<li>能正常处理是apache服务器的原因。实际使用中服务器、程序语言不同，很可能出现无法处理不urlencode编码的数据，尤其是汉字和jsp程序，容易出现乱码</li>
-<li>我们在使用浏览器操作时，浏览器会自动进行urlencode操作。为了尽可能逼真，我们使用<code>--data-urlencode</code>尽可能模仿浏览器的操作</li>
-</ul>
-<p><code>--data-urlencode</code>同样可以使用@指定从文件中输入。而且可以使用<code>name@filename</code>的形式。如使用<code>--data-urlencode name@foobar</code>，文件foobar中内容为Stackeye，即可达到<code>--data-urlencode name=Stackeye</code>的效果。这在-d选项中是不行的。需要注意的是此用法不会对name进行编码，所以需要预先编码好name字段。实际场景中一般name字段都是固定的，so it’s not too much trouble.</p>
-<h3 id="3-data-binary-lt-data-gt"><a href="#3-data-binary-lt-data-gt" class="headerlink" title="3. --data-binary &lt;data&gt;"></a>3. <code>--data-binary &lt;data&gt;</code></h3><p>发送指定的不做任何处理的数据（This posts data exactly as specified with no extra processing whatsoever），其余同-d。</p>
-<h3 id="4-G-get"><a href="#4-G-get" class="headerlink" title="4. -G/--get"></a>4. <code>-G/--get</code></h3><p>和-d/–data、–data-binary一块使用时，表示强制使用GET的方式提交表单。<br>和 -I/–head 一块使用时，表示把提交的数据加在url中，而不是加在数据头中。</p>
-<h2 id="参数使用实例"><a href="#参数使用实例" class="headerlink" title="参数使用实例"></a>参数使用实例</h2><h3 id="1-POST"><a href="#1-POST" class="headerlink" title="1. POST"></a>1. POST</h3><p>分析post.php可知，此php脚本提交了两个字段：name和age。<br>打开Developer Tools，填写表单提交后，可看到Network标签下显示出HTTP的POST数据包：<br><img src="/img/developertools_post.jpg" alt="chrome developer tools post分析"><br>注意图中红圈处，可以在“view source”和”view parsed”直接切换，Request Header此时正以source模式显示，此模式下更利于我们的分析。<br>由此图可看到当前页面(post.php)向welcome.php提交了两个字段name和age，值分别为“Stackeye”和“100”，并可看到服务器的返回信息。</p>
-<p>我们可使用curl命令的-d选项模拟此POST过程：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o welcome.html \</span><br><span class="line">-e http://127.0.0.1/post.php -d name=Stackeye -d age=100 http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
-<p>或<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o welcome.html \</span><br><span class="line">-e http://127.0.0.1/post.php -d <span class="string">"name=Stackeye;age=100"</span> http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
-<p>因为POST提交表单的过程，一定会有显示表单的页面，因此一般都会有来源页面。因此使用-e指定了post页面为来源页面。<br>分析可得到curl命令需要使用的几乎所有信息。</p>
-<p>注：“几乎所有”的原因是如有些字段是在别的网页传递而来，或者由当前页面的js脚本等生成，此时就需要进一步的分析网页源代码等内容。</p>
-<h3 id="2-GET"><a href="#2-GET" class="headerlink" title="2. GET"></a>2. GET</h3><p>GET的提交我们直接使用网址后面加参数的形式，使用浏览器打开如下网址：<br><code>http://XXX.XXX.XXX.XXX/welcome.php?name=StackeyeGet&amp;age=101</code><br>同样使用Developer Tools抓包分析如下：<br><img src="/img/developertools_get.jpg" alt="Developer Tools GET分析"><br>由此图可看到GET向welcome.php提交了两个字段name和age，值分别为“StackeyeGet”和“101”。<br>我们可以使用curl的-G选项提交：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o welcome.html \</span><br><span class="line">-e http://127.0.0.1/post.php -G -d name=Stackeye -d age=100 http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
-<p>此时可看到welcome.html中有“This is a GET Request.”表明是由GET提交数据。</p>
-<p>实际场景中，表单中指定使用GET提交数据的情况很少。因此-G较少使用。<br>但我们更常用的还是直接curl带参数的url，此时与手动操作更接近：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o welcome.html \</span><br><span class="line"><span class="string">"http://127.0.0.1/welcome.php?name=StackeyeGet&amp;age=101"</span></span><br></pre></td></tr></table></figure></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要为curl提交表单的相关命令参数。<br>实际应用中，我们可能还需要使用curl上传文件，相关命令请看下篇。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之三：curl基本使用</title>
-    <url>/2012/08/linux-curl-basic-usage/</url>
-    <content><![CDATA[<p>在介绍完<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">cURL简介</a>和需要的<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">HTTP协议概述</a>之后。终于可以回归正题，进入curl的使用方法。</p>
-<h2 id="curl命令格式"><a href="#curl命令格式" class="headerlink" title="curl命令格式"></a>curl命令格式</h2><p>基本的使用用法如下：<br><code>curl [选项] [URL...]</code></p>
-<h2 id="GET一个网页"><a href="#GET一个网页" class="headerlink" title="GET一个网页"></a>GET一个网页</h2><p><code>curl http://www.baidu.com</code><br>网页源码将被打印出来。</p>
-<h3 id="o-output-lt-file-gt-指定保存目录"><a href="#o-output-lt-file-gt-指定保存目录" class="headerlink" title="-o/--output &lt;file&gt;指定保存目录"></a><code>-o/--output &lt;file&gt;</code>指定保存目录</h3><p>为便于后续处理，我们将网页内容保存在文件中：<br><code>curl -o stackeye.html http://www.stackeye.com</code><br>此时仍会显示进度条等信息。</p>
-<h3 id="s-silent静默模式"><a href="#s-silent静默模式" class="headerlink" title="-s/--silent静默模式"></a><code>-s/--silent</code>静默模式</h3><p>通过脚本结合curl可以实现很复杂的功能，而在脚本中调用curl，我们不需要进度条等信息。如执行：<br><code>curl -s -o stackeye.html http://www.stackeye.com</code><br>将不会显示任何信息。<br><a id="more"></a></p>
-<h2 id="v-–verbose查看通信过程、调试。"><a href="#v-–verbose查看通信过程、调试。" class="headerlink" title="-v/–verbose查看通信过程、调试。"></a>-v/–verbose查看通信过程、调试。</h2><p>这个参数可以清晰的查看到curl的通信过程，以便于调试，如执行：<br><code>curl -v http://www.baidu.com</code><br>返回结果如下，可以清晰的看到curl发出的HTTP请求及服务器返回的HTTP响应：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">* About to connect() to www.baidu.com port 80 (#0)</span><br><span class="line">*   Trying 119.75.218.77... connected</span><br><span class="line">* Connected to www.baidu.com (119.75.218.77) port 80 (#0)</span><br><span class="line">&gt; GET / HTTP/1.1</span><br><span class="line">&gt; User-Agent: curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18</span><br><span class="line">&gt; Host: www.baidu.com</span><br><span class="line">&gt; Accept: */*</span><br><span class="line">&gt;</span><br><span class="line">&lt; HTTP/1.1 200 OK</span><br><span class="line">&lt; Date: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Server: BWS/1.0</span><br><span class="line">&lt; Content-Length: 8216</span><br><span class="line">&lt; Content-Type: text/html;charset=gbk</span><br><span class="line">&lt; Cache-Control: private</span><br><span class="line">&lt; Expires: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Set-Cookie: BAIDUID=AF0E3C36DBB60C0D7C29DE11705028D7:FG=1; expires=Wed, 01-Aug-42 12:39:15 GMT; path=/; domain=.baidu.com</span><br><span class="line">&lt; P3P: CP=&quot; OTI DSP COR IVA OUR IND COM &quot;</span><br><span class="line">&lt; Connection: Keep-Alive</span><br><span class="line">&lt;</span><br><span class="line">&lt;!doctype html&gt;以下为HTML内容，略</span><br></pre></td></tr></table></figure></p>
-<p>以下所有命令都可以通过加入-v选项，查看具体通信过程。<br>更详细的调试信息可以使用–trace-ascii选项，如：<br><code>curl --trace-ascii debug.txt http://www.baidu.com</code></p>
-<h2 id="A-–user-agent指定User-Agent字段"><a href="#A-–user-agent指定User-Agent字段" class="headerlink" title="-A/–user-agent指定User-Agent字段"></a>-A/–user-agent指定User-Agent字段</h2><p>此选项字段用于指定HTTP请求头的User-Agent字段，即客户端（如浏览器）类型。<br>很多网站为了防止自动化程序采集，仅允许浏览器访问，最简单的办法就是通过User-Agent字段识别客户端类型做出处理。而如下命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p><code>&quot;Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)&quot;</code>为firefox的UserAgent值。<br>通过-A指定User-Agent字段，使curl伪装成Firefox，从而绕过网站的检测。<br>User-Agent字段可以通过抓包分析得到，或者通过chrome的Developer Tools、Firefox的Firebug等工具得到。<br>而如果一个网站对浏览器的限制也很严格的话，那我们甚至可以通过修改User-Agent伪装成百度蜘蛛或者googlebot突破限制，因为基于SEO的考虑，网站对搜索引擎蜘蛛的限制很小。</p>
-<h2 id="e-–referer-设置Referer"><a href="#e-–referer-设置Referer" class="headerlink" title="-e/–referer 设置Referer"></a>-e/–referer <url>设置Referer</url></h2><p>此选项字段用于指定HTTP请求头中的Referer字段，即来源网页。<br>为了防盗链，很多网页尤其是图片等可下载资源会检测Referer字段，对于非自己站内的来源全部屏蔽掉，此时我们就需要这个参数。<br>通过执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com http://www.stackeye.com</span><br><span class="line">http://www.stackeye.com将检测到来源网站为http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
-<h2 id="cookie使用"><a href="#cookie使用" class="headerlink" title="cookie使用"></a>cookie使用</h2><p>cookie的介绍参考上一篇。<br>我们登录网站后，为保持登录状态，需要使用cookie信息。</p>
-<h3 id="D-–dump-header-保存协议头部信息"><a href="#D-–dump-header-保存协议头部信息" class="headerlink" title="-D/–dump-header 保存协议头部信息"></a>-D/–dump-header 保存协议头部信息</h3><p><code>-D/--dump-header &lt;file&gt;</code>保存协议头部信息<br>头部信息中包含最常使用的cookie信息，如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -D stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会将头部信息保存至stackeyecookie.txt中。</p>
-<h3 id="b-–cookie-指定cookie"><a href="#b-–cookie-指定cookie" class="headerlink" title="-b/–cookie 指定cookie"></a>-b/–cookie 指定cookie</h3><p><code>-b/--cookie &lt;name=data&gt;/&lt;file&gt;</code>指定cookie<br>-b后可直接加-D保存的文件，curl会自动从中读取出cookie值，而且-b选项不会修改此文件。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -b stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会自动将stackeyecookie.txt中cookie信息附加至HTTP请求头中。</p>
-<p>结合-D和-b参数，即可完成cookie的保存和后续使用。</p>
-<p>cookie的形式就是“属性:值”对形式，-b后可直接以“属性=值”的形式给出cookie，当有多个属性时以分号间隔且包含在双引号中。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -b <span class="string">"user=Adeploy;pass=password"</span> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会将cookie信息<code>user=Adeploy;pass=password</code>附加在HTTP请求头中。</p>
-<h2 id="Redirects重定向"><a href="#Redirects重定向" class="headerlink" title="Redirects重定向"></a>Redirects重定向</h2><p>打开某些网页，网页会显示“ 3XX Moved Permanently ”，即网页被移动到其他位置，新位置一般由HTTP响应头中的Location字段给出。<br>重定向一般是因为网站结构调整后，避免用户访问原来页面出现404错误。<br>而另一类常见的用法就是在登陆成功后，网页显示成功信息，然后将用户重定向至内容页面。<br><code>-L/--location</code>选项可以自动跟踪重定向。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇只介绍简单的curl使用选项，下篇将结合实例具体说明。</p>
+<p>更多安全性问题请参考RFC2617。</p>
+<h3 id="3-NTML"><a href="#3-NTML" class="headerlink" title="3. NTML"></a>3. NTML</h3><p>NTML由微软开发，使用于Windows平台。被认为是比摘要认证更安全的认证方式。<br>它使用Windows凭证（Windows credentials）来传递认证数据，而不是使用未编码的用户名密码。<br>NTML要求服务器与客户端做出多次数据交换，服务器和所有其中的代理都必须支持永久连接（persistent connections）才能完成认证。</p>
+<h3 id="4-Kerberos"><a href="#4-Kerberos" class="headerlink" title="4. Kerberos"></a>4. Kerberos</h3><p>服务器与客户端通过第三方的Kerberos服务器完成认证。具体请参见<a href="http://baike.baidu.com/view/306687.htm" target="_blank" rel="noopener">百度百科条目</a>和<a href="http://zh.wikipedia.org/wiki/Kerberos" target="_blank" rel="noopener">维基百科条目</a>。<br>Kerberose相比NTML有很大改善：速度快，而且允许相互认证、认证代理和简单的信任关系。参考<a href="http://msdn.microsoft.com/en-us/library/aa480475.aspx" target="_blank" rel="noopener">KERBEROS vs NTLM</a>。</p>
+<h3 id="5-SPNEGO"><a href="#5-SPNEGO" class="headerlink" title="5. SPNEGO"></a>5. SPNEGO</h3><p>全称是Simple and Protected GSS-API Negotiation，是微软提供的一种使用<a href="http://baike.baidu.com/view/1551940.htm" target="_blank" rel="noopener">GSS-API</a>认证机制的安全协议，用于使Webserver共享Windows Credentials，它扩展了Kerberos(一种网络认证协议)。<br>SPNEGO适用于客户端需要认证，但是客户端服务端都不清楚对方支持什么认证协议的场合。<br>SPENGO其实是一种”伪认证机制“（pseudo-mechanism），用以协商出真正的认证机制。<br>最常见的是微软的HTTP协商认证扩展（HTTP Negotiate authentication extension），协商的最终机制在NTML和Kerberos中选择。Kerberos因其优点优先使用。<br>百度词条对此认证的解释是不够准确的，准确的解释可以参考<a href="http://en.wikipedia.org/wiki/SPNEGO" target="_blank" rel="noopener">维基百科条目</a>。</p>
+<h2 id="认证方式选择"><a href="#认证方式选择" class="headerlink" title="认证方式选择"></a>认证方式选择</h2><p>选择何种认证方式取决于资源要被保护的程度。不需要保护的资源使用基本认证方式。因为认证会导致更多的数据传输，可能影响用户体验。<br>认证方式最弱的是基本认证，最强的是协商认证。服务端在WWW-Authentication提供自己支持的认证方式，供客户端任意选择。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>RFC2616-HTTP协议<br>RFC2617-HTTP认证：基本认证和摘要认证<br>RFC1321-MD5摘要加密逻辑<br><a href="http://frontier.userland.com/stories/storyReader$2159" target="_blank" rel="noopener">HTTP Authentication Schemes</a></p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -294,6 +169,57 @@
 <h3 id="7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”"><a href="#7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”" class="headerlink" title="7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”"></a>7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o setcookie.html -D cookie001.txt http://127.0.0.1/setcookie.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldeny.html -e http://www.adeploy.com -D cookie002.txt -b cookie001.txt \</span><br><span class="line">http://127.0.0.1/curldeny.php</span><br></pre></td></tr></table></figure>
 <p>打开curldeny.html文件，可看到“You finally get it!”信息。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是针对curl基本用法的实例以加深理解和掌握。实际操作中，登陆、发帖等操作还会用到提交表单相关操作，下篇将进行讲解。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之五：curl基本使用之提交表单</title>
+    <url>/2012/08/linux-curl-basic-usage-forms/</url>
+    <content><![CDATA[<p>很多时候，我们想获得的内容或者想进行的操作，只有在登陆之后才有权限，此时就需要用到提交表单。<br>表单以HTML的形式呈现给用户，用户使用表单提交数据后，服务端获得表单数据进行处理，然后进行后续操作。比如我们登录的过程，登录的表单呈现给我们，输入用户名密码提交后，服务端获得用户名密码在数据库中查询，以查询结果判定密码正确与否。<br>向HTTP服务器提交数据常用的有GET和POST两种方法。下文针对这两种方法，结合实例说明curl的使用。</p>
+<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前篇，服务端所有代码通过php实现。</p>
+<ul>
+<li>post.php，显示表单用于POST提交数据：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP POST Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a post form demo.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;form action=<span class="string">"welcome.php"</span> method=<span class="string">"post"</span>&gt;</span><br><span class="line">Name: &lt;input type=<span class="string">"text"</span> name=<span class="string">"name"</span> /&gt;</span><br><span class="line">Age: &lt;input type=<span class="string">"text"</span> name=<span class="string">"age"</span> /&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li>welcome.php，处理POST或GET的数据并显示：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP Form Demo.&lt;br /&gt;</span><br><span class="line">It can parse both GET <span class="keyword">and</span> POST data.&lt;br /&gt;</span><br><span class="line">This is a &lt;strong&gt;</span><br><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="keyword">if</span>(count($_POST) &gt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"POST"</span>;</span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"GET"</span>; </span><br><span class="line"><span class="meta">?&gt;</span>&lt;/strong&gt; Request.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">Welcome &lt;strong&gt;<span class="meta">&lt;?php</span> <span class="keyword">echo</span> $_REQUEST[<span class="string">"name"</span>]; <span class="meta">?&gt;</span>&lt;/strong&gt;.&lt;br /&gt;</span><br><span class="line">You are &lt;strong&gt;<span class="meta">&lt;?php</span> <span class="keyword">echo</span> $_REQUEST[<span class="string">"age"</span>]; <span class="meta">?&gt;</span>&lt;/strong&gt; years old.</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="跟踪表单提交的过程"><a href="#跟踪表单提交的过程" class="headerlink" title="跟踪表单提交的过程"></a>跟踪表单提交的过程</h2><p>提交表单的过程比GET网页的过程要复杂些。GET一个网页一般只会对Referer、User-Agent等字段进行限制。而提交表单的过程，需要知道提交的数据的字段名称、字段值的格式等。而且某些表单还含有隐藏字段。因此使用curl提交表单一般需要我们分析网页源代码，甚至采用抓包工具等进行数据包的分析。</p>
+<p>我们分析的一般都是HTTP协议，chrome自带的Developer Tools可以更容易的分析HTTP协议，因此我们使用此工具（Firefox上的Firebug插件提供类似功能）。<br>以下分析基于chrome浏览器。Firefox浏览器需要自行安装firebug插件。</p>
+<p>使用chrome打开网页（注意360急速浏览器下要使用“极速模式”，不要使用“兼容模式”），然后右键“审核元素”即可，如下图：<br><img src="/img/developertools.jpg" alt="chrome developer tools"><br>几个比较重要的tab页：</p>
+<ul>
+<li>Element标签用于显示当前元素，如想看到一个按钮的源码，对按钮右键审核元素即可看到。</li>
+<li>Network标签用于显示数据包，对于协议的分析，我们最常用此标签。</li>
+</ul>
+<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><h3 id="1-d-data-lt-data-gt"><a href="#1-d-data-lt-data-gt" class="headerlink" title="1. -d/--data &lt;data&gt;"></a>1. <code>-d/--data &lt;data&gt;</code></h3><p>指定HTTP请求时发送的数据（主要为POST请求），使用和用户通过浏览器提交表单时一样的方式。使用的content-type是<code>application/x-www-form-urlencoded</code>。<br>相当于<code>--data-ascii</code>。发送纯粹二进制的数据（data purely binary），需要使用<code>--data-binary</code>。URL-encode编码要发送的数据，需要使用<code>--data-urlencode</code>。<br>当有多个-d时，curl会自动将发送的数据段是用“&amp;”符号拼接，如：<code>-d name=Stackeye -d age=100</code>将自动拼接为name=Stackeye&amp;age=100作为post数据块（post chunk）发送。<br>如果想指定文件中的内容，可以使用-d @filename的形式。如文件foobar中内容为<code>name=Stackeye</code>，使用-d @foobar即可达到<code>-d name=Stackeye</code>一样的效果（只有第一个=作为特殊字符）。从文件读入时要注意=、@等特殊字符的异常情况。<br>而-d @-可以指定要发送的内容来自标准输入（stdin）。如执行<code>curl -d @- http://127.0.0.1/welcome.php</code>，在终端输入数据后回车、Ctrl+D后达到相同效果。<br>对于文件的使用，对于其他类似选项适用。<br>但<code>-d/--data</code>不会对数据进行url编码，而实际场景中我们最常用的还是发送url编码后的数据。</p>
+<h3 id="2-data-urlencode-lt-data-gt"><a href="#2-data-urlencode-lt-data-gt" class="headerlink" title="2. --data-urlencode &lt;data&gt;"></a>2. <code>--data-urlencode &lt;data&gt;</code></h3><p>使用URL-encode编码要发送的数据。除此之外，其余同-d。<br>-d选项默认是不会对要发送数据进行编码的，在旧版本没有<code>--data-urlencode</code>选项的curl时，要发送编码的数据，必须手动对数据进行编码，或者将数据存放在编码的文件中。<br>比如要发送数据为”Stackeye blog”，必须手动把空格变为”%20”：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -d name=Stackeye%20blog -d age=100 http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
+<p>而<code>--data-urlencode</code>自动完成此过程:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --data-urlencode name=Stackeye%20blog --data-urlencode age=100 \</span><br><span class="line">http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
+<p>wireshark抓包后显示如下：<br><img src="/img/curl_encode.jpg" alt="curl urlencode post数据抓包"><br>在我们的程序中，直接使用-d发送需urlencode编码的数据（一般为除字母数字外的其他字符，如空格，汉字等），程序也会正常处理，那我们为什么还需要使用-<code>-data-urlencode</code>呢？原因如下：</p>
+<ul>
+<li>能正常处理是apache服务器的原因。实际使用中服务器、程序语言不同，很可能出现无法处理不urlencode编码的数据，尤其是汉字和jsp程序，容易出现乱码</li>
+<li>我们在使用浏览器操作时，浏览器会自动进行urlencode操作。为了尽可能逼真，我们使用<code>--data-urlencode</code>尽可能模仿浏览器的操作</li>
+</ul>
+<p><code>--data-urlencode</code>同样可以使用@指定从文件中输入。而且可以使用<code>name@filename</code>的形式。如使用<code>--data-urlencode name@foobar</code>，文件foobar中内容为Stackeye，即可达到<code>--data-urlencode name=Stackeye</code>的效果。这在-d选项中是不行的。需要注意的是此用法不会对name进行编码，所以需要预先编码好name字段。实际场景中一般name字段都是固定的，so it’s not too much trouble.</p>
+<h3 id="3-data-binary-lt-data-gt"><a href="#3-data-binary-lt-data-gt" class="headerlink" title="3. --data-binary &lt;data&gt;"></a>3. <code>--data-binary &lt;data&gt;</code></h3><p>发送指定的不做任何处理的数据（This posts data exactly as specified with no extra processing whatsoever），其余同-d。</p>
+<h3 id="4-G-get"><a href="#4-G-get" class="headerlink" title="4. -G/--get"></a>4. <code>-G/--get</code></h3><p>和-d/–data、–data-binary一块使用时，表示强制使用GET的方式提交表单。<br>和 -I/–head 一块使用时，表示把提交的数据加在url中，而不是加在数据头中。</p>
+<h2 id="参数使用实例"><a href="#参数使用实例" class="headerlink" title="参数使用实例"></a>参数使用实例</h2><h3 id="1-POST"><a href="#1-POST" class="headerlink" title="1. POST"></a>1. POST</h3><p>分析post.php可知，此php脚本提交了两个字段：name和age。<br>打开Developer Tools，填写表单提交后，可看到Network标签下显示出HTTP的POST数据包：<br><img src="/img/developertools_post.jpg" alt="chrome developer tools post分析"><br>注意图中红圈处，可以在“view source”和”view parsed”直接切换，Request Header此时正以source模式显示，此模式下更利于我们的分析。<br>由此图可看到当前页面(post.php)向welcome.php提交了两个字段name和age，值分别为“Stackeye”和“100”，并可看到服务器的返回信息。</p>
+<p>我们可使用curl命令的-d选项模拟此POST过程：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o welcome.html \</span><br><span class="line">-e http://127.0.0.1/post.php -d name=Stackeye -d age=100 http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
+<p>或<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o welcome.html \</span><br><span class="line">-e http://127.0.0.1/post.php -d <span class="string">"name=Stackeye;age=100"</span> http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
+<p>因为POST提交表单的过程，一定会有显示表单的页面，因此一般都会有来源页面。因此使用-e指定了post页面为来源页面。<br>分析可得到curl命令需要使用的几乎所有信息。</p>
+<p>注：“几乎所有”的原因是如有些字段是在别的网页传递而来，或者由当前页面的js脚本等生成，此时就需要进一步的分析网页源代码等内容。</p>
+<h3 id="2-GET"><a href="#2-GET" class="headerlink" title="2. GET"></a>2. GET</h3><p>GET的提交我们直接使用网址后面加参数的形式，使用浏览器打开如下网址：<br><code>http://XXX.XXX.XXX.XXX/welcome.php?name=StackeyeGet&amp;age=101</code><br>同样使用Developer Tools抓包分析如下：<br><img src="/img/developertools_get.jpg" alt="Developer Tools GET分析"><br>由此图可看到GET向welcome.php提交了两个字段name和age，值分别为“StackeyeGet”和“101”。<br>我们可以使用curl的-G选项提交：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o welcome.html \</span><br><span class="line">-e http://127.0.0.1/post.php -G -d name=Stackeye -d age=100 http://127.0.0.1/welcome.php</span><br></pre></td></tr></table></figure></p>
+<p>此时可看到welcome.html中有“This is a GET Request.”表明是由GET提交数据。</p>
+<p>实际场景中，表单中指定使用GET提交数据的情况很少。因此-G较少使用。<br>但我们更常用的还是直接curl带参数的url，此时与手动操作更接近：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o welcome.html \</span><br><span class="line"><span class="string">"http://127.0.0.1/welcome.php?name=StackeyeGet&amp;age=101"</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要为curl提交表单的相关命令参数。<br>实际应用中，我们可能还需要使用curl上传文件，相关命令请看下篇。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -401,6 +327,76 @@
       </tags>
   </entry>
   <entry>
+    <title>Linux下cURL使用教程之九：代理的使用</title>
+    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
+    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
+<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
+<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
+<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
+<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
+<p>5、如果有多个-x使用，只有最后一个有效。</p>
+<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
+<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>注：</p>
+<ul>
+<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
+<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
+<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
+<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
+<ol>
+<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
+</li>
+<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
+</li>
+<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
+</li>
+<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
+</li>
+<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
+</li>
+</ol>
+<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
+<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
+<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
+<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到代理IP为10.1.1.2。</p>
+<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
+<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
+<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
+<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
+<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
+<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
+<p>其它常用相关环境变量如下：</p>
+<ul>
+<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
+<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
+</ul>
+<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间</title>
     <url>/2012/08/linux-curl-example-post-to-baidu-hi/</url>
     <content><![CDATA[<p>前六篇之后，我们对curl的基本使用已经有了一定的了解。下面我们就在实际场景中使用我们的所学。<br>本篇实例目标为编写linux脚本,使用curl完成发布文章至百度空间。<br>下文将从百度空间登陆到发表文章，对每个过程的HTTP进行分析，并编写脚本实现。</p>
@@ -439,6 +435,27 @@
 <h3 id="2-没有错误重试"><a href="#2-没有错误重试" class="headerlink" title="2. 没有错误重试"></a>2. 没有错误重试</h3><p>可以使用如下循环进行错误重试：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#retry after fail</span></span><br><span class="line">COUNTER=0</span><br><span class="line"><span class="comment">#当失败时循环5次</span></span><br><span class="line"><span class="keyword">while</span> [ fail ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> [ <span class="variable">$COUNTER</span> -gt 5 ];<span class="keyword">then</span></span><br><span class="line">                <span class="built_in">echo</span> error</span><br><span class="line">                <span class="built_in">exit</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        sleep 60</span><br><span class="line">        <span class="comment">#curl语句</span></span><br><span class="line">        COUNTER=`expr <span class="variable">$COUNTER</span> + 1`</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
 <h3 id="3-文件权限"><a href="#3-文件权限" class="headerlink" title="3. 文件权限"></a>3. 文件权限</h3><p>文件中保存有账户密码，记得设置文件属性为700，避免密码泄露。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>完整脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"By Stackeye's blog"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"www.stackeye.com"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Change the file mod to 700 to keep your password safe!"</span></span><br><span class="line"></span><br><span class="line">username=<span class="string">""</span></span><br><span class="line">password=<span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#login</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br><span class="line"></span><br><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=`cat baidu002.html |grep bdstoken=|awk -F <span class="string">"bdstoken="</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\&amp;"</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#submit the article</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is line2!"</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment">#delete temp files</span></span><br><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure></p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之一：cURL简介</title>
+    <url>/2012/07/linux-curl-description/</url>
+    <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
+<p>而cURL就是HTTP脚本编程的利器。</p>
+<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
+<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
+<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
+<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
+<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
+</ol>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -670,27 +687,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之一：cURL简介</title>
-    <url>/2012/07/linux-curl-description/</url>
-    <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
-<p>而cURL就是HTTP脚本编程的利器。</p>
-<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
-<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
-<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
-<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
-<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
     <url>/2013/03/gateway-performance-test-desc/</url>
     <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
@@ -759,36 +755,36 @@
       </tags>
   </entry>
   <entry>
-    <title>解密Redis持久化</title>
-    <url>/2017/04/redis-persistence-demystified/</url>
-    <content><![CDATA[<p>本文主要是对<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">antirez博客</a>的翻译。其实<a href="http://blog.nosqlfan.com/html/3813.html" target="_blank" rel="noopener"></a>nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。</p>
-<p>首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久化的工作原理，Redis的持久化如何可靠，以及与其它数据库的对比。</p>
-<h2 id="操作系统和磁盘"><a href="#操作系统和磁盘" class="headerlink" title="操作系统和磁盘"></a>操作系统和磁盘</h2><h3 id="写操作的流程"><a href="#写操作的流程" class="headerlink" title="写操作的流程"></a>写操作的流程</h3><p>我们应该考虑的第一件事是对于数据库的持久化，我们的期望是什么。因此我们将一个简单的写操作中发生的事情可视化：</p>
-<ol>
-<li>客户端发送写命令到数据库（数据库在客户端内存中）</li>
-<li>数据库接收到写操作（数据在服务器内存中）</li>
-<li>数据库调用系统调用，将数据写入磁盘（数据在内核缓冲区中）</li>
-<li>操作系统将写缓冲区的数据转移到磁盘控制器上（数据在磁盘缓存中）</li>
-<li>磁盘控制器真正将数据写入到物理介质（数据真正落在磁盘上）<a id="more"></a>
-<blockquote>
-<p>注意：以上是一个各方面简单化的版本，因为实际有更多的cache和buffer。<br>步骤2经常被实现为数据库内部的一个复杂缓存系统。写操作也经常被不同的线程或进程处理。然而数据库或早或晚要将数据写入磁盘，而这就是我们关心的。也就是说，内存中的数据在某个节点必须要被传输到内核（步骤3）。<br>另外一个大的细节省略在步骤3.现实要更复杂，因为大多数高级操作系统内核实现了不同级别的缓存，其中通常包含文件系统级别的chache和一个略小一些的buffer cache。</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="故障分析"><a href="#故障分析" class="headerlink" title="故障分析"></a>故障分析</h3><p>在这个流程中什么时候我们的写操作才是安全的呢？</p>
-<p>如果我们考虑一个仅涉及数据库软件的失效（例如进程被管理员杀掉或崩溃），而不涉及操作系统内核，那成功执行完成步骤3的写操作就被认为是安全的。也就是在write这个系统调用（或其它用于将数据转移到内核的系统调用）返回成功后。在此步骤之后，即使数据库进程崩溃，内核仍然会负责将数据转移到磁盘控制器。</p>
-<p>如果我们考虑一个更灾难性的事件，如电力中断，只有在步骤5执行完成后我们才是安全的。也就是在数据真正被转移到物理设备中时。</p>
-<p>我们可以总结为，数据安全的重要阶段位于步骤3、4、5：</p>
-<h3 id="POSIX-API"><a href="#POSIX-API" class="headerlink" title="POSIX API"></a>POSIX API</h3><h3 id="我们无法控制的部分"><a href="#我们无法控制的部分" class="headerlink" title="我们无法控制的部分"></a>我们无法控制的部分</h3><h3 id="数据损坏"><a href="#数据损坏" class="headerlink" title="数据损坏"></a>数据损坏</h3><h2 id="Redis持久化实现"><a href="#Redis持久化实现" class="headerlink" title="Redis持久化实现"></a>Redis持久化实现</h2><h3 id="RDB快照"><a href="#RDB快照" class="headerlink" title="RDB快照"></a>RDB快照</h3><h3 id="AOF文件"><a href="#AOF文件" class="headerlink" title="AOF文件"></a>AOF文件</h3><h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><p>appendfsync no<br>appendfsync everysec<br>appendfsync always<br>为什么pipeline不同<br>AOF和Redis事务</p>
-<h3 id="与PostgreSQL和MySQL的对比"><a href="#与PostgreSQL和MySQL的对比" class="headerlink" title="与PostgreSQL和MySQL的对比"></a>与PostgreSQL和MySQL的对比</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h2 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h2><h2 id="附录：关于重启阶段的笔记"><a href="#附录：关于重启阶段的笔记" class="headerlink" title="附录：关于重启阶段的笔记"></a>附录：关于重启阶段的笔记</h2>]]></content>
+    <title>Linux下cURL使用教程之三：curl基本使用</title>
+    <url>/2012/08/linux-curl-basic-usage/</url>
+    <content><![CDATA[<p>在介绍完<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">cURL简介</a>和需要的<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">HTTP协议概述</a>之后。终于可以回归正题，进入curl的使用方法。</p>
+<h2 id="curl命令格式"><a href="#curl命令格式" class="headerlink" title="curl命令格式"></a>curl命令格式</h2><p>基本的使用用法如下：<br><code>curl [选项] [URL...]</code></p>
+<h2 id="GET一个网页"><a href="#GET一个网页" class="headerlink" title="GET一个网页"></a>GET一个网页</h2><p><code>curl http://www.baidu.com</code><br>网页源码将被打印出来。</p>
+<h3 id="o-output-lt-file-gt-指定保存目录"><a href="#o-output-lt-file-gt-指定保存目录" class="headerlink" title="-o/--output &lt;file&gt;指定保存目录"></a><code>-o/--output &lt;file&gt;</code>指定保存目录</h3><p>为便于后续处理，我们将网页内容保存在文件中：<br><code>curl -o stackeye.html http://www.stackeye.com</code><br>此时仍会显示进度条等信息。</p>
+<h3 id="s-silent静默模式"><a href="#s-silent静默模式" class="headerlink" title="-s/--silent静默模式"></a><code>-s/--silent</code>静默模式</h3><p>通过脚本结合curl可以实现很复杂的功能，而在脚本中调用curl，我们不需要进度条等信息。如执行：<br><code>curl -s -o stackeye.html http://www.stackeye.com</code><br>将不会显示任何信息。<br><a id="more"></a></p>
+<h2 id="v-–verbose查看通信过程、调试。"><a href="#v-–verbose查看通信过程、调试。" class="headerlink" title="-v/–verbose查看通信过程、调试。"></a>-v/–verbose查看通信过程、调试。</h2><p>这个参数可以清晰的查看到curl的通信过程，以便于调试，如执行：<br><code>curl -v http://www.baidu.com</code><br>返回结果如下，可以清晰的看到curl发出的HTTP请求及服务器返回的HTTP响应：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">* About to connect() to www.baidu.com port 80 (#0)</span><br><span class="line">*   Trying 119.75.218.77... connected</span><br><span class="line">* Connected to www.baidu.com (119.75.218.77) port 80 (#0)</span><br><span class="line">&gt; GET / HTTP/1.1</span><br><span class="line">&gt; User-Agent: curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18</span><br><span class="line">&gt; Host: www.baidu.com</span><br><span class="line">&gt; Accept: */*</span><br><span class="line">&gt;</span><br><span class="line">&lt; HTTP/1.1 200 OK</span><br><span class="line">&lt; Date: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Server: BWS/1.0</span><br><span class="line">&lt; Content-Length: 8216</span><br><span class="line">&lt; Content-Type: text/html;charset=gbk</span><br><span class="line">&lt; Cache-Control: private</span><br><span class="line">&lt; Expires: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Set-Cookie: BAIDUID=AF0E3C36DBB60C0D7C29DE11705028D7:FG=1; expires=Wed, 01-Aug-42 12:39:15 GMT; path=/; domain=.baidu.com</span><br><span class="line">&lt; P3P: CP=&quot; OTI DSP COR IVA OUR IND COM &quot;</span><br><span class="line">&lt; Connection: Keep-Alive</span><br><span class="line">&lt;</span><br><span class="line">&lt;!doctype html&gt;以下为HTML内容，略</span><br></pre></td></tr></table></figure></p>
+<p>以下所有命令都可以通过加入-v选项，查看具体通信过程。<br>更详细的调试信息可以使用–trace-ascii选项，如：<br><code>curl --trace-ascii debug.txt http://www.baidu.com</code></p>
+<h2 id="A-–user-agent指定User-Agent字段"><a href="#A-–user-agent指定User-Agent字段" class="headerlink" title="-A/–user-agent指定User-Agent字段"></a>-A/–user-agent指定User-Agent字段</h2><p>此选项字段用于指定HTTP请求头的User-Agent字段，即客户端（如浏览器）类型。<br>很多网站为了防止自动化程序采集，仅允许浏览器访问，最简单的办法就是通过User-Agent字段识别客户端类型做出处理。而如下命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p><code>&quot;Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)&quot;</code>为firefox的UserAgent值。<br>通过-A指定User-Agent字段，使curl伪装成Firefox，从而绕过网站的检测。<br>User-Agent字段可以通过抓包分析得到，或者通过chrome的Developer Tools、Firefox的Firebug等工具得到。<br>而如果一个网站对浏览器的限制也很严格的话，那我们甚至可以通过修改User-Agent伪装成百度蜘蛛或者googlebot突破限制，因为基于SEO的考虑，网站对搜索引擎蜘蛛的限制很小。</p>
+<h2 id="e-–referer-设置Referer"><a href="#e-–referer-设置Referer" class="headerlink" title="-e/–referer 设置Referer"></a>-e/–referer <url>设置Referer</url></h2><p>此选项字段用于指定HTTP请求头中的Referer字段，即来源网页。<br>为了防盗链，很多网页尤其是图片等可下载资源会检测Referer字段，对于非自己站内的来源全部屏蔽掉，此时我们就需要这个参数。<br>通过执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com http://www.stackeye.com</span><br><span class="line">http://www.stackeye.com将检测到来源网站为http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
+<h2 id="cookie使用"><a href="#cookie使用" class="headerlink" title="cookie使用"></a>cookie使用</h2><p>cookie的介绍参考上一篇。<br>我们登录网站后，为保持登录状态，需要使用cookie信息。</p>
+<h3 id="D-–dump-header-保存协议头部信息"><a href="#D-–dump-header-保存协议头部信息" class="headerlink" title="-D/–dump-header 保存协议头部信息"></a>-D/–dump-header 保存协议头部信息</h3><p><code>-D/--dump-header &lt;file&gt;</code>保存协议头部信息<br>头部信息中包含最常使用的cookie信息，如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -D stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会将头部信息保存至stackeyecookie.txt中。</p>
+<h3 id="b-–cookie-指定cookie"><a href="#b-–cookie-指定cookie" class="headerlink" title="-b/–cookie 指定cookie"></a>-b/–cookie 指定cookie</h3><p><code>-b/--cookie &lt;name=data&gt;/&lt;file&gt;</code>指定cookie<br>-b后可直接加-D保存的文件，curl会自动从中读取出cookie值，而且-b选项不会修改此文件。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -b stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会自动将stackeyecookie.txt中cookie信息附加至HTTP请求头中。</p>
+<p>结合-D和-b参数，即可完成cookie的保存和后续使用。</p>
+<p>cookie的形式就是“属性:值”对形式，-b后可直接以“属性=值”的形式给出cookie，当有多个属性时以分号间隔且包含在双引号中。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -b <span class="string">"user=Adeploy;pass=password"</span> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会将cookie信息<code>user=Adeploy;pass=password</code>附加在HTTP请求头中。</p>
+<h2 id="Redirects重定向"><a href="#Redirects重定向" class="headerlink" title="Redirects重定向"></a>Redirects重定向</h2><p>打开某些网页，网页会显示“ 3XX Moved Permanently ”，即网页被移动到其他位置，新位置一般由HTTP响应头中的Location字段给出。<br>重定向一般是因为网站结构调整后，避免用户访问原来页面出现404错误。<br>而另一类常见的用法就是在登陆成功后，网页显示成功信息，然后将用户重定向至内容页面。<br><code>-L/--location</code>选项可以自动跟踪重定向。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇只介绍简单的curl使用选项，下篇将结合实例具体说明。</p>
+]]></content>
       <categories>
-        <category>Redis</category>
+        <category>curl</category>
       </categories>
       <tags>
-        <tag>redis</tag>
-        <tag>nosql</tag>
-        <tag>aof</tag>
-        <tag>rdb</tag>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -866,6 +862,39 @@
         <tag>web</tag>
         <tag>orm</tag>
         <tag>sqlalchemy</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解密Redis持久化</title>
+    <url>/2017/04/redis-persistence-demystified/</url>
+    <content><![CDATA[<p>本文主要是对<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">antirez博客</a>的翻译。其实<a href="http://blog.nosqlfan.com/html/3813.html" target="_blank" rel="noopener"></a>nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。</p>
+<p>首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久化的工作原理，Redis的持久化如何可靠，以及与其它数据库的对比。</p>
+<h2 id="操作系统和磁盘"><a href="#操作系统和磁盘" class="headerlink" title="操作系统和磁盘"></a>操作系统和磁盘</h2><h3 id="写操作的流程"><a href="#写操作的流程" class="headerlink" title="写操作的流程"></a>写操作的流程</h3><p>我们应该考虑的第一件事是对于数据库的持久化，我们的期望是什么。因此我们将一个简单的写操作中发生的事情可视化：</p>
+<ol>
+<li>客户端发送写命令到数据库（数据库在客户端内存中）</li>
+<li>数据库接收到写操作（数据在服务器内存中）</li>
+<li>数据库调用系统调用，将数据写入磁盘（数据在内核缓冲区中）</li>
+<li>操作系统将写缓冲区的数据转移到磁盘控制器上（数据在磁盘缓存中）</li>
+<li>磁盘控制器真正将数据写入到物理介质（数据真正落在磁盘上）<a id="more"></a>
+<blockquote>
+<p>注意：以上是一个各方面简单化的版本，因为实际有更多的cache和buffer。<br>步骤2经常被实现为数据库内部的一个复杂缓存系统。写操作也经常被不同的线程或进程处理。然而数据库或早或晚要将数据写入磁盘，而这就是我们关心的。也就是说，内存中的数据在某个节点必须要被传输到内核（步骤3）。<br>另外一个大的细节省略在步骤3.现实要更复杂，因为大多数高级操作系统内核实现了不同级别的缓存，其中通常包含文件系统级别的chache和一个略小一些的buffer cache。</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="故障分析"><a href="#故障分析" class="headerlink" title="故障分析"></a>故障分析</h3><p>在这个流程中什么时候我们的写操作才是安全的呢？</p>
+<p>如果我们考虑一个仅涉及数据库软件的失效（例如进程被管理员杀掉或崩溃），而不涉及操作系统内核，那成功执行完成步骤3的写操作就被认为是安全的。也就是在write这个系统调用（或其它用于将数据转移到内核的系统调用）返回成功后。在此步骤之后，即使数据库进程崩溃，内核仍然会负责将数据转移到磁盘控制器。</p>
+<p>如果我们考虑一个更灾难性的事件，如电力中断，只有在步骤5执行完成后我们才是安全的。也就是在数据真正被转移到物理设备中时。</p>
+<p>我们可以总结为，数据安全的重要阶段位于步骤3、4、5：</p>
+<h3 id="POSIX-API"><a href="#POSIX-API" class="headerlink" title="POSIX API"></a>POSIX API</h3><h3 id="我们无法控制的部分"><a href="#我们无法控制的部分" class="headerlink" title="我们无法控制的部分"></a>我们无法控制的部分</h3><h3 id="数据损坏"><a href="#数据损坏" class="headerlink" title="数据损坏"></a>数据损坏</h3><h2 id="Redis持久化实现"><a href="#Redis持久化实现" class="headerlink" title="Redis持久化实现"></a>Redis持久化实现</h2><h3 id="RDB快照"><a href="#RDB快照" class="headerlink" title="RDB快照"></a>RDB快照</h3><h3 id="AOF文件"><a href="#AOF文件" class="headerlink" title="AOF文件"></a>AOF文件</h3><h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><p>appendfsync no<br>appendfsync everysec<br>appendfsync always<br>为什么pipeline不同<br>AOF和Redis事务</p>
+<h3 id="与PostgreSQL和MySQL的对比"><a href="#与PostgreSQL和MySQL的对比" class="headerlink" title="与PostgreSQL和MySQL的对比"></a>与PostgreSQL和MySQL的对比</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h2 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h2><h2 id="附录：关于重启阶段的笔记"><a href="#附录：关于重启阶段的笔记" class="headerlink" title="附录：关于重启阶段的笔记"></a>附录：关于重启阶段的笔记</h2>]]></content>
+      <categories>
+        <category>Redis</category>
+      </categories>
+      <tags>
+        <tag>redis</tag>
+        <tag>nosql</tag>
+        <tag>aof</tag>
+        <tag>rdb</tag>
       </tags>
   </entry>
   <entry>
