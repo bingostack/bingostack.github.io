@@ -1,71 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
-    <url>/2013/03/gateway-performance-test-desc/</url>
-    <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
-<ol>
-<li>简介及性能指标介绍 - 本篇</li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
-</ol>
-<a id="more"></a>
-<h2 id="性能测试简介"><a href="#性能测试简介" class="headerlink" title="性能测试简介"></a>性能测试简介</h2><p>以下解释来自百度百科：</p>
+    <title>buildbot实战</title>
+    <url>/2014/11/buildbot-in-action/</url>
+    <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
+<ul>
+<li>监控代码仓库</li>
+<li>代码仓库有变化后，立即拉取代码</li>
+<li>执行build、部署、测试及发布工作</li>
+<li>反馈结果</li>
+</ul>
+<p>我们对这样一个工具的一般要求为：</p>
+<ul>
+<li>轻量级，安装、配置简单，本身耗费资源较少</li>
+<li>高效率，较快的完成自动化任务</li>
+<li>通用性强，在不同的操作系统，甚至与不同的代码系统兼容</li>
+<li>易扩展、配置及管理，能较简单的配置自动化任务</li>
+</ul>
+<p>Buildbot和Jenkins都能很好的满足我们这些要求。但相比Jenkins，buildbot更轻量级，部署配置更为简单。<br>Web界面也更简单美观一些。</p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>buildbot架构比较简单，主要分为三部分：</p>
+<ul>
+<li>版本控制层<br>外部版本控制，通过插件或主动触发的方式触发buildbot执行任务。</li>
+<li>任务执行层<br>master接收任务后，调度其slave执行任务，并获取到返回的结果</li>
+<li>通知层<br>master获取结果后，可通过邮件、IRC等方式进行通知。</li>
+</ul>
+<p>其中重要的主体是master和slave，其主要采用星形拓扑结构，一个集群中可以多个master、多个slave。master主要负责任务接收、调度并通知任务，slave负责具体的任务执行。各节点本身无状态，横向扩展性很好。<br><a id="more"></a><br><img src="/img/buildbot-overview.png" alt="buildbot架构"></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="pip安装"><a href="#pip安装" class="headerlink" title="pip安装"></a>pip安装</h3><p>建议使用pip安装，避免麻烦的依赖问题。<br>同时当前对python3版本支持不太好，建议使用python2.7版本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install gcc python-devel </span><br><span class="line">yum install python-dateutil15 git expect</span><br><span class="line"><span class="comment"># master安装</span></span><br><span class="line">pip install buildbot</span><br><span class="line"><span class="comment"># salve安装</span></span><br><span class="line">pip install buildbot-slave</span><br></pre></td></tr></table></figure></p>
+<p>如果是python2.6的话，因为最新版本的Twisted需要python2.7，所以需要提前指定版本安装：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install Twisted==15.1.0</span><br></pre></td></tr></table></figure></p>
+<p>为充分利用资源，同一台机器可配置为多个master、slave：可使用不同用户或virtualenv，每个用户或virtualenv环境部署为一个节点。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install virtualenv</span><br></pre></td></tr></table></figure></p>
+<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>最近看到<a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">buildbot官方</a>给出了Dockerfile(但Dockerfile地址是错的，可以自行在github代码中查找)，可下载后自行构建镜像使用，运行后即可使用：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Download Buildbot Dockerfile.</span></span><br><span class="line">wget https://raw.githubusercontent.com/buildbot/buildbot/master/master/Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the Buildbot container (it will take a few minutes to download packages)</span></span><br><span class="line">docker build -t buildbot - &lt; Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Run buildbot</span></span><br><span class="line">CONTAINER_ID=$(docker run -d -p 8010:8010 -p 22 buildbot)</span><br></pre></td></tr></table></figure></p>
+<p>然后打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可。</p>
+<h2 id="创建及运行"><a href="#创建及运行" class="headerlink" title="创建及运行"></a>创建及运行</h2><h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildbot create-master master</span><br><span class="line"><span class="comment"># 配置文件</span></span><br><span class="line">mv master/master.cfg.sample master/master.cfg</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildbot start master</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f master/twistd.log</span><br></pre></td></tr></table></figure>
+<p>buildbot会在当前目录下创建master名称的目录，以上为<code>master</code>。<br>看到最后显示<code>BuildMaster is running</code>即为启动成功，此时可通过<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>访问，默认用户名密码都是<code>pyflakes</code>。</p>
+<h3 id="slave"><a href="#slave" class="headerlink" title="slave"></a>slave</h3><p>创建slave时需要指定mater的地址，或者修改配置文件指定。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildslave create-slave slave1 localhost:9989 slave1 pass</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildslave start slave</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f slave/twistd.log</span><br></pre></td></tr></table></figure></p>
+<p>create-slave的参数分布是：slave目录、master、名字、密码。其中master默认都采用9989与slave通信。名字、密码必须与master的master.cfg中配置的一致：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'slaves'</span>] = [buildslave.BuildSlave(<span class="string">"example-slave"</span>, <span class="string">"pass"</span>)]</span><br></pre></td></tr></table></figure></p>
+<h3 id="预览"><a href="#预览" class="headerlink" title="预览"></a>预览</h3><p>此时打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可看到如下页面：<br><img src="/img/buildbot-index.png" alt="buildbot预览"><br>其中Buildslaves页面可查看到我们新添加的example-slave，且状态为<code>Idle</code>。<br>而Waterfall页面可查看到当前的builder，目前只有runtest，点进去点击forcebuild即可进行测试build。成功后记录显示为绿色。</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>Buildbot的配置文件为<code>.cfg</code>后缀的python脚本，使用python语法。如上文slave的定义就是一个python list的定义。</p>
+<h3 id="master配置"><a href="#master配置" class="headerlink" title="master配置"></a>master配置</h3><p>主要配置如下。</p>
+<ul>
+<li>BUILDSLAVES<br>slave的定义，以list的形式呈现。需要主要名字和密码与slave一致。<br>其中protocols可定义与slave的通信方式，包括端口等。</li>
+<li><p>CHANGESOURCES<br>指定需要监控的源代码地址。格式如下，其中可指定git地址、工作目录、分支、监控周期等。可定义多个，每个append进list即可。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c[&apos;change_source&apos;] = []</span><br><span class="line">c[&apos;change_source&apos;].append(changes.GitPoller(</span><br><span class="line">        &apos;git://github.com/buildbot/pyflakes.git&apos;,</span><br><span class="line">        workdir=&apos;gitpoller-workdir&apos;, branch=&apos;master&apos;,</span><br><span class="line">        pollinterval=300))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>SCHEDULERS<br>scheduler指定何时、如何触发执行builder，其中builder在BUILDERS中定义。下文定义了两个scheduler：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'schedulers'</span>] = []</span><br><span class="line"><span class="comment"># 定义每小时运行的scheduler</span></span><br><span class="line">hourlyscheduler = Periodic(name = <span class="string">"hourly"</span>,</span><br><span class="line">                           builderNames = [<span class="string">"simplebuild"</span>],</span><br><span class="line">                           periodicBuildTimer = <span class="number">3600</span>)</span><br><span class="line"><span class="comment"># 定义手动触发的scheduler</span></span><br><span class="line">c[<span class="string">'schedulers'</span>].append(schedulers.ForceScheduler(</span><br><span class="line">                            name=<span class="string">"force"</span>,</span><br><span class="line">                            builderNames=[<span class="string">"master"</span>]))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>BUILDERS<br>builder定义具体执行的任务内容，由一系列的步骤组成。每个步骤定义在step中，factory包含一系列的step，builder通过指定factory等参数创建。可定义多个builder。<br>代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义factory</span></span><br><span class="line">factory = util.BuildFactory()</span><br><span class="line"><span class="comment"># 定义具体step</span></span><br><span class="line">factory.addStep(steps.Git(repourl=<span class="string">'git://github.com/buildbot/pyflakes.git'</span>, mode=<span class="string">'incremental'</span>))</span><br><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"trial"</span>, <span class="string">"pyflakes"</span>]))</span><br><span class="line"><span class="comment"># 创建builder</span></span><br><span class="line">c[<span class="string">'builders'</span>] = []</span><br><span class="line"><span class="comment"># 指定名称、使用的slave、factory</span></span><br><span class="line">c[<span class="string">'builders'</span>].append(</span><br><span class="line">    util.BuilderConfig(name=<span class="string">"master"</span>,</span><br><span class="line">      slavenames=[<span class="string">"master"</span>],</span><br><span class="line">      factory=factory))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>STATUS TARGETS<br>此处定义buildbot对外通知build信息的方式。最基本的方式就是显示在页面中，因此此处同时定义了页面的认证方式，即登录使用的用户名、密码在此处修改。同时可定义IRC、邮件等通知方式。</p>
+</li>
+<li>PROJECT IDENTITY<br>此处主要为buildbot的基本信息，如title、超链接、url等。</li>
+<li>DB URL<br>此处定义使用的数据库，默认使用sqlite，地址为本地文件路径。</li>
+</ul>
+<h3 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h3><p>slave的定义主要在<code>buildbot.tac</code>文件中，可用于定义使用的master及slave基本信息。</p>
+<h2 id="启动及使用"><a href="#启动及使用" class="headerlink" title="启动及使用"></a>启动及使用</h2><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><ul>
+<li>启动<br>master、slave的启动上文已提及，子命令为start，参数为路径。</li>
+<li>停止、重启<br>stop和restart，其余同start</li>
+<li>master重新加载配置<br><code>buildbot reconfig master</code>即可重新加载配置。</li>
+</ul>
+<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>平时比较常用手动触发build，即forcebuild：web页面登录-&gt;Builders-&gt;选择builder-&gt;Force Build-&gt;在Waterfall查看打包结果及详细日志。<br><img src="/img/buildbot-waterfall.png" alt="buildbot waterfall"><br>注意：只有登录后才有build权限。</p>
+<h3 id="各页面介绍"><a href="#各页面介绍" class="headerlink" title="各页面介绍"></a>各页面介绍</h3><p>Buildbot比较方便的一点是全部通过页面来进行操作。主要页面介绍如下：</p>
+<ul>
+<li>Waterfall，以瀑布流的方式显示build任务，可点击任务查看详情、执行操作等</li>
+<li>Grid/T-Grid，以对应的方式显示build任务</li>
+<li>Console，还在开发中，当前主要显示revision信息</li>
+<li>Builders，定义的所有builder</li>
+<li>Recent Builds，最近的build</li>
+<li>Buildslaves，定义的所有slave</li>
+<li>Changesources，定义的所有代码仓库</li>
+<li>JSON API，对外提供的JSON API文档</li>
+</ul>
+<h2 id="高级使用"><a href="#高级使用" class="headerlink" title="高级使用"></a>高级使用</h2><h3 id="多分支build"><a href="#多分支build" class="headerlink" title="多分支build"></a>多分支build</h3><p>定义一个Changesource。<br>定义多个schedulers，分别对应不同分支。<br>定义多个factory，其中的step除branch不同外，其余step通用。通用的step可一次定义，多次使用。<br>builder分别指定分支和factory。</p>
+<h3 id="多项目build"><a href="#多项目build" class="headerlink" title="多项目build"></a>多项目build</h3><p>新版本可使用此功能，但不太推荐。buildbot的一个master还是更多的擅长对一个项目的管理。<br>需要定义多个Changesource，然后在其它定义时通过<code>project</code>和<code>repository</code>参数指定项目。</p>
+<h3 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h3><p>通过检查step的返回结果判断是否执行成功，规则同shell：0为成功，其它失败。<br>因此如果step中调用了自己的脚本，需要保证按上述规则返回结果。</p>
+<h3 id="添加参数"><a href="#添加参数" class="headerlink" title="添加参数"></a>添加参数</h3><p>使用<code>util.Property</code>获得网页上指定的参数，可设置默认值：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"bash"</span>, <span class="string">"autorpm.sh"</span>, util.Property(<span class="string">'project'</span>, default=<span class="string">''</span>)]))</span><br></pre></td></tr></table></figure></p>
+<p>在build页面通过name/value指定，如：<br><img src="/img/buildbot-param.png" alt="buildbot指定参数"></p>
+<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><p>实际使用中发现，buildslave所创建的文件，权限都为600或700。<br>这样会造成如cp到apache目录时，apache无法读取文件。<br>通过官方文档查看到slave启动时有umask选项：</p>
 <blockquote>
-<p>性能测试是通过自动化的测试<strong>工具</strong>模拟多种正常、峰值以及异常<strong>负载</strong>条件来对系统的各项性能指标进行测试。负载测试和压力测试都属于性能测试，两者可以结合进行。通过负载测试，确定在各种工作负载下系统的性能，目标是测试当负载逐渐增加时，系统各项性能指标的变化情况。压力测试是通过确定一个系统的<strong>瓶颈</strong>或者不能接受的性能点，来获得系统能提供的最大服务级别的测试。</p>
+<p>–umask<br>This is a string (generally an octal representation of an integer) which will cause the buildslave process’ umask value to be set shortly after initialization.<br>The twistddaemonization utility forces the umask to 077 at startup (which means that all files created by the buildslave or its child processes will be unreadable by any user other than the buildslave account).<br>If you want build products to be readable by other accounts, you can add –umask=022 to tell the buildslave to fix the umask after twistd clobbers it.<br>If you want build products to be writable by other accounts too, use –umask=000, but this is likely to be a security problem.</p>
 </blockquote>
-<p>其中有三个关键词需要关注：</p>
-<ul>
-<li>工具：性能测试一般需要的压力较大较复杂，单纯依靠手工很难做到，因此一般需要专业化的设备、工具，或编写自动化测试脚本完成。网关类产品一般要求的负载较高，在千兆、万兆设置更高级别，一般需要专业配置千兆万兆网卡的硬件设备，如IAXA等，价格较昂贵。而其它产品一般也需要如Loadruner、Jmeter等专业化的性能测试软件并根据场景编写脚本完成。</li>
-<li>负载：性能测试有别于功能测试的点就在于使用的负载较高。而且负载的构造需要根据实际的场景才有价值，并需要使用特定的工具或自行研发软件实现。</li>
-<li>瓶颈：逐渐加大负载到达瓶颈。测试中比较重要的就是各个性能拐点，因为各个拐点往往都有重要的意义。如保持最优响应的拐点、延迟急剧增加的拐点、系统彻底瘫痪的拐点。持续测试找到各个拐点，对于产品的调优、部署及运维都有很大的价值。<br><img src="/img/jmeter-result.png" alt="性能测试结果"></li>
+<p>通过修改slave目录下的buildbot.tac，修改：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">umask = 022</span><br></pre></td></tr></table></figure></p>
+<p>然后重启slave解决此问题:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">buildbot stop slave1</span><br><span class="line">buildbot stop slave2</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://build.chromium.org/p/chromium/console" target="_blank" rel="noopener">chromium buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">docker安装buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/tour.html" target="_blank" rel="noopener">quick tour of buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/fiveminutes.html" target="_blank" rel="noopener">Buildbot in 5 minutes</a></li>
 </ul>
-<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
-<ul>
-<li>性能测试，对产品负载压力承受能力的测试。</li>
-<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
-<li>网关类产品，部署作为网关的设备及软件。</li>
-<li>IDS，入侵检测系统</li>
-<li>IPS，入侵防御系统</li>
-<li>UTM，对防火墙、IDS\、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
-<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
-<li>DUT，devices under test，测试设备。</li>
-</ul>
-<h2 id="性能指标名词解释"><a href="#性能指标名词解释" class="headerlink" title="性能指标名词解释"></a>性能指标名词解释</h2><p>网络安全类产品或网关类产品常见的性能指标有：</p>
-<ul>
-<li>RFC2544 四项值（吞吐量、延迟、丢包率、背靠背）</li>
-<li>TCP 的每秒新建连接数（CPS）</li>
-<li>HTTP 的每秒处理事务数（TPS）、HTTP 有效吞吐量（HTTP Throughput）</li>
-<li>最大并发连接数等</li>
-</ul>
-<p>除此之外，部分评测机构或客户也会根据自己的实际情况增加性能指标，如：IPS/UTM下的HTTP有效吞吐量和每秒新建，Mail协议（SMTP/POP3/IMAP）的有效吞吐量和新建，特殊场景的混合流量（如加入恶意流量）的吞吐量等。<br>可参考业界标杆Fortinet的<a href="https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/Fortinet_Product_Matrix.pdf" target="_blank" rel="noopener">性能测试报告</a>。<br><img src="/img/fortinet-product-matrix-sample.png" alt="Fortinet product matrix"></p>
-<p>下面我们先认识一下各性能指标名词的含义。本篇只介绍各名词的含义，测试方法后续章节中说明。</p>
-<h3 id="RFC2544-四项值"><a href="#RFC2544-四项值" class="headerlink" title="RFC2544 四项值"></a>RFC2544 四项值</h3><p><a href="https://tools.ietf.org/html/rfc1242" target="_blank" rel="noopener">RFC1242</a>文档中定义了吞吐量（Throughput）、延迟（Latency）、丢包率（Frame Loss）、背靠背（Back-to-Back）四个标准术语。<br><a href="https://www.ietf.org/rfc/rfc2544.txt" target="_blank" rel="noopener">RFC2544</a>是RFC组织提出的用于评测网络互联设备（防火墙、IDS、交换机路由器等）的国际标准，其中主要对RFC1242 中定义的性能评测参数的具体测试方法、结果的提交形式作了较详细的规定。</p>
-<p>下面将对这四项值是做为重点进行介绍。</p>
-<h4 id="吞吐量（Throughput）"><a href="#吞吐量（Throughput）" class="headerlink" title="吞吐量（Throughput）"></a>吞吐量（Throughput）</h4><p>吞吐量是指被测设备在不丢包的情况下，所能转发的最大速率或最大流量。通常测试结果以每秒通过的最大数据包数（PPS）或比特数（Mb/s）。<br>用于反映被测设备所能够处理的最大的数据流量，重在测试被测设备的转发能力。<br>结果值越大越好。<br>吞吐量比较通用，适用于绝大多数软件系统的性能测试。</p>
-<h4 id="延迟（Latency）"><a href="#延迟（Latency）" class="headerlink" title="延迟（Latency）"></a>延迟（Latency）</h4><p>发送一定数量的数据包，记录中间数据包发出的时间T1，以及经由被测设备转发后到达接收端口的时间T2：Latency＝T2－T1。延迟的测试结果以毫秒（ms）或微秒（μs）表示。<br>测试延迟是在测试过程中不存在丢包的条件下进行的，也就是说在测试延迟时，先要知道被测设备的吞吐量，从而定义发包的速率。<br>延迟用于反映被测设备处理数据包的速度。<br>延迟越小，表明设备处理速度越快。<br>延迟比较通用，是大多数软件系统性能测试的重要指标。</p>
-<h4 id="丢包率（Frame-Loss）"><a href="#丢包率（Frame-Loss）" class="headerlink" title="丢包率（Frame Loss）"></a>丢包率（Frame Loss）</h4><p>丢包率是指在一定的负载下，由于缺乏资源而未能被转发的包占应该转发的包数的百分比。<br>用于反映被测设备承受特定负载能力。<br>结果值越小越好。</p>
-<h4 id="背靠背（Back-to-Back）"><a href="#背靠背（Back-to-Back）" class="headerlink" title="背靠背（Back-to-Back）"></a>背靠背（Back-to-Back）</h4><p>以能够产生的最大的速率，发送一定长度的数据包，并不断改变单次发送的数据包数目，直到被测设备能够完全转发所有发送的数据包而不丢包，这个包数就是该设备的背对背值。<br>用于反映被测设备处理突发数据的缓存能力。背对背的值越大，路由器的缓存能力就越强，处理突发数据包的能力越强。</p>
-<h3 id="TCP每秒新建连接数（CPS）"><a href="#TCP每秒新建连接数（CPS）" class="headerlink" title="TCP每秒新建连接数（CPS）"></a>TCP每秒新建连接数（CPS）</h3><p>TCP每秒新建是在业界提到最多的一个。这个性能指标出自<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档。全称是 Maximum TCP Connection Establishment Rate（最大TCP 建立速率），大家习惯将这个指标称为CPS（TCPConnection Per Second）。<br>TCP每秒新建速率是指在被测设备能够成功建立所有请求连接的条件下，所能承受的最大TCP 连接建立速度。其测试采用迭代搜索算法，每次迭代过程中，以低于被测设备所能承受的最大并发连接数发起速率不同的TCP 连接请求，直到得到所有连接成功建立的最大速率。<br>TCP每秒新建速率以连接数/秒表示结果，其值越大越好。<br>注：TCP Connection Establishment已在<a href="https://tools.ietf.org/html/rfc2647" target="_blank" rel="noopener">RFC2647</a>文档中进行定义。</p>
-<h3 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h3><p>TPS性能指标是反映被测设备应用层的新建速率，这个性能指标也出自RFC3511文档。全称是Maximum HTTP Transaction Rate（最大HTTP传输事务速率），大家习惯将这个指标称为TPS（HTTPTransaction Per Second）。<br>HTTP的每秒事务数是指在被测设备能够成功建立连接的条件下，所能承受的最大的HTTP 协议的请求/回应操作的速度。其测试采用反复搜索过程，每次反复过程中，以低于被测设备所能承受的最大处理速率，直到所有连接被成功建立并且有对相应的请求。<br>结果以连接数/秒表示结果。其值越大越好。</p>
-<h3 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h3><p>HTTP有效吞吐量是反映被测设备在应用层的最大传输速率，这个性能指标在RFC3511文档中没有明确描述，但可以通过将HTTP Transaction Rate调整转化为HTTP有效吞吐量的测试方法。HTTP有效吞吐量是指在被测设备能够成功建立连接的条件下，在同一时间内所能承受的最大的有效数据量。<br>测试结果值越大越好。</p>
-<h3 id="最大并发连接数"><a href="#最大并发连接数" class="headerlink" title="最大并发连接数"></a>最大并发连接数</h3><p>最大并发连接数性能指标是反映被测设备最大的会话条目数，这个性能指标也出自RFC3511文档。全称是 Concurrent TCP Connection Capacity。最大并发连接数是指在被测设备能够成功建立连接的条件下，所能同时承受的最大的链接条目数，也反映了被测设备维持多个会话的能力。<br>测试结果值越大越好。</p>
-<h3 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h3><p>在<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档中主要描述了HTTP协议的性能测试，但随着产品及技术的大幅度更新，这往往已经不能满足客户或厂商的需求。我们还需要测试其它协议的性能，通常以应用层为主：包括FTP协议、Mail协议等。但测试的内容基本都是一样的，以每秒新建（每秒会话）和吞吐量为主。只需将HTTP协议变为其它应用层协议即可。</p>
-<p>随着网关产品尤其是网络安全类产品的发展，性能测试的范围不再局限于防火墙功能上的性能测试，还新增加了对其它功能如IPS、AV（防病毒）和UTM（集成安全网关）等的性能测试。但可以看到，这些功能的增加对于测试过程或者测试方法而言其实没有直接的影响，仍然要使用原来的测试过程或测试方法。下篇我们将介绍具体的测试方法。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是简介及测试方法的概念介绍。所有的性能指标中，RFC2544的四项指标是其中比较重要的部分且目前基本以形成标准，下篇文章将对其进行介绍。</p>
 ]]></content>
       <categories>
-        <category>Testing</category>
+        <category>openstack</category>
       </categories>
       <tags>
-        <tag>性能测试</tag>
-        <tag>ips</tag>
-        <tag>NGFW</tag>
-        <tag>防火墙</tag>
-        <tag>spi firewall</tag>
+        <tag>openstack</tag>
+        <tag>ci</tag>
+        <tag>持续集成</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之九：代理的使用</title>
+    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
+    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
+<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
+<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
+<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
+<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
+<p>5、如果有多个-x使用，只有最后一个有效。</p>
+<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
+<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>注：</p>
+<ul>
+<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
+<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
+<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
+<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
+<ol>
+<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
+</li>
+<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
+</li>
+<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
+</li>
+<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
+</li>
+<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
+</li>
+</ol>
+<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
+<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
+<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
+<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到代理IP为10.1.1.2。</p>
+<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
+<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
+<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
+<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
+<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
+<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
+<p>其它常用相关环境变量如下：</p>
+<ul>
+<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
+<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
+</ul>
+<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -153,16 +253,93 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之一：cURL简介</title>
-    <url>/2012/07/linux-curl-description/</url>
-    <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
-<p>而cURL就是HTTP脚本编程的利器。</p>
-<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
-<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
-<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
-<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
-<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
+    <title>Linux下cURL使用教程之四：curl基本使用实例</title>
+    <url>/2012/08/linux-curl-basic-usage-example/</url>
+    <content><![CDATA[<p>本篇主要结合编写的PHP程序实例对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage/" target="_blank" rel="noopener">curl基本使用</a>进行具体说明。</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="HTTP服务器"><a href="#HTTP服务器" class="headerlink" title="HTTP服务器"></a>HTTP服务器</h3><p>建议<code>Ubuntu+Apache+PHP</code>，方便简洁:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install apache2 php5</span><br></pre></td></tr></table></figure></p>
+<p>即可。</p>
+<h3 id="网页"><a href="#网页" class="headerlink" title="网页"></a>网页</h3><p>以下为测试使用的服务器端代码，全部使用php实现。</p>
+<ul>
+<li>curldemo.php，用于输出User-Agent、Referer、Cookie信息：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_USER_AGENT'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">'HTTP_REFERER'</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_REFERER'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_COOKIE[<span class="string">'user'</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user="</span>.$_COOKIE[<span class="string">'user'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">        setcookie(<span class="string">"user"</span>,<span class="string">""</span>,time()<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li><p>curlfollow.php，设置cookie后跳转至curldemo.php（使用js跳转，curl不会执行js函数，因此只有在浏览器中才会自动跳转）：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    setcookie(<span class="string">"user"</span>,<span class="string">"Stackeye"</span>);</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;script&gt;window.location =\"curldemo.php\";&lt;/script&gt;"</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>curl301.php，重定向至curldemo.php（header重定向后Referer字段为空，设置的cookie也不保存）：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    Header( <span class="string">"HTTP/1.1 301 Moved Permanently"</span> ) ;</span><br><span class="line">    Header( <span class="string">"Location: curldemo.php"</span> );</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>curldeny.php，对User-Agent/Referer/cookie有严格要求，才会显示最终内容：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">CurlDeny-PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">	I<span class="string">'ll deny all http requests,&lt;br&gt;</span></span><br><span class="line"><span class="string">	except your User-agent contains "Mozilla/4.0",&lt;br&gt;</span></span><br><span class="line"><span class="string">	your referer contains "www.baidu.com",&lt;br&gt;</span></span><br><span class="line"><span class="string">	and your cookie user is "Stackeye"!&lt;br&gt;</span></span><br><span class="line"><span class="string">	If you succeed,you will see "You finally get it"!&lt;br&gt;&lt;br&gt;</span></span><br><span class="line"><span class="string">&lt;?php</span></span><br><span class="line"><span class="string">    if(strpos($_SERVER['</span>HTTP_USER_AGENT<span class="string">'],"Mozilla/4.0")!==false)</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">    	echo "&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;".$_SERVER['</span>HTTP_USER_AGENT<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    	if(isset($_SERVER['</span>HTTP_REFERER<span class="string">'])</span></span><br><span class="line"><span class="string">         &amp;&amp;strpos($_SERVER['</span>HTTP_REFERER<span class="string">'],"www.stackeye.com")!==false)</span></span><br><span class="line"><span class="string">    	&#123;</span></span><br><span class="line"><span class="string">    		echo "&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;".$_SERVER['</span>HTTP_REFERER<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    		if(isset($_COOKIE['</span>user<span class="string">'])&amp;&amp;strcmp($_COOKIE['</span>user<span class="string">'],"Stackeye")==0)</span></span><br><span class="line"><span class="string">    		&#123;</span></span><br><span class="line"><span class="string">    	      echo "&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user=".$_COOKIE['</span>user<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">            setcookie("user","",time()-1);</span></span><br><span class="line"><span class="string">            echo "You finally get it!&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    		&#125;</span></span><br><span class="line"><span class="string">    		else</span></span><br><span class="line"><span class="string">    		    echo "\n&lt;br&gt;&lt;br&gt;I'</span>m sorry but you are so close!&lt;br&gt;\n<span class="string">";</span></span><br><span class="line"><span class="string">    	&#125;</span></span><br><span class="line"><span class="string">    	else</span></span><br><span class="line"><span class="string">    	    echo "</span>\n&lt;br&gt;&lt;br&gt;I<span class="string">'m sorry but you are so close!&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    else</span></span><br><span class="line"><span class="string">        echo "\n&lt;br&gt;&lt;br&gt;I'</span>m sorry but you are so close!&lt;br&gt;\n<span class="string">" ;</span></span><br><span class="line"><span class="string">?&gt;</span></span><br><span class="line"><span class="string">&lt;br&gt;</span></span><br><span class="line"><span class="string">&lt;a href="</span>http:<span class="comment">//www.stackeye.com" target="_blank"&gt;Stackeye's Blog&lt;/a&gt;</span></span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>setcookie.php，设置cookie的user字段，用以访问curldeny.php:</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">SetCookie-PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">	I just set the cookie,&lt;br&gt; </span><br><span class="line">	with which you can get the curldeny.php.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    setcookie(<span class="string">"user"</span>,<span class="string">"Stackeye"</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>以上PHP文件放入服务器根目录下即可（Ubuntu+Apache下默认为<code>/var/www</code>）。以下默认服务器地址为本机127.0.0.1。</p>
+<h2 id="curl访问任务"><a href="#curl访问任务" class="headerlink" title="curl访问任务"></a>curl访问任务</h2><p>使用curl命令完成如下任务。</p>
+<h3 id="1-伪装成Firefox访问curldemo-php"><a href="#1-伪装成Firefox访问curldemo-php" class="headerlink" title="1. 伪装成Firefox访问curldemo.php"></a>1. 伪装成Firefox访问curldemo.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure>
+<p>保存的html文件可以用浏览器打开查看。</p>
+<h3 id="2-伪装来源页面为www-stackeye-com访问curldemo-php"><a href="#2-伪装来源页面为www-stackeye-com访问curldemo-php" class="headerlink" title="2. 伪装来源页面为www.stackeye.com访问curldemo.php"></a>2. 伪装来源页面为<a href="http://www.stackeye.com访问curldemo.php" target="_blank" rel="noopener">www.stackeye.com访问curldemo.php</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o curlex.html -e http://www.stackeye.com http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure>
+<h3 id="3-伪装成Firefox访问curlfollow-php，并保存cookie文件"><a href="#3-伪装成Firefox访问curlfollow-php，并保存cookie文件" class="headerlink" title="3. 伪装成Firefox访问curlfollow.php，并保存cookie文件"></a>3. 伪装成Firefox访问curlfollow.php，并保存cookie文件</h3><p>然后使用保存的cookie文件，伪装成firefox，访问curldemo.php<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curlfollow.html -D cookie001.txt http://127.0.0.1/curlfollow.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html -D cookie002.txt -b cookie001.txt http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure></p>
+<p>curldemo.html将显示user的值为Stackeye。</p>
+<h3 id="4-伪装成Firefox并直接使用cookie值访问curldemo-php"><a href="#4-伪装成Firefox并直接使用cookie值访问curldemo-php" class="headerlink" title="4. 伪装成Firefox并直接使用cookie值访问curldemo.php"></a>4. 伪装成Firefox并直接使用cookie值访问curldemo.php</h3><p>cookie中user值为Stackeye，pass值为password<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html -D cookie002.txt -b “user=Stackeye;pass=password” \</span><br><span class="line">http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure></p>
+<p>curldemo.html将显示user的值为Stackeye，pass值为password。</p>
+<h3 id="5-不自动跟踪重定向访问curl301-php"><a href="#5-不自动跟踪重定向访问curl301-php" class="headerlink" title="5. 不自动跟踪重定向访问curl301.php"></a>5. 不自动跟踪重定向访问curl301.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -v -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curl301.html http://127.0.0.1/curl301.php</span><br></pre></td></tr></table></figure>
+<p>因为此时curl301.html文件内容为空，我们只能通过-v查看具体内容。<br>可以看到curl只访问了curl301.php</p>
+<h3 id="6-自动跟踪重定向访问curl301-php"><a href="#6-自动跟踪重定向访问curl301-php" class="headerlink" title="6. 自动跟踪重定向访问curl301.php"></a>6. 自动跟踪重定向访问curl301.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -L -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curl301.html http://127.0.0.1/curl301.php</span><br></pre></td></tr></table></figure>
+<p>此时打开curl301.html会看到curldemo.php的内容，说明curl自动根据重定向去访问了curldemo.php。</p>
+<h3 id="7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”"><a href="#7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”" class="headerlink" title="7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”"></a>7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o setcookie.html -D cookie001.txt http://127.0.0.1/setcookie.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldeny.html -e http://www.adeploy.com -D cookie002.txt -b cookie001.txt \</span><br><span class="line">http://127.0.0.1/curldeny.php</span><br></pre></td></tr></table></figure>
+<p>打开curldeny.html文件，可看到“You finally get it!”信息。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是针对curl基本用法的实例以加深理解和掌握。实际操作中，登陆、发帖等操作还会用到提交表单相关操作，下篇将进行讲解。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</title>
+    <url>/2012/08/linux-curl-basic-usage-upload-file/</url>
+    <content><![CDATA[<p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/" target="_blank" rel="noopener">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
+<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前，所有服务端代码通过php实现。</p>
+<ul>
+<li>file.php，显示文件上传表单：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP File Upload Demo.&lt;br /&gt;</span><br><span class="line">Select a file <span class="keyword">and</span> Submit.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;form action=<span class="string">"upload_file.php"</span> method=<span class="string">"post"</span></span><br><span class="line">enctype=<span class="string">"multipart/form-data"</span>&gt;</span><br><span class="line">&lt;label <span class="keyword">for</span>=<span class="string">"file"</span>&gt;Filename:&lt;/label&gt;</span><br><span class="line">&lt;input type=<span class="string">"file"</span> name=<span class="string">"file"</span> id=<span class="string">"file"</span> /&gt; </span><br><span class="line">&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"submit"</span> value=<span class="string">"Submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li><p>upload_file.php，处理上传的文件。<br>上传文件后，文件先缓存在临时目录中，脚本结束时临时文件被删除。upload_file.php只是简单输出上传文件的信息，而不做实际场景中将临时文件保存至永久目录等进一步处理。但此差异对我们进行curl实验没有任何影响。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a File Upload Process Demo.&lt;br /&gt;</span><br><span class="line">It only shows the information of the file you uploaded.&lt;br /&gt;</span><br><span class="line">The file you uploaded remains temporary,&lt;br /&gt;</span><br><span class="line"><span class="keyword">and</span> is deleted when this script is finished.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span> ($_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] &gt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Error: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Upload: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"name"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Type: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"type"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Size: "</span> . ($_FILES[<span class="string">"file"</span>][<span class="string">"size"</span>] / <span class="number">1024</span>) . <span class="string">" Kb&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Stored in: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"tmp_name"</span>];</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>put.php，处理通过HTTP PUT方法上传的文件。<br>同上，为了安全只输出上传文件信息，不做实际转存处理。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP PUT Demo.&lt;br&gt;</span><br><span class="line">It reads the file you upload using PUT,&lt;br&gt;</span><br><span class="line"><span class="keyword">and</span> prints the content out.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/* PUT data comes in on the stdin stream */</span></span><br><span class="line">$putdata = fopen(<span class="string">"php://input"</span>, <span class="string">"r"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Read the data 1 KB at a time</span></span><br><span class="line"><span class="comment">   and print the content out */</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"The contents of the file you upload:&lt;br&gt;&lt;br&gt;\n"</span>;</span><br><span class="line"><span class="keyword">while</span> ($data = fread($putdata, <span class="number">1024</span>))</span><br><span class="line">    <span class="keyword">echo</span> $data;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="comment">/* Close the streams */</span></span><br><span class="line">fclose($putdata);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><h3 id="F-–form"><a href="#F-–form" class="headerlink" title="-F/–form"></a>-F/–form</h3><p><code>-F/--form &lt;name=content&gt;</code><br>使用<code>Content-Type  multi‐part/form-data</code>的方式提交数据，可用于上传二进制文件。</p>
+<ol>
+<li><p>@的使用<br>一般使用<code>-F file=@filename</code>的形式，其中file为文件表单的name，filename为文件名。@后面的文件作为文件上传处理。</p>
+</li>
+<li><p>&lt;的使用<br>对于&lt;后的文件，curl会读取其内容，而不会作为文件上传。类似-d选项中@的作用。<br>如<br><code>curl -F name=&lt;foobar.txt -Fage=100 http://127.0.0.1/welcome.php</code><br>foobar.txt内容为Adeploy，则此命令与以下命令等价：<br><code>curl -F name=Adeploy -Fage=100 http://127.0.0.1/welcome.php</code><br>而-F @foobar.txt表示将foobar.txt作为文件上传。</p>
+</li>
+<li><p>-F不进行url编码<br>-F与-d类似，都是不对数据进行urlencode编码，而且-F不能与-d或–data-urlencode共用。<br>因此如果上传文件的同时还需要提交其他需要urlencode编码的字段（如中文用户名），就会出现问题。<br>除手动编码外，实用的解决办法是自己编写urlencode函数（网上可以找到Linux脚本实现的urlencode函数或C语言版本、Perl版本、Python），调用即可。</p>
+</li>
+<li><p>使用”type=”指定Content-Type<br>如<code>curl -F &quot;web=@index.html;type=text/html&quot; url.com</code><br>将index.html以text/html的Content-Type上传。</p>
+</li>
+<li><p>使用”filename=”修改上传文件的名字<br>如<code>curl -F &quot;file=@localfile;filename=nameinpost&quot; url.com</code><br>上传localfile并修改文件名字为nameinpost。</p>
+</li>
 </ol>
+<h3 id="–form-string"><a href="#–form-string" class="headerlink" title="–form-string"></a>–form-string</h3><p><code>--form-string &lt;name=string&gt;</code><br>基本同-F，但是此参数后面跟”@”、”&lt;”、”;type=”时，不做特殊含义解析。</p>
+<h3 id="T-–upload-file"><a href="#T-–upload-file" class="headerlink" title="-T/–upload-file"></a>-T/–upload-file</h3><p><code>-T/--upload-file &lt;file&gt;</code><br>使用HTTP的PUT方法上传文件，需要目标URL支持HTTP的PUT方法。<br>可以与-d、–data-urlencode、-F同时使用。</p>
+<h2 id="参数使用实例"><a href="#参数使用实例" class="headerlink" title="参数使用实例"></a>参数使用实例</h2><h3 id="F文件上传"><a href="#F文件上传" class="headerlink" title="-F文件上传"></a>-F文件上传</h3><p>打开file.php选择文件后submit，Developer Tools抓包截图如下：<br><img src="/img/developertools_file.jpg" alt="Developer Tools file上传"><br>注意此时的Content-Type字段是<code>multipart/form-data</code>，主要用于上传文件，具体可参考<a href="http://www.ietf.org/rfc/rfc1867.txt" target="_blank" rel="noopener">RFC1867</a>。<br>分析file.php的源代码可知，表单中file类型的input元素name=file，所以命令如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o file.html -F file=@a.txt http://127.0.0.1/upload_file.php</span><br></pre></td></tr></table></figure></p>
+<h3 id="T文件上传"><a href="#T文件上传" class="headerlink" title="-T文件上传"></a>-T文件上传</h3><p>没有找到正确的PUT表单，因此无法使用Developer Tools跟踪实际提交过程。<br>命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o put.html -T a.txt http://127.0.0.1/put.php</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要为使用curl上传文件的操作方法。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -487,197 +664,22 @@
       </categories>
       <tags>
         <tag>openstack</tag>
-        <tag>docker</tag>
         <tag>kolla</tag>
+        <tag>docker</tag>
         <tag>容器化</tag>
       </tags>
   </entry>
   <entry>
-    <title>buildbot实战</title>
-    <url>/2014/11/buildbot-in-action/</url>
-    <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
-<ul>
-<li>监控代码仓库</li>
-<li>代码仓库有变化后，立即拉取代码</li>
-<li>执行build、部署、测试及发布工作</li>
-<li>反馈结果</li>
-</ul>
-<p>我们对这样一个工具的一般要求为：</p>
-<ul>
-<li>轻量级，安装、配置简单，本身耗费资源较少</li>
-<li>高效率，较快的完成自动化任务</li>
-<li>通用性强，在不同的操作系统，甚至与不同的代码系统兼容</li>
-<li>易扩展、配置及管理，能较简单的配置自动化任务</li>
-</ul>
-<p>Buildbot和Jenkins都能很好的满足我们这些要求。但相比Jenkins，buildbot更轻量级，部署配置更为简单。<br>Web界面也更简单美观一些。</p>
-<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>buildbot架构比较简单，主要分为三部分：</p>
-<ul>
-<li>版本控制层<br>外部版本控制，通过插件或主动触发的方式触发buildbot执行任务。</li>
-<li>任务执行层<br>master接收任务后，调度其slave执行任务，并获取到返回的结果</li>
-<li>通知层<br>master获取结果后，可通过邮件、IRC等方式进行通知。</li>
-</ul>
-<p>其中重要的主体是master和slave，其主要采用星形拓扑结构，一个集群中可以多个master、多个slave。master主要负责任务接收、调度并通知任务，slave负责具体的任务执行。各节点本身无状态，横向扩展性很好。<br><a id="more"></a><br><img src="/img/buildbot-overview.png" alt="buildbot架构"></p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="pip安装"><a href="#pip安装" class="headerlink" title="pip安装"></a>pip安装</h3><p>建议使用pip安装，避免麻烦的依赖问题。<br>同时当前对python3版本支持不太好，建议使用python2.7版本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install gcc python-devel </span><br><span class="line">yum install python-dateutil15 git expect</span><br><span class="line"><span class="comment"># master安装</span></span><br><span class="line">pip install buildbot</span><br><span class="line"><span class="comment"># salve安装</span></span><br><span class="line">pip install buildbot-slave</span><br></pre></td></tr></table></figure></p>
-<p>如果是python2.6的话，因为最新版本的Twisted需要python2.7，所以需要提前指定版本安装：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install Twisted==15.1.0</span><br></pre></td></tr></table></figure></p>
-<p>为充分利用资源，同一台机器可配置为多个master、slave：可使用不同用户或virtualenv，每个用户或virtualenv环境部署为一个节点。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install virtualenv</span><br></pre></td></tr></table></figure></p>
-<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>最近看到<a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">buildbot官方</a>给出了Dockerfile(但Dockerfile地址是错的，可以自行在github代码中查找)，可下载后自行构建镜像使用，运行后即可使用：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Download Buildbot Dockerfile.</span></span><br><span class="line">wget https://raw.githubusercontent.com/buildbot/buildbot/master/master/Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the Buildbot container (it will take a few minutes to download packages)</span></span><br><span class="line">docker build -t buildbot - &lt; Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Run buildbot</span></span><br><span class="line">CONTAINER_ID=$(docker run -d -p 8010:8010 -p 22 buildbot)</span><br></pre></td></tr></table></figure></p>
-<p>然后打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可。</p>
-<h2 id="创建及运行"><a href="#创建及运行" class="headerlink" title="创建及运行"></a>创建及运行</h2><h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildbot create-master master</span><br><span class="line"><span class="comment"># 配置文件</span></span><br><span class="line">mv master/master.cfg.sample master/master.cfg</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildbot start master</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f master/twistd.log</span><br></pre></td></tr></table></figure>
-<p>buildbot会在当前目录下创建master名称的目录，以上为<code>master</code>。<br>看到最后显示<code>BuildMaster is running</code>即为启动成功，此时可通过<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>访问，默认用户名密码都是<code>pyflakes</code>。</p>
-<h3 id="slave"><a href="#slave" class="headerlink" title="slave"></a>slave</h3><p>创建slave时需要指定mater的地址，或者修改配置文件指定。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildslave create-slave slave1 localhost:9989 slave1 pass</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildslave start slave</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f slave/twistd.log</span><br></pre></td></tr></table></figure></p>
-<p>create-slave的参数分布是：slave目录、master、名字、密码。其中master默认都采用9989与slave通信。名字、密码必须与master的master.cfg中配置的一致：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'slaves'</span>] = [buildslave.BuildSlave(<span class="string">"example-slave"</span>, <span class="string">"pass"</span>)]</span><br></pre></td></tr></table></figure></p>
-<h3 id="预览"><a href="#预览" class="headerlink" title="预览"></a>预览</h3><p>此时打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可看到如下页面：<br><img src="/img/buildbot-index.png" alt="buildbot预览"><br>其中Buildslaves页面可查看到我们新添加的example-slave，且状态为<code>Idle</code>。<br>而Waterfall页面可查看到当前的builder，目前只有runtest，点进去点击forcebuild即可进行测试build。成功后记录显示为绿色。</p>
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>Buildbot的配置文件为<code>.cfg</code>后缀的python脚本，使用python语法。如上文slave的定义就是一个python list的定义。</p>
-<h3 id="master配置"><a href="#master配置" class="headerlink" title="master配置"></a>master配置</h3><p>主要配置如下。</p>
-<ul>
-<li>BUILDSLAVES<br>slave的定义，以list的形式呈现。需要主要名字和密码与slave一致。<br>其中protocols可定义与slave的通信方式，包括端口等。</li>
-<li><p>CHANGESOURCES<br>指定需要监控的源代码地址。格式如下，其中可指定git地址、工作目录、分支、监控周期等。可定义多个，每个append进list即可。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c[&apos;change_source&apos;] = []</span><br><span class="line">c[&apos;change_source&apos;].append(changes.GitPoller(</span><br><span class="line">        &apos;git://github.com/buildbot/pyflakes.git&apos;,</span><br><span class="line">        workdir=&apos;gitpoller-workdir&apos;, branch=&apos;master&apos;,</span><br><span class="line">        pollinterval=300))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>SCHEDULERS<br>scheduler指定何时、如何触发执行builder，其中builder在BUILDERS中定义。下文定义了两个scheduler：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'schedulers'</span>] = []</span><br><span class="line"><span class="comment"># 定义每小时运行的scheduler</span></span><br><span class="line">hourlyscheduler = Periodic(name = <span class="string">"hourly"</span>,</span><br><span class="line">                           builderNames = [<span class="string">"simplebuild"</span>],</span><br><span class="line">                           periodicBuildTimer = <span class="number">3600</span>)</span><br><span class="line"><span class="comment"># 定义手动触发的scheduler</span></span><br><span class="line">c[<span class="string">'schedulers'</span>].append(schedulers.ForceScheduler(</span><br><span class="line">                            name=<span class="string">"force"</span>,</span><br><span class="line">                            builderNames=[<span class="string">"master"</span>]))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>BUILDERS<br>builder定义具体执行的任务内容，由一系列的步骤组成。每个步骤定义在step中，factory包含一系列的step，builder通过指定factory等参数创建。可定义多个builder。<br>代码如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义factory</span></span><br><span class="line">factory = util.BuildFactory()</span><br><span class="line"><span class="comment"># 定义具体step</span></span><br><span class="line">factory.addStep(steps.Git(repourl=<span class="string">'git://github.com/buildbot/pyflakes.git'</span>, mode=<span class="string">'incremental'</span>))</span><br><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"trial"</span>, <span class="string">"pyflakes"</span>]))</span><br><span class="line"><span class="comment"># 创建builder</span></span><br><span class="line">c[<span class="string">'builders'</span>] = []</span><br><span class="line"><span class="comment"># 指定名称、使用的slave、factory</span></span><br><span class="line">c[<span class="string">'builders'</span>].append(</span><br><span class="line">    util.BuilderConfig(name=<span class="string">"master"</span>,</span><br><span class="line">      slavenames=[<span class="string">"master"</span>],</span><br><span class="line">      factory=factory))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>STATUS TARGETS<br>此处定义buildbot对外通知build信息的方式。最基本的方式就是显示在页面中，因此此处同时定义了页面的认证方式，即登录使用的用户名、密码在此处修改。同时可定义IRC、邮件等通知方式。</p>
-</li>
-<li>PROJECT IDENTITY<br>此处主要为buildbot的基本信息，如title、超链接、url等。</li>
-<li>DB URL<br>此处定义使用的数据库，默认使用sqlite，地址为本地文件路径。</li>
-</ul>
-<h3 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h3><p>slave的定义主要在<code>buildbot.tac</code>文件中，可用于定义使用的master及slave基本信息。</p>
-<h2 id="启动及使用"><a href="#启动及使用" class="headerlink" title="启动及使用"></a>启动及使用</h2><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><ul>
-<li>启动<br>master、slave的启动上文已提及，子命令为start，参数为路径。</li>
-<li>停止、重启<br>stop和restart，其余同start</li>
-<li>master重新加载配置<br><code>buildbot reconfig master</code>即可重新加载配置。</li>
-</ul>
-<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>平时比较常用手动触发build，即forcebuild：web页面登录-&gt;Builders-&gt;选择builder-&gt;Force Build-&gt;在Waterfall查看打包结果及详细日志。<br><img src="/img/buildbot-waterfall.png" alt="buildbot waterfall"><br>注意：只有登录后才有build权限。</p>
-<h3 id="各页面介绍"><a href="#各页面介绍" class="headerlink" title="各页面介绍"></a>各页面介绍</h3><p>Buildbot比较方便的一点是全部通过页面来进行操作。主要页面介绍如下：</p>
-<ul>
-<li>Waterfall，以瀑布流的方式显示build任务，可点击任务查看详情、执行操作等</li>
-<li>Grid/T-Grid，以对应的方式显示build任务</li>
-<li>Console，还在开发中，当前主要显示revision信息</li>
-<li>Builders，定义的所有builder</li>
-<li>Recent Builds，最近的build</li>
-<li>Buildslaves，定义的所有slave</li>
-<li>Changesources，定义的所有代码仓库</li>
-<li>JSON API，对外提供的JSON API文档</li>
-</ul>
-<h2 id="高级使用"><a href="#高级使用" class="headerlink" title="高级使用"></a>高级使用</h2><h3 id="多分支build"><a href="#多分支build" class="headerlink" title="多分支build"></a>多分支build</h3><p>定义一个Changesource。<br>定义多个schedulers，分别对应不同分支。<br>定义多个factory，其中的step除branch不同外，其余step通用。通用的step可一次定义，多次使用。<br>builder分别指定分支和factory。</p>
-<h3 id="多项目build"><a href="#多项目build" class="headerlink" title="多项目build"></a>多项目build</h3><p>新版本可使用此功能，但不太推荐。buildbot的一个master还是更多的擅长对一个项目的管理。<br>需要定义多个Changesource，然后在其它定义时通过<code>project</code>和<code>repository</code>参数指定项目。</p>
-<h3 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h3><p>通过检查step的返回结果判断是否执行成功，规则同shell：0为成功，其它失败。<br>因此如果step中调用了自己的脚本，需要保证按上述规则返回结果。</p>
-<h3 id="添加参数"><a href="#添加参数" class="headerlink" title="添加参数"></a>添加参数</h3><p>使用<code>util.Property</code>获得网页上指定的参数，可设置默认值：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"bash"</span>, <span class="string">"autorpm.sh"</span>, util.Property(<span class="string">'project'</span>, default=<span class="string">''</span>)]))</span><br></pre></td></tr></table></figure></p>
-<p>在build页面通过name/value指定，如：<br><img src="/img/buildbot-param.png" alt="buildbot指定参数"></p>
-<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><p>实际使用中发现，buildslave所创建的文件，权限都为600或700。<br>这样会造成如cp到apache目录时，apache无法读取文件。<br>通过官方文档查看到slave启动时有umask选项：</p>
-<blockquote>
-<p>–umask<br>This is a string (generally an octal representation of an integer) which will cause the buildslave process’ umask value to be set shortly after initialization.<br>The twistddaemonization utility forces the umask to 077 at startup (which means that all files created by the buildslave or its child processes will be unreadable by any user other than the buildslave account).<br>If you want build products to be readable by other accounts, you can add –umask=022 to tell the buildslave to fix the umask after twistd clobbers it.<br>If you want build products to be writable by other accounts too, use –umask=000, but this is likely to be a security problem.</p>
-</blockquote>
-<p>通过修改slave目录下的buildbot.tac，修改：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">umask = 022</span><br></pre></td></tr></table></figure></p>
-<p>然后重启slave解决此问题:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">buildbot stop slave1</span><br><span class="line">buildbot stop slave2</span><br></pre></td></tr></table></figure></p>
-<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
-<li><a href="https://build.chromium.org/p/chromium/console" target="_blank" rel="noopener">chromium buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">docker安装buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/tour.html" target="_blank" rel="noopener">quick tour of buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/fiveminutes.html" target="_blank" rel="noopener">Buildbot in 5 minutes</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>openstack</category>
-      </categories>
-      <tags>
-        <tag>openstack</tag>
-        <tag>ci</tag>
-        <tag>持续集成</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之四：curl基本使用实例</title>
-    <url>/2012/08/linux-curl-basic-usage-example/</url>
-    <content><![CDATA[<p>本篇主要结合编写的PHP程序实例对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage/" target="_blank" rel="noopener">curl基本使用</a>进行具体说明。</p>
-<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="HTTP服务器"><a href="#HTTP服务器" class="headerlink" title="HTTP服务器"></a>HTTP服务器</h3><p>建议<code>Ubuntu+Apache+PHP</code>，方便简洁:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install apache2 php5</span><br></pre></td></tr></table></figure></p>
-<p>即可。</p>
-<h3 id="网页"><a href="#网页" class="headerlink" title="网页"></a>网页</h3><p>以下为测试使用的服务器端代码，全部使用php实现。</p>
-<ul>
-<li>curldemo.php，用于输出User-Agent、Referer、Cookie信息：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_USER_AGENT'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">'HTTP_REFERER'</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_REFERER'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_COOKIE[<span class="string">'user'</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user="</span>.$_COOKIE[<span class="string">'user'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">        setcookie(<span class="string">"user"</span>,<span class="string">""</span>,time()<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<a id="more"></a>
-<ul>
-<li><p>curlfollow.php，设置cookie后跳转至curldemo.php（使用js跳转，curl不会执行js函数，因此只有在浏览器中才会自动跳转）：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    setcookie(<span class="string">"user"</span>,<span class="string">"Stackeye"</span>);</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;script&gt;window.location =\"curldemo.php\";&lt;/script&gt;"</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>curl301.php，重定向至curldemo.php（header重定向后Referer字段为空，设置的cookie也不保存）：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    Header( <span class="string">"HTTP/1.1 301 Moved Permanently"</span> ) ;</span><br><span class="line">    Header( <span class="string">"Location: curldemo.php"</span> );</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>curldeny.php，对User-Agent/Referer/cookie有严格要求，才会显示最终内容：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">CurlDeny-PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">	I<span class="string">'ll deny all http requests,&lt;br&gt;</span></span><br><span class="line"><span class="string">	except your User-agent contains "Mozilla/4.0",&lt;br&gt;</span></span><br><span class="line"><span class="string">	your referer contains "www.baidu.com",&lt;br&gt;</span></span><br><span class="line"><span class="string">	and your cookie user is "Stackeye"!&lt;br&gt;</span></span><br><span class="line"><span class="string">	If you succeed,you will see "You finally get it"!&lt;br&gt;&lt;br&gt;</span></span><br><span class="line"><span class="string">&lt;?php</span></span><br><span class="line"><span class="string">    if(strpos($_SERVER['</span>HTTP_USER_AGENT<span class="string">'],"Mozilla/4.0")!==false)</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">    	echo "&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;".$_SERVER['</span>HTTP_USER_AGENT<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    	if(isset($_SERVER['</span>HTTP_REFERER<span class="string">'])</span></span><br><span class="line"><span class="string">         &amp;&amp;strpos($_SERVER['</span>HTTP_REFERER<span class="string">'],"www.stackeye.com")!==false)</span></span><br><span class="line"><span class="string">    	&#123;</span></span><br><span class="line"><span class="string">    		echo "&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;".$_SERVER['</span>HTTP_REFERER<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    		if(isset($_COOKIE['</span>user<span class="string">'])&amp;&amp;strcmp($_COOKIE['</span>user<span class="string">'],"Stackeye")==0)</span></span><br><span class="line"><span class="string">    		&#123;</span></span><br><span class="line"><span class="string">    	      echo "&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user=".$_COOKIE['</span>user<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">            setcookie("user","",time()-1);</span></span><br><span class="line"><span class="string">            echo "You finally get it!&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    		&#125;</span></span><br><span class="line"><span class="string">    		else</span></span><br><span class="line"><span class="string">    		    echo "\n&lt;br&gt;&lt;br&gt;I'</span>m sorry but you are so close!&lt;br&gt;\n<span class="string">";</span></span><br><span class="line"><span class="string">    	&#125;</span></span><br><span class="line"><span class="string">    	else</span></span><br><span class="line"><span class="string">    	    echo "</span>\n&lt;br&gt;&lt;br&gt;I<span class="string">'m sorry but you are so close!&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    else</span></span><br><span class="line"><span class="string">        echo "\n&lt;br&gt;&lt;br&gt;I'</span>m sorry but you are so close!&lt;br&gt;\n<span class="string">" ;</span></span><br><span class="line"><span class="string">?&gt;</span></span><br><span class="line"><span class="string">&lt;br&gt;</span></span><br><span class="line"><span class="string">&lt;a href="</span>http:<span class="comment">//www.stackeye.com" target="_blank"&gt;Stackeye's Blog&lt;/a&gt;</span></span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>setcookie.php，设置cookie的user字段，用以访问curldeny.php:</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">SetCookie-PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">	I just set the cookie,&lt;br&gt; </span><br><span class="line">	with which you can get the curldeny.php.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    setcookie(<span class="string">"user"</span>,<span class="string">"Stackeye"</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>以上PHP文件放入服务器根目录下即可（Ubuntu+Apache下默认为<code>/var/www</code>）。以下默认服务器地址为本机127.0.0.1。</p>
-<h2 id="curl访问任务"><a href="#curl访问任务" class="headerlink" title="curl访问任务"></a>curl访问任务</h2><p>使用curl命令完成如下任务。</p>
-<h3 id="1-伪装成Firefox访问curldemo-php"><a href="#1-伪装成Firefox访问curldemo-php" class="headerlink" title="1. 伪装成Firefox访问curldemo.php"></a>1. 伪装成Firefox访问curldemo.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure>
-<p>保存的html文件可以用浏览器打开查看。</p>
-<h3 id="2-伪装来源页面为www-stackeye-com访问curldemo-php"><a href="#2-伪装来源页面为www-stackeye-com访问curldemo-php" class="headerlink" title="2. 伪装来源页面为www.stackeye.com访问curldemo.php"></a>2. 伪装来源页面为<a href="http://www.stackeye.com访问curldemo.php" target="_blank" rel="noopener">www.stackeye.com访问curldemo.php</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o curlex.html -e http://www.stackeye.com http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure>
-<h3 id="3-伪装成Firefox访问curlfollow-php，并保存cookie文件"><a href="#3-伪装成Firefox访问curlfollow-php，并保存cookie文件" class="headerlink" title="3. 伪装成Firefox访问curlfollow.php，并保存cookie文件"></a>3. 伪装成Firefox访问curlfollow.php，并保存cookie文件</h3><p>然后使用保存的cookie文件，伪装成firefox，访问curldemo.php<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curlfollow.html -D cookie001.txt http://127.0.0.1/curlfollow.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html -D cookie002.txt -b cookie001.txt http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure></p>
-<p>curldemo.html将显示user的值为Stackeye。</p>
-<h3 id="4-伪装成Firefox并直接使用cookie值访问curldemo-php"><a href="#4-伪装成Firefox并直接使用cookie值访问curldemo-php" class="headerlink" title="4. 伪装成Firefox并直接使用cookie值访问curldemo.php"></a>4. 伪装成Firefox并直接使用cookie值访问curldemo.php</h3><p>cookie中user值为Stackeye，pass值为password<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html -D cookie002.txt -b “user=Stackeye;pass=password” \</span><br><span class="line">http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure></p>
-<p>curldemo.html将显示user的值为Stackeye，pass值为password。</p>
-<h3 id="5-不自动跟踪重定向访问curl301-php"><a href="#5-不自动跟踪重定向访问curl301-php" class="headerlink" title="5. 不自动跟踪重定向访问curl301.php"></a>5. 不自动跟踪重定向访问curl301.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -v -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curl301.html http://127.0.0.1/curl301.php</span><br></pre></td></tr></table></figure>
-<p>因为此时curl301.html文件内容为空，我们只能通过-v查看具体内容。<br>可以看到curl只访问了curl301.php</p>
-<h3 id="6-自动跟踪重定向访问curl301-php"><a href="#6-自动跟踪重定向访问curl301-php" class="headerlink" title="6. 自动跟踪重定向访问curl301.php"></a>6. 自动跟踪重定向访问curl301.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -L -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curl301.html http://127.0.0.1/curl301.php</span><br></pre></td></tr></table></figure>
-<p>此时打开curl301.html会看到curldemo.php的内容，说明curl自动根据重定向去访问了curldemo.php。</p>
-<h3 id="7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”"><a href="#7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”" class="headerlink" title="7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”"></a>7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o setcookie.html -D cookie001.txt http://127.0.0.1/setcookie.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldeny.html -e http://www.adeploy.com -D cookie002.txt -b cookie001.txt \</span><br><span class="line">http://127.0.0.1/curldeny.php</span><br></pre></td></tr></table></figure>
-<p>打开curldeny.html文件，可看到“You finally get it!”信息。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是针对curl基本用法的实例以加深理解和掌握。实际操作中，登陆、发帖等操作还会用到提交表单相关操作，下篇将进行讲解。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</title>
-    <url>/2012/08/linux-curl-basic-usage-upload-file/</url>
-    <content><![CDATA[<p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/" target="_blank" rel="noopener">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
-<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前，所有服务端代码通过php实现。</p>
-<ul>
-<li>file.php，显示文件上传表单：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP File Upload Demo.&lt;br /&gt;</span><br><span class="line">Select a file <span class="keyword">and</span> Submit.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;form action=<span class="string">"upload_file.php"</span> method=<span class="string">"post"</span></span><br><span class="line">enctype=<span class="string">"multipart/form-data"</span>&gt;</span><br><span class="line">&lt;label <span class="keyword">for</span>=<span class="string">"file"</span>&gt;Filename:&lt;/label&gt;</span><br><span class="line">&lt;input type=<span class="string">"file"</span> name=<span class="string">"file"</span> id=<span class="string">"file"</span> /&gt; </span><br><span class="line">&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"submit"</span> value=<span class="string">"Submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<a id="more"></a>
-<ul>
-<li><p>upload_file.php，处理上传的文件。<br>上传文件后，文件先缓存在临时目录中，脚本结束时临时文件被删除。upload_file.php只是简单输出上传文件的信息，而不做实际场景中将临时文件保存至永久目录等进一步处理。但此差异对我们进行curl实验没有任何影响。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a File Upload Process Demo.&lt;br /&gt;</span><br><span class="line">It only shows the information of the file you uploaded.&lt;br /&gt;</span><br><span class="line">The file you uploaded remains temporary,&lt;br /&gt;</span><br><span class="line"><span class="keyword">and</span> is deleted when this script is finished.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span> ($_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] &gt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Error: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Upload: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"name"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Type: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"type"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Size: "</span> . ($_FILES[<span class="string">"file"</span>][<span class="string">"size"</span>] / <span class="number">1024</span>) . <span class="string">" Kb&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Stored in: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"tmp_name"</span>];</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>put.php，处理通过HTTP PUT方法上传的文件。<br>同上，为了安全只输出上传文件信息，不做实际转存处理。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP PUT Demo.&lt;br&gt;</span><br><span class="line">It reads the file you upload using PUT,&lt;br&gt;</span><br><span class="line"><span class="keyword">and</span> prints the content out.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/* PUT data comes in on the stdin stream */</span></span><br><span class="line">$putdata = fopen(<span class="string">"php://input"</span>, <span class="string">"r"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Read the data 1 KB at a time</span></span><br><span class="line"><span class="comment">   and print the content out */</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"The contents of the file you upload:&lt;br&gt;&lt;br&gt;\n"</span>;</span><br><span class="line"><span class="keyword">while</span> ($data = fread($putdata, <span class="number">1024</span>))</span><br><span class="line">    <span class="keyword">echo</span> $data;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="comment">/* Close the streams */</span></span><br><span class="line">fclose($putdata);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><h3 id="F-–form"><a href="#F-–form" class="headerlink" title="-F/–form"></a>-F/–form</h3><p><code>-F/--form &lt;name=content&gt;</code><br>使用<code>Content-Type  multi‐part/form-data</code>的方式提交数据，可用于上传二进制文件。</p>
-<ol>
-<li><p>@的使用<br>一般使用<code>-F file=@filename</code>的形式，其中file为文件表单的name，filename为文件名。@后面的文件作为文件上传处理。</p>
-</li>
-<li><p>&lt;的使用<br>对于&lt;后的文件，curl会读取其内容，而不会作为文件上传。类似-d选项中@的作用。<br>如<br><code>curl -F name=&lt;foobar.txt -Fage=100 http://127.0.0.1/welcome.php</code><br>foobar.txt内容为Adeploy，则此命令与以下命令等价：<br><code>curl -F name=Adeploy -Fage=100 http://127.0.0.1/welcome.php</code><br>而-F @foobar.txt表示将foobar.txt作为文件上传。</p>
-</li>
-<li><p>-F不进行url编码<br>-F与-d类似，都是不对数据进行urlencode编码，而且-F不能与-d或–data-urlencode共用。<br>因此如果上传文件的同时还需要提交其他需要urlencode编码的字段（如中文用户名），就会出现问题。<br>除手动编码外，实用的解决办法是自己编写urlencode函数（网上可以找到Linux脚本实现的urlencode函数或C语言版本、Perl版本、Python），调用即可。</p>
-</li>
-<li><p>使用”type=”指定Content-Type<br>如<code>curl -F &quot;web=@index.html;type=text/html&quot; url.com</code><br>将index.html以text/html的Content-Type上传。</p>
-</li>
-<li><p>使用”filename=”修改上传文件的名字<br>如<code>curl -F &quot;file=@localfile;filename=nameinpost&quot; url.com</code><br>上传localfile并修改文件名字为nameinpost。</p>
-</li>
+    <title>Linux下cURL使用教程之一：cURL简介</title>
+    <url>/2012/07/linux-curl-description/</url>
+    <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
+<p>而cURL就是HTTP脚本编程的利器。</p>
+<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
+<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
+<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
+<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
+<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
 </ol>
-<h3 id="–form-string"><a href="#–form-string" class="headerlink" title="–form-string"></a>–form-string</h3><p><code>--form-string &lt;name=string&gt;</code><br>基本同-F，但是此参数后面跟”@”、”&lt;”、”;type=”时，不做特殊含义解析。</p>
-<h3 id="T-–upload-file"><a href="#T-–upload-file" class="headerlink" title="-T/–upload-file"></a>-T/–upload-file</h3><p><code>-T/--upload-file &lt;file&gt;</code><br>使用HTTP的PUT方法上传文件，需要目标URL支持HTTP的PUT方法。<br>可以与-d、–data-urlencode、-F同时使用。</p>
-<h2 id="参数使用实例"><a href="#参数使用实例" class="headerlink" title="参数使用实例"></a>参数使用实例</h2><h3 id="F文件上传"><a href="#F文件上传" class="headerlink" title="-F文件上传"></a>-F文件上传</h3><p>打开file.php选择文件后submit，Developer Tools抓包截图如下：<br><img src="/img/developertools_file.jpg" alt="Developer Tools file上传"><br>注意此时的Content-Type字段是<code>multipart/form-data</code>，主要用于上传文件，具体可参考<a href="http://www.ietf.org/rfc/rfc1867.txt" target="_blank" rel="noopener">RFC1867</a>。<br>分析file.php的源代码可知，表单中file类型的input元素name=file，所以命令如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o file.html -F file=@a.txt http://127.0.0.1/upload_file.php</span><br></pre></td></tr></table></figure></p>
-<h3 id="T文件上传"><a href="#T文件上传" class="headerlink" title="-T文件上传"></a>-T文件上传</h3><p>没有找到正确的PUT表单，因此无法使用Developer Tools跟踪实际提交过程。<br>命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o put.html -T a.txt http://127.0.0.1/put.php</span><br></pre></td></tr></table></figure></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要为使用curl上传文件的操作方法。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -686,6 +688,74 @@
         <tag>curl</tag>
         <tag>linux curl</tag>
         <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
+    <url>/2013/03/gateway-performance-test-desc/</url>
+    <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
+<ol>
+<li>简介及性能指标介绍 - 本篇</li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
+</ol>
+<a id="more"></a>
+<h2 id="性能测试简介"><a href="#性能测试简介" class="headerlink" title="性能测试简介"></a>性能测试简介</h2><p>以下解释来自百度百科：</p>
+<blockquote>
+<p>性能测试是通过自动化的测试<strong>工具</strong>模拟多种正常、峰值以及异常<strong>负载</strong>条件来对系统的各项性能指标进行测试。负载测试和压力测试都属于性能测试，两者可以结合进行。通过负载测试，确定在各种工作负载下系统的性能，目标是测试当负载逐渐增加时，系统各项性能指标的变化情况。压力测试是通过确定一个系统的<strong>瓶颈</strong>或者不能接受的性能点，来获得系统能提供的最大服务级别的测试。</p>
+</blockquote>
+<p>其中有三个关键词需要关注：</p>
+<ul>
+<li>工具：性能测试一般需要的压力较大较复杂，单纯依靠手工很难做到，因此一般需要专业化的设备、工具，或编写自动化测试脚本完成。网关类产品一般要求的负载较高，在千兆、万兆设置更高级别，一般需要专业配置千兆万兆网卡的硬件设备，如IAXA等，价格较昂贵。而其它产品一般也需要如Loadruner、Jmeter等专业化的性能测试软件并根据场景编写脚本完成。</li>
+<li>负载：性能测试有别于功能测试的点就在于使用的负载较高。而且负载的构造需要根据实际的场景才有价值，并需要使用特定的工具或自行研发软件实现。</li>
+<li>瓶颈：逐渐加大负载到达瓶颈。测试中比较重要的就是各个性能拐点，因为各个拐点往往都有重要的意义。如保持最优响应的拐点、延迟急剧增加的拐点、系统彻底瘫痪的拐点。持续测试找到各个拐点，对于产品的调优、部署及运维都有很大的价值。<br><img src="/img/jmeter-result.png" alt="性能测试结果"></li>
+</ul>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS\、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>DUT，devices under test，测试设备。</li>
+</ul>
+<h2 id="性能指标名词解释"><a href="#性能指标名词解释" class="headerlink" title="性能指标名词解释"></a>性能指标名词解释</h2><p>网络安全类产品或网关类产品常见的性能指标有：</p>
+<ul>
+<li>RFC2544 四项值（吞吐量、延迟、丢包率、背靠背）</li>
+<li>TCP 的每秒新建连接数（CPS）</li>
+<li>HTTP 的每秒处理事务数（TPS）、HTTP 有效吞吐量（HTTP Throughput）</li>
+<li>最大并发连接数等</li>
+</ul>
+<p>除此之外，部分评测机构或客户也会根据自己的实际情况增加性能指标，如：IPS/UTM下的HTTP有效吞吐量和每秒新建，Mail协议（SMTP/POP3/IMAP）的有效吞吐量和新建，特殊场景的混合流量（如加入恶意流量）的吞吐量等。<br>可参考业界标杆Fortinet的<a href="https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/Fortinet_Product_Matrix.pdf" target="_blank" rel="noopener">性能测试报告</a>。<br><img src="/img/fortinet-product-matrix-sample.png" alt="Fortinet product matrix"></p>
+<p>下面我们先认识一下各性能指标名词的含义。本篇只介绍各名词的含义，测试方法后续章节中说明。</p>
+<h3 id="RFC2544-四项值"><a href="#RFC2544-四项值" class="headerlink" title="RFC2544 四项值"></a>RFC2544 四项值</h3><p><a href="https://tools.ietf.org/html/rfc1242" target="_blank" rel="noopener">RFC1242</a>文档中定义了吞吐量（Throughput）、延迟（Latency）、丢包率（Frame Loss）、背靠背（Back-to-Back）四个标准术语。<br><a href="https://www.ietf.org/rfc/rfc2544.txt" target="_blank" rel="noopener">RFC2544</a>是RFC组织提出的用于评测网络互联设备（防火墙、IDS、交换机路由器等）的国际标准，其中主要对RFC1242 中定义的性能评测参数的具体测试方法、结果的提交形式作了较详细的规定。</p>
+<p>下面将对这四项值是做为重点进行介绍。</p>
+<h4 id="吞吐量（Throughput）"><a href="#吞吐量（Throughput）" class="headerlink" title="吞吐量（Throughput）"></a>吞吐量（Throughput）</h4><p>吞吐量是指被测设备在不丢包的情况下，所能转发的最大速率或最大流量。通常测试结果以每秒通过的最大数据包数（PPS）或比特数（Mb/s）。<br>用于反映被测设备所能够处理的最大的数据流量，重在测试被测设备的转发能力。<br>结果值越大越好。<br>吞吐量比较通用，适用于绝大多数软件系统的性能测试。</p>
+<h4 id="延迟（Latency）"><a href="#延迟（Latency）" class="headerlink" title="延迟（Latency）"></a>延迟（Latency）</h4><p>发送一定数量的数据包，记录中间数据包发出的时间T1，以及经由被测设备转发后到达接收端口的时间T2：Latency＝T2－T1。延迟的测试结果以毫秒（ms）或微秒（μs）表示。<br>测试延迟是在测试过程中不存在丢包的条件下进行的，也就是说在测试延迟时，先要知道被测设备的吞吐量，从而定义发包的速率。<br>延迟用于反映被测设备处理数据包的速度。<br>延迟越小，表明设备处理速度越快。<br>延迟比较通用，是大多数软件系统性能测试的重要指标。</p>
+<h4 id="丢包率（Frame-Loss）"><a href="#丢包率（Frame-Loss）" class="headerlink" title="丢包率（Frame Loss）"></a>丢包率（Frame Loss）</h4><p>丢包率是指在一定的负载下，由于缺乏资源而未能被转发的包占应该转发的包数的百分比。<br>用于反映被测设备承受特定负载能力。<br>结果值越小越好。</p>
+<h4 id="背靠背（Back-to-Back）"><a href="#背靠背（Back-to-Back）" class="headerlink" title="背靠背（Back-to-Back）"></a>背靠背（Back-to-Back）</h4><p>以能够产生的最大的速率，发送一定长度的数据包，并不断改变单次发送的数据包数目，直到被测设备能够完全转发所有发送的数据包而不丢包，这个包数就是该设备的背对背值。<br>用于反映被测设备处理突发数据的缓存能力。背对背的值越大，路由器的缓存能力就越强，处理突发数据包的能力越强。</p>
+<h3 id="TCP每秒新建连接数（CPS）"><a href="#TCP每秒新建连接数（CPS）" class="headerlink" title="TCP每秒新建连接数（CPS）"></a>TCP每秒新建连接数（CPS）</h3><p>TCP每秒新建是在业界提到最多的一个。这个性能指标出自<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档。全称是 Maximum TCP Connection Establishment Rate（最大TCP 建立速率），大家习惯将这个指标称为CPS（TCPConnection Per Second）。<br>TCP每秒新建速率是指在被测设备能够成功建立所有请求连接的条件下，所能承受的最大TCP 连接建立速度。其测试采用迭代搜索算法，每次迭代过程中，以低于被测设备所能承受的最大并发连接数发起速率不同的TCP 连接请求，直到得到所有连接成功建立的最大速率。<br>TCP每秒新建速率以连接数/秒表示结果，其值越大越好。<br>注：TCP Connection Establishment已在<a href="https://tools.ietf.org/html/rfc2647" target="_blank" rel="noopener">RFC2647</a>文档中进行定义。</p>
+<h3 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h3><p>TPS性能指标是反映被测设备应用层的新建速率，这个性能指标也出自RFC3511文档。全称是Maximum HTTP Transaction Rate（最大HTTP传输事务速率），大家习惯将这个指标称为TPS（HTTPTransaction Per Second）。<br>HTTP的每秒事务数是指在被测设备能够成功建立连接的条件下，所能承受的最大的HTTP 协议的请求/回应操作的速度。其测试采用反复搜索过程，每次反复过程中，以低于被测设备所能承受的最大处理速率，直到所有连接被成功建立并且有对相应的请求。<br>结果以连接数/秒表示结果。其值越大越好。</p>
+<h3 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h3><p>HTTP有效吞吐量是反映被测设备在应用层的最大传输速率，这个性能指标在RFC3511文档中没有明确描述，但可以通过将HTTP Transaction Rate调整转化为HTTP有效吞吐量的测试方法。HTTP有效吞吐量是指在被测设备能够成功建立连接的条件下，在同一时间内所能承受的最大的有效数据量。<br>测试结果值越大越好。</p>
+<h3 id="最大并发连接数"><a href="#最大并发连接数" class="headerlink" title="最大并发连接数"></a>最大并发连接数</h3><p>最大并发连接数性能指标是反映被测设备最大的会话条目数，这个性能指标也出自RFC3511文档。全称是 Concurrent TCP Connection Capacity。最大并发连接数是指在被测设备能够成功建立连接的条件下，所能同时承受的最大的链接条目数，也反映了被测设备维持多个会话的能力。<br>测试结果值越大越好。</p>
+<h3 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h3><p>在<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档中主要描述了HTTP协议的性能测试，但随着产品及技术的大幅度更新，这往往已经不能满足客户或厂商的需求。我们还需要测试其它协议的性能，通常以应用层为主：包括FTP协议、Mail协议等。但测试的内容基本都是一样的，以每秒新建（每秒会话）和吞吐量为主。只需将HTTP协议变为其它应用层协议即可。</p>
+<p>随着网关产品尤其是网络安全类产品的发展，性能测试的范围不再局限于防火墙功能上的性能测试，还新增加了对其它功能如IPS、AV（防病毒）和UTM（集成安全网关）等的性能测试。但可以看到，这些功能的增加对于测试过程或者测试方法而言其实没有直接的影响，仍然要使用原来的测试过程或测试方法。下篇我们将介绍具体的测试方法。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是简介及测试方法的概念介绍。所有的性能指标中，RFC2544的四项指标是其中比较重要的部分且目前基本以形成标准，下篇文章将对其进行介绍。</p>
+]]></content>
+      <categories>
+        <category>Testing</category>
+      </categories>
+      <tags>
+        <tag>性能测试</tag>
+        <tag>ips</tag>
+        <tag>NGFW</tag>
+        <tag>防火墙</tag>
+        <tag>spi firewall</tag>
       </tags>
   </entry>
   <entry>
@@ -719,6 +789,83 @@
         <tag>nosql</tag>
         <tag>aof</tag>
         <tag>rdb</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SQLAlchemy简介及在OpenStack中的使用</title>
+    <url>/2015/07/sqlalchemy-intro/</url>
+    <content><![CDATA[<p>SQLAlchemy是Python编程语言下的一款开源软件，提供了SQL工具包及对象关系映射(ORM)工具。</p>
+<h2 id="web编程之orm"><a href="#web编程之orm" class="headerlink" title="web编程之orm"></a>web编程之orm</h2><p>在编写web服务时，我们通常使用orm，而不是直接使用SQL与数据库进行交互。<br>如果使用Django等比较全面的框架，可以选择默认的ORM。但如果选择flask等轻量级框架，则需要自己选择ORM。同时，自己选择使用ORM也带来了更大的灵活性。<br><a id="more"></a></p>
+<h3 id="orm是什么"><a href="#orm是什么" class="headerlink" title="orm是什么"></a>orm是什么</h3><p>以下节选自wikipeida：</p>
+<blockquote>
+<p>Object-relational mapping (ORM, O/RM, and O/R mapping tool) in computer science is a programming technique for converting data between incompatible type systems in object-oriented programming languages.</p>
+</blockquote>
+<p>以下节选自百度百科：</p>
+<blockquote>
+<p>对象关系映射（英语：Object Relation Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。</p>
+</blockquote>
+<p>实际项目中，我们主要使用orm作为与数据库等进行实际交互的工具。</p>
+<h3 id="为什么使用orm"><a href="#为什么使用orm" class="headerlink" title="为什么使用orm"></a>为什么使用orm</h3><p>与直接使用sql访问数据库相比，其有以下好处：</p>
+<ul>
+<li>代码的简洁性，对存储层的通用封装<br>使用orm，操作数据库往往仅需要简单的几条语句，使代码变得简洁。</li>
+<li>数据源的兼容性<br>orm往往对多种数据库、数据源进行通用的封装，从而使得编写一套代码，适用于不同的数据源变得可能。</li>
+<li>操作的安全性<br>直接使用sql操作数据库，往往会因为开发人员疏忽引入sql注入等安全问题。而使用orm，能避免此问题。</li>
+<li>操作语句的高效性<br>orm的封装是众多开发人员智慧的结晶，其中往往已经对生成的sql语句进行了优化，使得一般语句的性能比较高效，而开发人员不需要再去考虑性能问题。但orm一般是通用的解决方案，无法针对所有场景进行优化，特殊场景下其生成的sql语句可能会非常低效，因此需要在实际使用时进行监控并酌情优化。</li>
+</ul>
+<h2 id="简介及特性"><a href="#简介及特性" class="headerlink" title="简介及特性"></a>简介及特性</h2><p>SQLAlchemy的特性主要如下：</p>
+<ul>
+<li>Mature, High Performing Architecture DBA Approved</li>
+<li>Non-Opinionated</li>
+<li>Unit Of Work</li>
+<li>Function-based query construction Modular and Extensible</li>
+<li>Separate mapping and class design …</li>
+</ul>
+<p>See: <a href="http://www.sqlalchemy.org/features.html" target="_blank" rel="noopener">http://www.sqlalchemy.org/features.html</a></p>
+<h2 id="安装及使用"><a href="#安装及使用" class="headerlink" title="安装及使用"></a>安装及使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>开发环境推荐使用pip安装，同时注意版本问题。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install sqlalchemy</span><br></pre></td></tr></table></figure></p>
+<p>生产环境推荐使用rpm/deb安装，同时注意版本问题。<br>rpm - 版本兼容问题<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum install SQLAlchemy</span><br><span class="line">apt-get install SQLAlchemy</span><br></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>支持的2种方式:</p>
+<ul>
+<li>SQL Expression Language (core)</li>
+<li>Object Relational Mapper (orm)</li>
+</ul>
+<h2 id="Core方式"><a href="#Core方式" class="headerlink" title="Core方式"></a>Core方式</h2><p>(raw sql、sql expression)<br>对于绝大多数应用, 推荐使用SqlAlchemy. 即使是使用raw sql,<br>SqlAlchemy 也可以带来如下好处:</p>
+<ul>
+<li>内建数据库连接池</li>
+<li>强大的log功能</li>
+</ul>
+<p>SqlAlchemy的sql expression和raw sql的比较:</p>
+<ul>
+<li>sql expression 写法是纯python代码, 阅读性更好</li>
+<li>raw sql 比 sql expression 更灵活, 如果SQL很复杂, 更有优势了</li>
+</ul>
+<h3 id="Connect"><a href="#Connect" class="headerlink" title="Connect"></a>Connect</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">engine_str = <span class="string">"mysql:mysql://root:root@localhost/django_sqla"</span></span><br><span class="line">engine = create_engine(engine_str, echo=<span class="literal">True</span>)</span><br><span class="line">conn = engine.connect()</span><br></pre></td></tr></table></figure>
+<h3 id="Metadata"><a href="#Metadata" class="headerlink" title="Metadata"></a>Metadata</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Table objects <span class="keyword">and</span> its children <span class="keyword">as</span> metadata Table Column(String, Integer…)</span><br><span class="line">Create tables within the engine</span><br></pre></td></tr></table></figure>
+<h3 id="Insert-expression"><a href="#Insert-expression" class="headerlink" title="Insert expression"></a>Insert expression</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ins2=users.insert() <span class="comment">#anexpression</span></span><br><span class="line">result2 = conn.execute(ins2, id=<span class="number">2</span>, name=’wendy’, fullname=’Wendy Williams’) <span class="comment"># execute</span></span><br><span class="line">Multiple inserts: conn.execute(ins2, a_list)</span><br></pre></td></tr></table></figure>
+<h3 id="Update"><a href="#Update" class="headerlink" title="Update"></a>Update</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">users.update().values(&#123;…&#125;).where(…)</span><br></pre></td></tr></table></figure>
+<h3 id="Delete"><a href="#Delete" class="headerlink" title="Delete"></a>Delete</h3><p>同上</p>
+<h3 id="Select"><a href="#Select" class="headerlink" title="Select"></a>Select</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s = select([users]) <span class="keyword">or</span> s = users.select()</span><br><span class="line">result = conn.execute(s)</span><br><span class="line">result.fetchone()</span><br><span class="line">result.close()</span><br></pre></td></tr></table></figure>
+<h3 id="text"><a href="#text" class="headerlink" title="text"></a>text</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">sqlalchemy allows using string</span><br><span class="line">s = text(“””Hello”””)</span><br></pre></td></tr></table></figure>
+<h2 id="orm方式"><a href="#orm方式" class="headerlink" title="orm方式"></a>orm方式</h2><h3 id="Declare-a-Mapping"><a href="#Declare-a-Mapping" class="headerlink" title="Declare a Mapping"></a>Declare a Mapping</h3><p>declarative_base: define classes and mapping to tables<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base = declarative_base()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = ‘users’</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure></p>
+<h3 id="MetaData"><a href="#MetaData" class="headerlink" title="MetaData"></a>MetaData</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base.metadata.create_all(engine)</span><br></pre></td></tr></table></figure>
+<h3 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h3><p>事务<br>using session to handle orm’s action<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=engine)</span><br><span class="line">session = Session()</span><br></pre></td></tr></table></figure></p>
+<h3 id="Connection-pool"><a href="#Connection-pool" class="headerlink" title="Connection pool"></a>Connection pool</h3><h3 id="Add-insert"><a href="#Add-insert" class="headerlink" title="Add(insert)"></a>Add(insert)</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ed_user = User(<span class="string">'ed'</span>, <span class="string">'Ed Jones'</span>, <span class="string">'edspassword'</span>)</span><br><span class="line">session.add(ed_user)</span><br><span class="line">session.add_all([...])</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+<h3 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result = session.query(User).filter(User.name==‘ed<span class="string">')</span></span><br><span class="line"><span class="string">result[0].name, result[0][0]</span></span><br></pre></td></tr></table></figure>
+<h3 id="Relationship"><a href="#Relationship" class="headerlink" title="Relationship"></a>Relationship</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span><span class="params">(Base)</span></span></span><br><span class="line">__tablename__ = ‘addresses’</span><br><span class="line">...</span><br><span class="line">user_id = Column(Integer, ForeignKey(<span class="string">'users.id'</span>)) user = relationship(<span class="string">"User"</span>,</span><br><span class="line">backref=backref(<span class="string">'addresses'</span>, order_by=id))</span><br></pre></td></tr></table></figure>
+<h2 id="迁移"><a href="#迁移" class="headerlink" title="迁移"></a>迁移</h2><p>Alembic<br><a href="http://blog.csdn.net/ying_593254979/article/details/10189799" target="_blank" rel="noopener">参考</a></p>
+<h2 id="OpenStack中的使用"><a href="#OpenStack中的使用" class="headerlink" title="OpenStack中的使用"></a>OpenStack中的使用</h2><p>wsgi框架+SQLAlchemy</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>版本兼容问题<br>rpmbuild</p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://en.wikipedia.org/wiki/Object-relational_mapping" target="_blank" rel="noopener">orm in wiki</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>web</tag>
+        <tag>orm</tag>
+        <tag>sqlalchemy</tag>
       </tags>
   </entry>
   <entry>
@@ -798,83 +945,6 @@
         <tag>keepalive</tag>
         <tag>vip</tag>
         <tag>LVS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SQLAlchemy简介及在OpenStack中的使用</title>
-    <url>/2015/07/sqlalchemy-intro/</url>
-    <content><![CDATA[<p>SQLAlchemy是Python编程语言下的一款开源软件，提供了SQL工具包及对象关系映射(ORM)工具。</p>
-<h2 id="web编程之orm"><a href="#web编程之orm" class="headerlink" title="web编程之orm"></a>web编程之orm</h2><p>在编写web服务时，我们通常使用orm，而不是直接使用SQL与数据库进行交互。<br>如果使用Django等比较全面的框架，可以选择默认的ORM。但如果选择flask等轻量级框架，则需要自己选择ORM。同时，自己选择使用ORM也带来了更大的灵活性。<br><a id="more"></a></p>
-<h3 id="orm是什么"><a href="#orm是什么" class="headerlink" title="orm是什么"></a>orm是什么</h3><p>以下节选自wikipeida：</p>
-<blockquote>
-<p>Object-relational mapping (ORM, O/RM, and O/R mapping tool) in computer science is a programming technique for converting data between incompatible type systems in object-oriented programming languages.</p>
-</blockquote>
-<p>以下节选自百度百科：</p>
-<blockquote>
-<p>对象关系映射（英语：Object Relation Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。</p>
-</blockquote>
-<p>实际项目中，我们主要使用orm作为与数据库等进行实际交互的工具。</p>
-<h3 id="为什么使用orm"><a href="#为什么使用orm" class="headerlink" title="为什么使用orm"></a>为什么使用orm</h3><p>与直接使用sql访问数据库相比，其有以下好处：</p>
-<ul>
-<li>代码的简洁性，对存储层的通用封装<br>使用orm，操作数据库往往仅需要简单的几条语句，使代码变得简洁。</li>
-<li>数据源的兼容性<br>orm往往对多种数据库、数据源进行通用的封装，从而使得编写一套代码，适用于不同的数据源变得可能。</li>
-<li>操作的安全性<br>直接使用sql操作数据库，往往会因为开发人员疏忽引入sql注入等安全问题。而使用orm，能避免此问题。</li>
-<li>操作语句的高效性<br>orm的封装是众多开发人员智慧的结晶，其中往往已经对生成的sql语句进行了优化，使得一般语句的性能比较高效，而开发人员不需要再去考虑性能问题。但orm一般是通用的解决方案，无法针对所有场景进行优化，特殊场景下其生成的sql语句可能会非常低效，因此需要在实际使用时进行监控并酌情优化。</li>
-</ul>
-<h2 id="简介及特性"><a href="#简介及特性" class="headerlink" title="简介及特性"></a>简介及特性</h2><p>SQLAlchemy的特性主要如下：</p>
-<ul>
-<li>Mature, High Performing Architecture DBA Approved</li>
-<li>Non-Opinionated</li>
-<li>Unit Of Work</li>
-<li>Function-based query construction Modular and Extensible</li>
-<li>Separate mapping and class design …</li>
-</ul>
-<p>See: <a href="http://www.sqlalchemy.org/features.html" target="_blank" rel="noopener">http://www.sqlalchemy.org/features.html</a></p>
-<h2 id="安装及使用"><a href="#安装及使用" class="headerlink" title="安装及使用"></a>安装及使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>开发环境推荐使用pip安装，同时注意版本问题。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install sqlalchemy</span><br></pre></td></tr></table></figure></p>
-<p>生产环境推荐使用rpm/deb安装，同时注意版本问题。<br>rpm - 版本兼容问题<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum install SQLAlchemy</span><br><span class="line">apt-get install SQLAlchemy</span><br></pre></td></tr></table></figure></p>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>支持的2种方式:</p>
-<ul>
-<li>SQL Expression Language (core)</li>
-<li>Object Relational Mapper (orm)</li>
-</ul>
-<h2 id="Core方式"><a href="#Core方式" class="headerlink" title="Core方式"></a>Core方式</h2><p>(raw sql、sql expression)<br>对于绝大多数应用, 推荐使用SqlAlchemy. 即使是使用raw sql,<br>SqlAlchemy 也可以带来如下好处:</p>
-<ul>
-<li>内建数据库连接池</li>
-<li>强大的log功能</li>
-</ul>
-<p>SqlAlchemy的sql expression和raw sql的比较:</p>
-<ul>
-<li>sql expression 写法是纯python代码, 阅读性更好</li>
-<li>raw sql 比 sql expression 更灵活, 如果SQL很复杂, 更有优势了</li>
-</ul>
-<h3 id="Connect"><a href="#Connect" class="headerlink" title="Connect"></a>Connect</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">engine_str = <span class="string">"mysql:mysql://root:root@localhost/django_sqla"</span></span><br><span class="line">engine = create_engine(engine_str, echo=<span class="literal">True</span>)</span><br><span class="line">conn = engine.connect()</span><br></pre></td></tr></table></figure>
-<h3 id="Metadata"><a href="#Metadata" class="headerlink" title="Metadata"></a>Metadata</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Table objects <span class="keyword">and</span> its children <span class="keyword">as</span> metadata Table Column(String, Integer…)</span><br><span class="line">Create tables within the engine</span><br></pre></td></tr></table></figure>
-<h3 id="Insert-expression"><a href="#Insert-expression" class="headerlink" title="Insert expression"></a>Insert expression</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ins2=users.insert() <span class="comment">#anexpression</span></span><br><span class="line">result2 = conn.execute(ins2, id=<span class="number">2</span>, name=’wendy’, fullname=’Wendy Williams’) <span class="comment"># execute</span></span><br><span class="line">Multiple inserts: conn.execute(ins2, a_list)</span><br></pre></td></tr></table></figure>
-<h3 id="Update"><a href="#Update" class="headerlink" title="Update"></a>Update</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">users.update().values(&#123;…&#125;).where(…)</span><br></pre></td></tr></table></figure>
-<h3 id="Delete"><a href="#Delete" class="headerlink" title="Delete"></a>Delete</h3><p>同上</p>
-<h3 id="Select"><a href="#Select" class="headerlink" title="Select"></a>Select</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s = select([users]) <span class="keyword">or</span> s = users.select()</span><br><span class="line">result = conn.execute(s)</span><br><span class="line">result.fetchone()</span><br><span class="line">result.close()</span><br></pre></td></tr></table></figure>
-<h3 id="text"><a href="#text" class="headerlink" title="text"></a>text</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">sqlalchemy allows using string</span><br><span class="line">s = text(“””Hello”””)</span><br></pre></td></tr></table></figure>
-<h2 id="orm方式"><a href="#orm方式" class="headerlink" title="orm方式"></a>orm方式</h2><h3 id="Declare-a-Mapping"><a href="#Declare-a-Mapping" class="headerlink" title="Declare a Mapping"></a>Declare a Mapping</h3><p>declarative_base: define classes and mapping to tables<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base = declarative_base()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = ‘users’</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure></p>
-<h3 id="MetaData"><a href="#MetaData" class="headerlink" title="MetaData"></a>MetaData</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base.metadata.create_all(engine)</span><br></pre></td></tr></table></figure>
-<h3 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h3><p>事务<br>using session to handle orm’s action<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=engine)</span><br><span class="line">session = Session()</span><br></pre></td></tr></table></figure></p>
-<h3 id="Connection-pool"><a href="#Connection-pool" class="headerlink" title="Connection pool"></a>Connection pool</h3><h3 id="Add-insert"><a href="#Add-insert" class="headerlink" title="Add(insert)"></a>Add(insert)</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ed_user = User(<span class="string">'ed'</span>, <span class="string">'Ed Jones'</span>, <span class="string">'edspassword'</span>)</span><br><span class="line">session.add(ed_user)</span><br><span class="line">session.add_all([...])</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-<h3 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result = session.query(User).filter(User.name==‘ed<span class="string">')</span></span><br><span class="line"><span class="string">result[0].name, result[0][0]</span></span><br></pre></td></tr></table></figure>
-<h3 id="Relationship"><a href="#Relationship" class="headerlink" title="Relationship"></a>Relationship</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span><span class="params">(Base)</span></span></span><br><span class="line">__tablename__ = ‘addresses’</span><br><span class="line">...</span><br><span class="line">user_id = Column(Integer, ForeignKey(<span class="string">'users.id'</span>)) user = relationship(<span class="string">"User"</span>,</span><br><span class="line">backref=backref(<span class="string">'addresses'</span>, order_by=id))</span><br></pre></td></tr></table></figure>
-<h2 id="迁移"><a href="#迁移" class="headerlink" title="迁移"></a>迁移</h2><p>Alembic<br><a href="http://blog.csdn.net/ying_593254979/article/details/10189799" target="_blank" rel="noopener">参考</a></p>
-<h2 id="OpenStack中的使用"><a href="#OpenStack中的使用" class="headerlink" title="OpenStack中的使用"></a>OpenStack中的使用</h2><p>wsgi框架+SQLAlchemy</p>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>版本兼容问题<br>rpmbuild</p>
-<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
-<li><a href="https://en.wikipedia.org/wiki/Object-relational_mapping" target="_blank" rel="noopener">orm in wiki</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Python</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>web</tag>
-        <tag>orm</tag>
-        <tag>sqlalchemy</tag>
       </tags>
   </entry>
 </search>
