@@ -1,101 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>buildbot实战</title>
-    <url>/2014/11/buildbot-in-action/</url>
-    <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
-<ul>
-<li>监控代码仓库</li>
-<li>代码仓库有变化后，立即拉取代码</li>
-<li>执行build、部署、测试及发布工作</li>
-<li>反馈结果</li>
-</ul>
-<p>我们对这样一个工具的一般要求为：</p>
-<ul>
-<li>轻量级，安装、配置简单，本身耗费资源较少</li>
-<li>高效率，较快的完成自动化任务</li>
-<li>通用性强，在不同的操作系统，甚至与不同的代码系统兼容</li>
-<li>易扩展、配置及管理，能较简单的配置自动化任务</li>
-</ul>
-<p>Buildbot和Jenkins都能很好的满足我们这些要求。但相比Jenkins，buildbot更轻量级，部署配置更为简单。<br>Web界面也更简单美观一些。</p>
-<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>buildbot架构比较简单，主要分为三部分：</p>
-<ul>
-<li>版本控制层<br>外部版本控制，通过插件或主动触发的方式触发buildbot执行任务。</li>
-<li>任务执行层<br>master接收任务后，调度其slave执行任务，并获取到返回的结果</li>
-<li>通知层<br>master获取结果后，可通过邮件、IRC等方式进行通知。</li>
-</ul>
-<p>其中重要的主体是master和slave，其主要采用星形拓扑结构，一个集群中可以多个master、多个slave。master主要负责任务接收、调度并通知任务，slave负责具体的任务执行。各节点本身无状态，横向扩展性很好。<br><a id="more"></a><br><img src="/img/buildbot-overview.png" alt="buildbot架构"></p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="pip安装"><a href="#pip安装" class="headerlink" title="pip安装"></a>pip安装</h3><p>建议使用pip安装，避免麻烦的依赖问题。<br>同时当前对python3版本支持不太好，建议使用python2.7版本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install gcc python-devel </span><br><span class="line">yum install python-dateutil15 git expect</span><br><span class="line"><span class="comment"># master安装</span></span><br><span class="line">pip install buildbot</span><br><span class="line"><span class="comment"># salve安装</span></span><br><span class="line">pip install buildbot-slave</span><br></pre></td></tr></table></figure></p>
-<p>如果是python2.6的话，因为最新版本的Twisted需要python2.7，所以需要提前指定版本安装：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install Twisted==15.1.0</span><br></pre></td></tr></table></figure></p>
-<p>为充分利用资源，同一台机器可配置为多个master、slave：可使用不同用户或virtualenv，每个用户或virtualenv环境部署为一个节点。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install virtualenv</span><br></pre></td></tr></table></figure></p>
-<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>最近看到<a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">buildbot官方</a>给出了Dockerfile(但Dockerfile地址是错的，可以自行在github代码中查找)，可下载后自行构建镜像使用，运行后即可使用：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Download Buildbot Dockerfile.</span></span><br><span class="line">wget https://raw.githubusercontent.com/buildbot/buildbot/master/master/Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the Buildbot container (it will take a few minutes to download packages)</span></span><br><span class="line">docker build -t buildbot - &lt; Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Run buildbot</span></span><br><span class="line">CONTAINER_ID=$(docker run -d -p 8010:8010 -p 22 buildbot)</span><br></pre></td></tr></table></figure></p>
-<p>然后打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可。</p>
-<h2 id="创建及运行"><a href="#创建及运行" class="headerlink" title="创建及运行"></a>创建及运行</h2><h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildbot create-master master</span><br><span class="line"><span class="comment"># 配置文件</span></span><br><span class="line">mv master/master.cfg.sample master/master.cfg</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildbot start master</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f master/twistd.log</span><br></pre></td></tr></table></figure>
-<p>buildbot会在当前目录下创建master名称的目录，以上为<code>master</code>。<br>看到最后显示<code>BuildMaster is running</code>即为启动成功，此时可通过<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>访问，默认用户名密码都是<code>pyflakes</code>。</p>
-<h3 id="slave"><a href="#slave" class="headerlink" title="slave"></a>slave</h3><p>创建slave时需要指定mater的地址，或者修改配置文件指定。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildslave create-slave slave1 localhost:9989 slave1 pass</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildslave start slave</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f slave/twistd.log</span><br></pre></td></tr></table></figure></p>
-<p>create-slave的参数分布是：slave目录、master、名字、密码。其中master默认都采用9989与slave通信。名字、密码必须与master的master.cfg中配置的一致：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'slaves'</span>] = [buildslave.BuildSlave(<span class="string">"example-slave"</span>, <span class="string">"pass"</span>)]</span><br></pre></td></tr></table></figure></p>
-<h3 id="预览"><a href="#预览" class="headerlink" title="预览"></a>预览</h3><p>此时打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可看到如下页面：<br><img src="/img/buildbot-index.png" alt="buildbot预览"><br>其中Buildslaves页面可查看到我们新添加的example-slave，且状态为<code>Idle</code>。<br>而Waterfall页面可查看到当前的builder，目前只有runtest，点进去点击forcebuild即可进行测试build。成功后记录显示为绿色。</p>
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>Buildbot的配置文件为<code>.cfg</code>后缀的python脚本，使用python语法。如上文slave的定义就是一个python list的定义。</p>
-<h3 id="master配置"><a href="#master配置" class="headerlink" title="master配置"></a>master配置</h3><p>主要配置如下。</p>
-<ul>
-<li>BUILDSLAVES<br>slave的定义，以list的形式呈现。需要主要名字和密码与slave一致。<br>其中protocols可定义与slave的通信方式，包括端口等。</li>
-<li><p>CHANGESOURCES<br>指定需要监控的源代码地址。格式如下，其中可指定git地址、工作目录、分支、监控周期等。可定义多个，每个append进list即可。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c[&apos;change_source&apos;] = []</span><br><span class="line">c[&apos;change_source&apos;].append(changes.GitPoller(</span><br><span class="line">        &apos;git://github.com/buildbot/pyflakes.git&apos;,</span><br><span class="line">        workdir=&apos;gitpoller-workdir&apos;, branch=&apos;master&apos;,</span><br><span class="line">        pollinterval=300))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>SCHEDULERS<br>scheduler指定何时、如何触发执行builder，其中builder在BUILDERS中定义。下文定义了两个scheduler：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'schedulers'</span>] = []</span><br><span class="line"><span class="comment"># 定义每小时运行的scheduler</span></span><br><span class="line">hourlyscheduler = Periodic(name = <span class="string">"hourly"</span>,</span><br><span class="line">                           builderNames = [<span class="string">"simplebuild"</span>],</span><br><span class="line">                           periodicBuildTimer = <span class="number">3600</span>)</span><br><span class="line"><span class="comment"># 定义手动触发的scheduler</span></span><br><span class="line">c[<span class="string">'schedulers'</span>].append(schedulers.ForceScheduler(</span><br><span class="line">                            name=<span class="string">"force"</span>,</span><br><span class="line">                            builderNames=[<span class="string">"master"</span>]))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>BUILDERS<br>builder定义具体执行的任务内容，由一系列的步骤组成。每个步骤定义在step中，factory包含一系列的step，builder通过指定factory等参数创建。可定义多个builder。<br>代码如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义factory</span></span><br><span class="line">factory = util.BuildFactory()</span><br><span class="line"><span class="comment"># 定义具体step</span></span><br><span class="line">factory.addStep(steps.Git(repourl=<span class="string">'git://github.com/buildbot/pyflakes.git'</span>, mode=<span class="string">'incremental'</span>))</span><br><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"trial"</span>, <span class="string">"pyflakes"</span>]))</span><br><span class="line"><span class="comment"># 创建builder</span></span><br><span class="line">c[<span class="string">'builders'</span>] = []</span><br><span class="line"><span class="comment"># 指定名称、使用的slave、factory</span></span><br><span class="line">c[<span class="string">'builders'</span>].append(</span><br><span class="line">    util.BuilderConfig(name=<span class="string">"master"</span>,</span><br><span class="line">      slavenames=[<span class="string">"master"</span>],</span><br><span class="line">      factory=factory))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>STATUS TARGETS<br>此处定义buildbot对外通知build信息的方式。最基本的方式就是显示在页面中，因此此处同时定义了页面的认证方式，即登录使用的用户名、密码在此处修改。同时可定义IRC、邮件等通知方式。</p>
-</li>
-<li>PROJECT IDENTITY<br>此处主要为buildbot的基本信息，如title、超链接、url等。</li>
-<li>DB URL<br>此处定义使用的数据库，默认使用sqlite，地址为本地文件路径。</li>
-</ul>
-<h3 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h3><p>slave的定义主要在<code>buildbot.tac</code>文件中，可用于定义使用的master及slave基本信息。</p>
-<h2 id="启动及使用"><a href="#启动及使用" class="headerlink" title="启动及使用"></a>启动及使用</h2><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><ul>
-<li>启动<br>master、slave的启动上文已提及，子命令为start，参数为路径。</li>
-<li>停止、重启<br>stop和restart，其余同start</li>
-<li>master重新加载配置<br><code>buildbot reconfig master</code>即可重新加载配置。</li>
-</ul>
-<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>平时比较常用手动触发build，即forcebuild：web页面登录-&gt;Builders-&gt;选择builder-&gt;Force Build-&gt;在Waterfall查看打包结果及详细日志。<br><img src="/img/buildbot-waterfall.png" alt="buildbot waterfall"><br>注意：只有登录后才有build权限。</p>
-<h3 id="各页面介绍"><a href="#各页面介绍" class="headerlink" title="各页面介绍"></a>各页面介绍</h3><p>Buildbot比较方便的一点是全部通过页面来进行操作。主要页面介绍如下：</p>
-<ul>
-<li>Waterfall，以瀑布流的方式显示build任务，可点击任务查看详情、执行操作等</li>
-<li>Grid/T-Grid，以对应的方式显示build任务</li>
-<li>Console，还在开发中，当前主要显示revision信息</li>
-<li>Builders，定义的所有builder</li>
-<li>Recent Builds，最近的build</li>
-<li>Buildslaves，定义的所有slave</li>
-<li>Changesources，定义的所有代码仓库</li>
-<li>JSON API，对外提供的JSON API文档</li>
-</ul>
-<h2 id="高级使用"><a href="#高级使用" class="headerlink" title="高级使用"></a>高级使用</h2><h3 id="多分支build"><a href="#多分支build" class="headerlink" title="多分支build"></a>多分支build</h3><p>定义一个Changesource。<br>定义多个schedulers，分别对应不同分支。<br>定义多个factory，其中的step除branch不同外，其余step通用。通用的step可一次定义，多次使用。<br>builder分别指定分支和factory。</p>
-<h3 id="多项目build"><a href="#多项目build" class="headerlink" title="多项目build"></a>多项目build</h3><p>新版本可使用此功能，但不太推荐。buildbot的一个master还是更多的擅长对一个项目的管理。<br>需要定义多个Changesource，然后在其它定义时通过<code>project</code>和<code>repository</code>参数指定项目。</p>
-<h3 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h3><p>通过检查step的返回结果判断是否执行成功，规则同shell：0为成功，其它失败。<br>因此如果step中调用了自己的脚本，需要保证按上述规则返回结果。</p>
-<h3 id="添加参数"><a href="#添加参数" class="headerlink" title="添加参数"></a>添加参数</h3><p>使用<code>util.Property</code>获得网页上指定的参数，可设置默认值：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"bash"</span>, <span class="string">"autorpm.sh"</span>, util.Property(<span class="string">'project'</span>, default=<span class="string">''</span>)]))</span><br></pre></td></tr></table></figure></p>
-<p>在build页面通过name/value指定，如：<br><img src="/img/buildbot-param.png" alt="buildbot指定参数"></p>
-<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><p>实际使用中发现，buildslave所创建的文件，权限都为600或700。<br>这样会造成如cp到apache目录时，apache无法读取文件。<br>通过官方文档查看到slave启动时有umask选项：</p>
+    <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
+    <url>/2013/03/gateway-performance-test-desc/</url>
+    <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
+<ol>
+<li>简介及性能指标介绍 - 本篇</li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
+</ol>
+<a id="more"></a>
+<h2 id="性能测试简介"><a href="#性能测试简介" class="headerlink" title="性能测试简介"></a>性能测试简介</h2><p>以下解释来自百度百科：</p>
 <blockquote>
-<p>–umask<br>This is a string (generally an octal representation of an integer) which will cause the buildslave process’ umask value to be set shortly after initialization.<br>The twistddaemonization utility forces the umask to 077 at startup (which means that all files created by the buildslave or its child processes will be unreadable by any user other than the buildslave account).<br>If you want build products to be readable by other accounts, you can add –umask=022 to tell the buildslave to fix the umask after twistd clobbers it.<br>If you want build products to be writable by other accounts too, use –umask=000, but this is likely to be a security problem.</p>
+<p>性能测试是通过自动化的测试<strong>工具</strong>模拟多种正常、峰值以及异常<strong>负载</strong>条件来对系统的各项性能指标进行测试。负载测试和压力测试都属于性能测试，两者可以结合进行。通过负载测试，确定在各种工作负载下系统的性能，目标是测试当负载逐渐增加时，系统各项性能指标的变化情况。压力测试是通过确定一个系统的<strong>瓶颈</strong>或者不能接受的性能点，来获得系统能提供的最大服务级别的测试。</p>
 </blockquote>
-<p>通过修改slave目录下的buildbot.tac，修改：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">umask = 022</span><br></pre></td></tr></table></figure></p>
-<p>然后重启slave解决此问题:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">buildbot stop slave1</span><br><span class="line">buildbot stop slave2</span><br></pre></td></tr></table></figure></p>
-<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
-<li><a href="https://build.chromium.org/p/chromium/console" target="_blank" rel="noopener">chromium buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">docker安装buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/tour.html" target="_blank" rel="noopener">quick tour of buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/fiveminutes.html" target="_blank" rel="noopener">Buildbot in 5 minutes</a></li>
+<p>其中有三个关键词需要关注：</p>
+<ul>
+<li>工具：性能测试一般需要的压力较大较复杂，单纯依靠手工很难做到，因此一般需要专业化的设备、工具，或编写自动化测试脚本完成。网关类产品一般要求的负载较高，在千兆、万兆设置更高级别，一般需要专业配置千兆万兆网卡的硬件设备，如IAXA等，价格较昂贵。而其它产品一般也需要如Loadruner、Jmeter等专业化的性能测试软件并根据场景编写脚本完成。</li>
+<li>负载：性能测试有别于功能测试的点就在于使用的负载较高。而且负载的构造需要根据实际的场景才有价值，并需要使用特定的工具或自行研发软件实现。</li>
+<li>瓶颈：逐渐加大负载到达瓶颈。测试中比较重要的就是各个性能拐点，因为各个拐点往往都有重要的意义。如保持最优响应的拐点、延迟急剧增加的拐点、系统彻底瘫痪的拐点。持续测试找到各个拐点，对于产品的调优、部署及运维都有很大的价值。<br><img src="/img/jmeter-result.png" alt="性能测试结果"></li>
 </ul>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS\、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>DUT，devices under test，测试设备。</li>
+</ul>
+<h2 id="性能指标名词解释"><a href="#性能指标名词解释" class="headerlink" title="性能指标名词解释"></a>性能指标名词解释</h2><p>网络安全类产品或网关类产品常见的性能指标有：</p>
+<ul>
+<li>RFC2544 四项值（吞吐量、延迟、丢包率、背靠背）</li>
+<li>TCP 的每秒新建连接数（CPS）</li>
+<li>HTTP 的每秒处理事务数（TPS）、HTTP 有效吞吐量（HTTP Throughput）</li>
+<li>最大并发连接数等</li>
+</ul>
+<p>除此之外，部分评测机构或客户也会根据自己的实际情况增加性能指标，如：IPS/UTM下的HTTP有效吞吐量和每秒新建，Mail协议（SMTP/POP3/IMAP）的有效吞吐量和新建，特殊场景的混合流量（如加入恶意流量）的吞吐量等。<br>可参考业界标杆Fortinet的<a href="https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/Fortinet_Product_Matrix.pdf" target="_blank" rel="noopener">性能测试报告</a>。<br><img src="/img/fortinet-product-matrix-sample.png" alt="Fortinet product matrix"></p>
+<p>下面我们先认识一下各性能指标名词的含义。本篇只介绍各名词的含义，测试方法后续章节中说明。</p>
+<h3 id="RFC2544-四项值"><a href="#RFC2544-四项值" class="headerlink" title="RFC2544 四项值"></a>RFC2544 四项值</h3><p><a href="https://tools.ietf.org/html/rfc1242" target="_blank" rel="noopener">RFC1242</a>文档中定义了吞吐量（Throughput）、延迟（Latency）、丢包率（Frame Loss）、背靠背（Back-to-Back）四个标准术语。<br><a href="https://www.ietf.org/rfc/rfc2544.txt" target="_blank" rel="noopener">RFC2544</a>是RFC组织提出的用于评测网络互联设备（防火墙、IDS、交换机路由器等）的国际标准，其中主要对RFC1242 中定义的性能评测参数的具体测试方法、结果的提交形式作了较详细的规定。</p>
+<p>下面将对这四项值是做为重点进行介绍。</p>
+<h4 id="吞吐量（Throughput）"><a href="#吞吐量（Throughput）" class="headerlink" title="吞吐量（Throughput）"></a>吞吐量（Throughput）</h4><p>吞吐量是指被测设备在不丢包的情况下，所能转发的最大速率或最大流量。通常测试结果以每秒通过的最大数据包数（PPS）或比特数（Mb/s）。<br>用于反映被测设备所能够处理的最大的数据流量，重在测试被测设备的转发能力。<br>结果值越大越好。<br>吞吐量比较通用，适用于绝大多数软件系统的性能测试。</p>
+<h4 id="延迟（Latency）"><a href="#延迟（Latency）" class="headerlink" title="延迟（Latency）"></a>延迟（Latency）</h4><p>发送一定数量的数据包，记录中间数据包发出的时间T1，以及经由被测设备转发后到达接收端口的时间T2：Latency＝T2－T1。延迟的测试结果以毫秒（ms）或微秒（μs）表示。<br>测试延迟是在测试过程中不存在丢包的条件下进行的，也就是说在测试延迟时，先要知道被测设备的吞吐量，从而定义发包的速率。<br>延迟用于反映被测设备处理数据包的速度。<br>延迟越小，表明设备处理速度越快。<br>延迟比较通用，是大多数软件系统性能测试的重要指标。</p>
+<h4 id="丢包率（Frame-Loss）"><a href="#丢包率（Frame-Loss）" class="headerlink" title="丢包率（Frame Loss）"></a>丢包率（Frame Loss）</h4><p>丢包率是指在一定的负载下，由于缺乏资源而未能被转发的包占应该转发的包数的百分比。<br>用于反映被测设备承受特定负载能力。<br>结果值越小越好。</p>
+<h4 id="背靠背（Back-to-Back）"><a href="#背靠背（Back-to-Back）" class="headerlink" title="背靠背（Back-to-Back）"></a>背靠背（Back-to-Back）</h4><p>以能够产生的最大的速率，发送一定长度的数据包，并不断改变单次发送的数据包数目，直到被测设备能够完全转发所有发送的数据包而不丢包，这个包数就是该设备的背对背值。<br>用于反映被测设备处理突发数据的缓存能力。背对背的值越大，路由器的缓存能力就越强，处理突发数据包的能力越强。</p>
+<h3 id="TCP每秒新建连接数（CPS）"><a href="#TCP每秒新建连接数（CPS）" class="headerlink" title="TCP每秒新建连接数（CPS）"></a>TCP每秒新建连接数（CPS）</h3><p>TCP每秒新建是在业界提到最多的一个。这个性能指标出自<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档。全称是 Maximum TCP Connection Establishment Rate（最大TCP 建立速率），大家习惯将这个指标称为CPS（TCPConnection Per Second）。<br>TCP每秒新建速率是指在被测设备能够成功建立所有请求连接的条件下，所能承受的最大TCP 连接建立速度。其测试采用迭代搜索算法，每次迭代过程中，以低于被测设备所能承受的最大并发连接数发起速率不同的TCP 连接请求，直到得到所有连接成功建立的最大速率。<br>TCP每秒新建速率以连接数/秒表示结果，其值越大越好。<br>注：TCP Connection Establishment已在<a href="https://tools.ietf.org/html/rfc2647" target="_blank" rel="noopener">RFC2647</a>文档中进行定义。</p>
+<h3 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h3><p>TPS性能指标是反映被测设备应用层的新建速率，这个性能指标也出自RFC3511文档。全称是Maximum HTTP Transaction Rate（最大HTTP传输事务速率），大家习惯将这个指标称为TPS（HTTPTransaction Per Second）。<br>HTTP的每秒事务数是指在被测设备能够成功建立连接的条件下，所能承受的最大的HTTP 协议的请求/回应操作的速度。其测试采用反复搜索过程，每次反复过程中，以低于被测设备所能承受的最大处理速率，直到所有连接被成功建立并且有对相应的请求。<br>结果以连接数/秒表示结果。其值越大越好。</p>
+<h3 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h3><p>HTTP有效吞吐量是反映被测设备在应用层的最大传输速率，这个性能指标在RFC3511文档中没有明确描述，但可以通过将HTTP Transaction Rate调整转化为HTTP有效吞吐量的测试方法。HTTP有效吞吐量是指在被测设备能够成功建立连接的条件下，在同一时间内所能承受的最大的有效数据量。<br>测试结果值越大越好。</p>
+<h3 id="最大并发连接数"><a href="#最大并发连接数" class="headerlink" title="最大并发连接数"></a>最大并发连接数</h3><p>最大并发连接数性能指标是反映被测设备最大的会话条目数，这个性能指标也出自RFC3511文档。全称是 Concurrent TCP Connection Capacity。最大并发连接数是指在被测设备能够成功建立连接的条件下，所能同时承受的最大的链接条目数，也反映了被测设备维持多个会话的能力。<br>测试结果值越大越好。</p>
+<h3 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h3><p>在<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档中主要描述了HTTP协议的性能测试，但随着产品及技术的大幅度更新，这往往已经不能满足客户或厂商的需求。我们还需要测试其它协议的性能，通常以应用层为主：包括FTP协议、Mail协议等。但测试的内容基本都是一样的，以每秒新建（每秒会话）和吞吐量为主。只需将HTTP协议变为其它应用层协议即可。</p>
+<p>随着网关产品尤其是网络安全类产品的发展，性能测试的范围不再局限于防火墙功能上的性能测试，还新增加了对其它功能如IPS、AV（防病毒）和UTM（集成安全网关）等的性能测试。但可以看到，这些功能的增加对于测试过程或者测试方法而言其实没有直接的影响，仍然要使用原来的测试过程或测试方法。下篇我们将介绍具体的测试方法。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是简介及测试方法的概念介绍。所有的性能指标中，RFC2544的四项指标是其中比较重要的部分且目前基本以形成标准，下篇文章将对其进行介绍。</p>
 ]]></content>
       <categories>
-        <category>openstack</category>
+        <category>Testing</category>
       </categories>
       <tags>
-        <tag>openstack</tag>
-        <tag>ci</tag>
-        <tag>持续集成</tag>
+        <tag>性能测试</tag>
+        <tag>ips</tag>
+        <tag>NGFW</tag>
+        <tag>防火墙</tag>
+        <tag>spi firewall</tag>
       </tags>
   </entry>
   <entry>
@@ -231,6 +201,109 @@
       </tags>
   </entry>
   <entry>
+    <title>Linux下cURL使用教程之九：代理的使用</title>
+    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
+    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
+<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
+<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
+<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
+<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
+<p>5、如果有多个-x使用，只有最后一个有效。</p>
+<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
+<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>注：</p>
+<ul>
+<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
+<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
+<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
+<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
+<ol>
+<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
+</li>
+<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
+</li>
+<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
+</li>
+<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
+</li>
+<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
+</li>
+</ol>
+<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
+<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
+<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
+<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到代理IP为10.1.1.2。</p>
+<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
+<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
+<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
+<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
+<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
+<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
+<p>其它常用相关环境变量如下：</p>
+<ul>
+<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
+<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
+</ul>
+<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之三：curl基本使用</title>
+    <url>/2012/08/linux-curl-basic-usage/</url>
+    <content><![CDATA[<p>在介绍完<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">cURL简介</a>和需要的<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">HTTP协议概述</a>之后。终于可以回归正题，进入curl的使用方法。</p>
+<h2 id="curl命令格式"><a href="#curl命令格式" class="headerlink" title="curl命令格式"></a>curl命令格式</h2><p>基本的使用用法如下：<br><code>curl [选项] [URL...]</code></p>
+<h2 id="GET一个网页"><a href="#GET一个网页" class="headerlink" title="GET一个网页"></a>GET一个网页</h2><p><code>curl http://www.baidu.com</code><br>网页源码将被打印出来。</p>
+<h3 id="o-output-lt-file-gt-指定保存目录"><a href="#o-output-lt-file-gt-指定保存目录" class="headerlink" title="-o/--output &lt;file&gt;指定保存目录"></a><code>-o/--output &lt;file&gt;</code>指定保存目录</h3><p>为便于后续处理，我们将网页内容保存在文件中：<br><code>curl -o stackeye.html http://www.stackeye.com</code><br>此时仍会显示进度条等信息。</p>
+<h3 id="s-silent静默模式"><a href="#s-silent静默模式" class="headerlink" title="-s/--silent静默模式"></a><code>-s/--silent</code>静默模式</h3><p>通过脚本结合curl可以实现很复杂的功能，而在脚本中调用curl，我们不需要进度条等信息。如执行：<br><code>curl -s -o stackeye.html http://www.stackeye.com</code><br>将不会显示任何信息。<br><a id="more"></a></p>
+<h2 id="v-–verbose查看通信过程、调试。"><a href="#v-–verbose查看通信过程、调试。" class="headerlink" title="-v/–verbose查看通信过程、调试。"></a>-v/–verbose查看通信过程、调试。</h2><p>这个参数可以清晰的查看到curl的通信过程，以便于调试，如执行：<br><code>curl -v http://www.baidu.com</code><br>返回结果如下，可以清晰的看到curl发出的HTTP请求及服务器返回的HTTP响应：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">* About to connect() to www.baidu.com port 80 (#0)</span><br><span class="line">*   Trying 119.75.218.77... connected</span><br><span class="line">* Connected to www.baidu.com (119.75.218.77) port 80 (#0)</span><br><span class="line">&gt; GET / HTTP/1.1</span><br><span class="line">&gt; User-Agent: curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18</span><br><span class="line">&gt; Host: www.baidu.com</span><br><span class="line">&gt; Accept: */*</span><br><span class="line">&gt;</span><br><span class="line">&lt; HTTP/1.1 200 OK</span><br><span class="line">&lt; Date: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Server: BWS/1.0</span><br><span class="line">&lt; Content-Length: 8216</span><br><span class="line">&lt; Content-Type: text/html;charset=gbk</span><br><span class="line">&lt; Cache-Control: private</span><br><span class="line">&lt; Expires: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Set-Cookie: BAIDUID=AF0E3C36DBB60C0D7C29DE11705028D7:FG=1; expires=Wed, 01-Aug-42 12:39:15 GMT; path=/; domain=.baidu.com</span><br><span class="line">&lt; P3P: CP=&quot; OTI DSP COR IVA OUR IND COM &quot;</span><br><span class="line">&lt; Connection: Keep-Alive</span><br><span class="line">&lt;</span><br><span class="line">&lt;!doctype html&gt;以下为HTML内容，略</span><br></pre></td></tr></table></figure></p>
+<p>以下所有命令都可以通过加入-v选项，查看具体通信过程。<br>更详细的调试信息可以使用–trace-ascii选项，如：<br><code>curl --trace-ascii debug.txt http://www.baidu.com</code></p>
+<h2 id="A-–user-agent指定User-Agent字段"><a href="#A-–user-agent指定User-Agent字段" class="headerlink" title="-A/–user-agent指定User-Agent字段"></a>-A/–user-agent指定User-Agent字段</h2><p>此选项字段用于指定HTTP请求头的User-Agent字段，即客户端（如浏览器）类型。<br>很多网站为了防止自动化程序采集，仅允许浏览器访问，最简单的办法就是通过User-Agent字段识别客户端类型做出处理。而如下命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p><code>&quot;Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)&quot;</code>为firefox的UserAgent值。<br>通过-A指定User-Agent字段，使curl伪装成Firefox，从而绕过网站的检测。<br>User-Agent字段可以通过抓包分析得到，或者通过chrome的Developer Tools、Firefox的Firebug等工具得到。<br>而如果一个网站对浏览器的限制也很严格的话，那我们甚至可以通过修改User-Agent伪装成百度蜘蛛或者googlebot突破限制，因为基于SEO的考虑，网站对搜索引擎蜘蛛的限制很小。</p>
+<h2 id="e-–referer-设置Referer"><a href="#e-–referer-设置Referer" class="headerlink" title="-e/–referer 设置Referer"></a>-e/–referer <url>设置Referer</url></h2><p>此选项字段用于指定HTTP请求头中的Referer字段，即来源网页。<br>为了防盗链，很多网页尤其是图片等可下载资源会检测Referer字段，对于非自己站内的来源全部屏蔽掉，此时我们就需要这个参数。<br>通过执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com http://www.stackeye.com</span><br><span class="line">http://www.stackeye.com将检测到来源网站为http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
+<h2 id="cookie使用"><a href="#cookie使用" class="headerlink" title="cookie使用"></a>cookie使用</h2><p>cookie的介绍参考上一篇。<br>我们登录网站后，为保持登录状态，需要使用cookie信息。</p>
+<h3 id="D-–dump-header-保存协议头部信息"><a href="#D-–dump-header-保存协议头部信息" class="headerlink" title="-D/–dump-header 保存协议头部信息"></a>-D/–dump-header 保存协议头部信息</h3><p><code>-D/--dump-header &lt;file&gt;</code>保存协议头部信息<br>头部信息中包含最常使用的cookie信息，如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -D stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会将头部信息保存至stackeyecookie.txt中。</p>
+<h3 id="b-–cookie-指定cookie"><a href="#b-–cookie-指定cookie" class="headerlink" title="-b/–cookie 指定cookie"></a>-b/–cookie 指定cookie</h3><p><code>-b/--cookie &lt;name=data&gt;/&lt;file&gt;</code>指定cookie<br>-b后可直接加-D保存的文件，curl会自动从中读取出cookie值，而且-b选项不会修改此文件。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -b stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会自动将stackeyecookie.txt中cookie信息附加至HTTP请求头中。</p>
+<p>结合-D和-b参数，即可完成cookie的保存和后续使用。</p>
+<p>cookie的形式就是“属性:值”对形式，-b后可直接以“属性=值”的形式给出cookie，当有多个属性时以分号间隔且包含在双引号中。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -b <span class="string">"user=Adeploy;pass=password"</span> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会将cookie信息<code>user=Adeploy;pass=password</code>附加在HTTP请求头中。</p>
+<h2 id="Redirects重定向"><a href="#Redirects重定向" class="headerlink" title="Redirects重定向"></a>Redirects重定向</h2><p>打开某些网页，网页会显示“ 3XX Moved Permanently ”，即网页被移动到其他位置，新位置一般由HTTP响应头中的Location字段给出。<br>重定向一般是因为网站结构调整后，避免用户访问原来页面出现404错误。<br>而另一类常见的用法就是在登陆成功后，网页显示成功信息，然后将用户重定向至内容页面。<br><code>-L/--location</code>选项可以自动跟踪重定向。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇只介绍简单的curl使用选项，下篇将结合实例具体说明。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</title>
     <url>/2012/08/linux-curl-basic-usage-upload-file/</url>
     <content><![CDATA[<p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/" target="_blank" rel="noopener">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
@@ -327,125 +400,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之九：代理的使用</title>
-    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
-    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
-<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
-<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
-<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
-<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
-<p>5、如果有多个-x使用，只有最后一个有效。</p>
-<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
-<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>注：</p>
-<ul>
-<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
-<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
-<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
-<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
-<ol>
-<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
-</li>
-<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
-</li>
-<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
-</li>
-<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
-</li>
-<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
-</li>
-</ol>
-<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
-<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
-<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
-<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
-<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
-<p>可看到代理IP为10.1.1.2。</p>
-<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
-<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
-<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
-<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
-<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
-<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
-<p>其它常用相关环境变量如下：</p>
-<ul>
-<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
-<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
-<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
-<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
-</ul>
-<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
-<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间</title>
-    <url>/2012/08/linux-curl-example-post-to-baidu-hi/</url>
-    <content><![CDATA[<p>前六篇之后，我们对curl的基本使用已经有了一定的了解。下面我们就在实际场景中使用我们的所学。<br>本篇实例目标为编写linux脚本,使用curl完成发布文章至百度空间。<br>下文将从百度空间登陆到发表文章，对每个过程的HTTP进行分析，并编写脚本实现。</p>
-<h2 id="工欲善其事，必先利其器"><a href="#工欲善其事，必先利其器" class="headerlink" title="工欲善其事，必先利其器"></a>工欲善其事，必先利其器</h2><p>抓包分析我们使用chrome自带的Developer Tools。<br>实际分析过程中最好把Developer Tools的Network标签左下角的“Preserve Log upon Navigation”选中，如下图圈中处：<br><img src="/img/developertoolspreserve.jpg" alt="Chrome Developer Tools Preserve Log upon Navigation"><br>单击变为红色即可。<br>此选项的作用在于当当前页面跳转到其他网页时，保存原来的日志记录。<br>默认不保存，比如在登陆成功一个网站后，自动跳转到其他网页，这样登陆网站过程中的记录都不保存。我们就没有办法对登陆过程进行具体分析。</p>
-<h2 id="POST登陆"><a href="#POST登陆" class="headerlink" title="POST登陆"></a>POST登陆</h2><h3 id="1-操作过程"><a href="#1-操作过程" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>登陆我们采用网址<code>https://passport.baidu.com/?login</code>，而不使用网址<code>http://hi.baidu.com/index.htm</code>或<code>http://hi.baidu.com/go/login</code> 右侧的登陆框。<br>这是因为后者可能因为百度空间改版等原因改变，而前者是百度账号的登陆界面，变化的几率要小。而且后者界面很多图片等元素，不利于我们抓包分析。</p>
-<h3 id="2-登陆过程分析"><a href="#2-登陆过程分析" class="headerlink" title="2. 登陆过程分析"></a>2. 登陆过程分析</h3><p>登陆成功后找到<code>/?login</code>的POST包，如下图：<br><img src="/img/DeveloperToolsBaiduLogin.jpg" alt="Developer Tools Baidu Login HTTP Analy"><br>主要显示了状态信息、请求头部（Request Headers）、POST数据（Form Data）和响应头部（Response Heades）。<br>Query String Parameters是对GET的参数的解析，即网址中的?login。一般网址中“?”后面的都应该是参数，具体请参考Linux下cURL使用教程之二：HTTP协议概述中“GET命令”一节。<br><a id="more"></a><br>请求头部如下（view source模式）：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /?login HTTP/1.1 Host: passport.baidu.com Connection: keep-alive Content-Length: 215 Cache-Control: max-age=0 Origin: https://passport.baidu.com User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 Content-Type: application/x-www-form-urlencoded Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8 Referer: https://passport.baidu.com/?login Accept-Encoding: gzip,deflate,sdch Accept-Language: zh-CN,zh;q=0.8 Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3 Cookie: BAIDU_WISE_UID=...无关cookie代码，很长，略去</span><br></pre></td></tr></table></figure></p>
-<p>POST数据如下（view decoded模式，因为curl可以完成urlencode，我们发送明文即可）：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tpl_ok:</span><br><span class="line">next_target:</span><br><span class="line">tpl:</span><br><span class="line">skip_ok:</span><br><span class="line">aid:</span><br><span class="line">need_pay:</span><br><span class="line">need_coin:</span><br><span class="line">pay_method:</span><br><span class="line">u: .%2F</span><br><span class="line">return_method: get</span><br><span class="line">more_param:</span><br><span class="line">return_type:</span><br><span class="line">psp_tt: 0</span><br><span class="line">password: youcan&apos;tsee</span><br><span class="line">safeflg: 0</span><br><span class="line">isphone: false</span><br><span class="line">username: Stackeye</span><br><span class="line">verifycode:</span><br><span class="line">mem_pass: on</span><br></pre></td></tr></table></figure></p>
-<h3 id="3-登陆过程curl脚本"><a href="#3-登陆过程curl脚本" class="headerlink" title="3. 登陆过程curl脚本"></a>3. 登陆过程curl脚本</h3><p>百度要求的不严格，因此我们不考虑来源页面（Referer）等信息，只注意隐藏User-Agent字段。同时保存cookie供后续使用。脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br></pre></td></tr></table></figure></p>
-<p>实验发现其他字段非必要，因此舍弃。</p>
-<h2 id="POST发表文章"><a href="#POST发表文章" class="headerlink" title="POST发表文章"></a>POST发表文章</h2><h3 id="1-操作过程-1"><a href="#1-操作过程-1" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>点击“我的空间”，进入<a href="http://hi.baidu.com/home，然后点击“文字“，进入到`http://hi.baidu.com/pub/show/createtext`，随便写些内容，右侧加些标签，发表即可。" target="_blank" rel="noopener">http://hi.baidu.com/home，然后点击“文字“，进入到`http://hi.baidu.com/pub/show/createtext`，随便写些内容，右侧加些标签，发表即可。</a></p>
-<h3 id="2-过程分析"><a href="#2-过程分析" class="headerlink" title="2. 过程分析"></a>2. 过程分析</h3><p>找到对createtext的POST包。POST的url为<code>http://hi.baidu.com/pub/submit/createtext</code>。<br>请求头中没有我们关心的字段：cookie不用具体分析，Referer等字段我们不去关注。</p>
-<p>POST数据如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">title: Stackeye&apos;s title</span><br><span class="line">tags[]: stackeyetag</span><br><span class="line">content: &lt;p&gt;Stackeye&amp;#39;s&amp;nbsp;content&lt;/p&gt;&lt;p&gt;This&amp;nbsp;is&amp;nbsp;for&amp;nbsp;curl&amp;nbsp;learning&amp;nbsp;test.&lt;/p&gt;</span><br><span class="line">private: 0</span><br><span class="line">imgnum: 0</span><br><span class="line">bdstoken: 01ae260f7a99a896a16dfa8d9f75cf16</span><br><span class="line">qbid:</span><br><span class="line">refer: http://hi.baidu.com/home</span><br><span class="line">multimedia[]: undefined#undefined#undefined#undefined</span><br><span class="line">private1: 0</span><br><span class="line">qing_request_source:</span><br></pre></td></tr></table></figure></p>
-<p>title是文章标题，tags是标签，content是内容。<br>除此之外还有一个bdstoken字段猜不出其含义。多次测试发现，其他字段基本固定，而bdstoken字段在每次退出重新登陆后就会发生变化。<br>这种字段来源有三种可能性：</p>
-<ul>
-<li>此字段没有实际意义<br>比如只是个简单的标志，服务器端并不校验此字段值。</li>
-<li>服务器生成，然后在POST之前传给客户端<br>需要我们分析POST之前数据包的响应数据。因为可能的数据包不多（一般来讲，图片、css、js等的包可以直接排除）。</li>
-<li>POST之前的某个网页动态生成<br>比如此网页或之前的某个网页上的js、Ajax等在客户端执行的函数生成。<br>这个需要审视此网页和之前的每个网页中的js等代码，甚至需要动态调试，比较麻烦。因此我们最后考虑这种情况。</li>
-</ul>
-<h3 id="3-寻找bdstoken字段"><a href="#3-寻找bdstoken字段" class="headerlink" title="3. 寻找bdstoken字段"></a>3. 寻找bdstoken字段</h3><p>编写脚本，bdstoken传递格式类似的随机值，文章发表失败。<br>寻找之前的数据包，我们从后向前找，查找每个text/html等网页类型的数据包的Response内容。<br>Developer Tools的搜索功能搜索不到，可以右键数据包”save all as har“保存为har文件，用记事本打开即可查找。但是不能批量保存，比较繁琐。<br>更简单的解决方式是使用wireshark抓包，wireshark的字符串搜索可以搜索到。<br>我们很快找到在GET的createtext页面（<code>http://hi.baidu.com/pub/show/createtext</code>）里有bdstoken字段，GET及bdstoken取出语句：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=<span class="string">""</span></span><br><span class="line"><span class="comment">#`cat baidu002.html |grep bdstoken=|awk -F "bdstoken=" '&#123;print $2&#125;'|awk -F "\&amp;" '&#123;print $1&#125;'`</span></span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#check before submit</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure></p>
-<p>脚本中使用了awk用于从html代码中提取bdstoken字段，HTML中相关内容为：<br><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://passport.baidu.com?logout&amp;bdstoken=393d8ef656bf74c8f739aa3ae5262f94&amp;u=http://hi.baidu.com/pub/show/createtext"</span>&gt;</span>退出<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>“bdstoken=”作为前分割标志，“&amp;”作为结束标志即可。</p>
-<h3 id="4-curl脚本"><a href="#4-curl脚本" class="headerlink" title="4. curl脚本"></a>4. curl脚本</h3><ul>
-<li><p>POST过程<br>使用的cookie是第一版步产生的bdcookie001<br>这是因为基本上只有第一步登陆的过程产生重要的cookie信息，其他步产生的cookie是非必须的。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is for curl learning test."</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>验证成功与否：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>资源清理语句：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><h3 id="1-POST文章时，title、content中不能含有特殊字符"><a href="#1-POST文章时，title、content中不能含有特殊字符" class="headerlink" title="1. POST文章时，title、content中不能含有特殊字符"></a>1. POST文章时，title、content中不能含有特殊字符</h3><p>title、content中不能含有双引号不能转义的特殊字符，如$,\,<code>。
-单引号不转义除单引号之外的所有特殊字符。而且在title=&quot;Stackeye&#39;s title&quot;和--data-urlencode title=&quot;$title&quot; \两处都使用单引号的会出现错误。
-因此如果实际应用的话，还需要另外一个特殊字符替换函数，替换$,\,</code>和双引号。<br>shell脚本对大批量文字的处理比较繁琐吃力。<br>因此实际场景中，遇到对文字处理较多的场景，shell脚本+curl的方式只作为测试手段探究原理与逻辑，程序使用Java、PHP、Python、C等更强大的语言实现。</p>
-<h3 id="2-没有错误重试"><a href="#2-没有错误重试" class="headerlink" title="2. 没有错误重试"></a>2. 没有错误重试</h3><p>可以使用如下循环进行错误重试：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#retry after fail</span></span><br><span class="line">COUNTER=0</span><br><span class="line"><span class="comment">#当失败时循环5次</span></span><br><span class="line"><span class="keyword">while</span> [ fail ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> [ <span class="variable">$COUNTER</span> -gt 5 ];<span class="keyword">then</span></span><br><span class="line">                <span class="built_in">echo</span> error</span><br><span class="line">                <span class="built_in">exit</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        sleep 60</span><br><span class="line">        <span class="comment">#curl语句</span></span><br><span class="line">        COUNTER=`expr <span class="variable">$COUNTER</span> + 1`</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
-<h3 id="3-文件权限"><a href="#3-文件权限" class="headerlink" title="3. 文件权限"></a>3. 文件权限</h3><p>文件中保存有账户密码，记得设置文件属性为700，避免密码泄露。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>完整脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"By Stackeye's blog"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"www.stackeye.com"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Change the file mod to 700 to keep your password safe!"</span></span><br><span class="line"></span><br><span class="line">username=<span class="string">""</span></span><br><span class="line">password=<span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#login</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br><span class="line"></span><br><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=`cat baidu002.html |grep bdstoken=|awk -F <span class="string">"bdstoken="</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\&amp;"</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#submit the article</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is line2!"</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment">#delete temp files</span></span><br><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure></p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Linux下cURL使用教程之一：cURL简介</title>
     <url>/2012/07/linux-curl-description/</url>
     <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
@@ -456,6 +410,52 @@
 <li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
 <li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
 </ol>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十：HTTP文件下载</title>
+    <url>/2012/08/linux-curl-usage-download-file/</url>
+    <content><![CDATA[<p>其实每次我们使用curl去打开一个url都是执行一次下载操作，因此我们甚至可以认为curl是一个下载工具。<br>而且curl的某些选项及特性，使得curl能完成非常强大的下载功能。<br>基本命令及一些有用的参数如下。</p>
+<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><p>使用<code>curl [URL...]</code>下载URL，并输出在终端。<br>可指定多个URL。多个URL时，下载内容同时在终端显示。</p>
+<h2 id="–progress-bar-进度条"><a href="#–progress-bar-进度条" class="headerlink" title="-#/–progress-bar 进度条"></a>-#/–progress-bar 进度条</h2><p>添加参数<code>-#/--progress-bar</code>查看下载进度条。</p>
+<h2 id="o-–output-输出文件"><a href="#o-–output-输出文件" class="headerlink" title="-o/–output 输出文件"></a>-o/–output 输出文件</h2><p>使用参数<code>-o/--output &lt;file&gt;</code>下载并保存至文件file。<br>可同时下载多个URL，每个-o对应一个URL。<br>如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>会下载<a href="http://www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而" target="_blank" rel="noopener">www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而</a><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com -o b.html http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html -o b.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>会分别下载两个URL至两个文件中。<br><a id="more"></a></p>
+<h2 id="O-–remote-name"><a href="#O-–remote-name" class="headerlink" title="-O/–remote-name"></a>-O/–remote-name</h2><p>下载并从url中提取文件名。<br>多个URL的情况同-o选项相同：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O -O http://www.xxx.com/a.html http://www.xxx.com/b.html</span><br><span class="line">curl -O http://www.xxx.com/a.html -O http://www.xxx.com/b.html</span><br></pre></td></tr></table></figure></p>
+<p>都会将两个URL分别保存在a.html和b.html中。</p>
+<h2 id="C-–continue-at-断点续传"><a href="#C-–continue-at-断点续传" class="headerlink" title="-C/–continue-at 断点续传"></a>-C/–continue-at 断点续传</h2><p>使用参数<code>-C/--continue-at &lt;offset&gt;</code>进行断点续传。offset参数指定跳过多少bytes。<br>“-C -”指定自动检测断点续传开始位置。<br>使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>下载QQ安装程序，在下载未完成时Ctrl+C结束下载，然后使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -C - -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>进行断点续传。可看到第二次下载时并不是重新下载，而是从上次结束的地方下载。</p>
+<h2 id="r-–range-分块下载"><a href="#r-–range-分块下载" class="headerlink" title="-r/–range 分块下载"></a>-r/–range 分块下载</h2><p>使用<code>-r/--range &lt;range&gt;</code>分块下载，指定每块下载的字节范围。如上例中下载qq，分块下载如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 0-10240 -o qq.exe.part1 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载前10240bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 10241-20480 -o qq.exe.part2 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载10241-20480bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 20481- -o qq.exe.part3 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载20481bytes及之后的字节。<br>下载完后可使用<code>cat qq.exe.part&gt;qq.exe</code>的形式得到完整文件（win下需要使用copy /b）。<br>此选项适用于HTTP/FTP/SFTP及本地文件。</p>
+<h2 id="–limit-rate-限速下载"><a href="#–limit-rate-限速下载" class="headerlink" title="–limit-rate 限速下载"></a>–limit-rate 限速下载</h2><p>使用参数<code>--limit-rate &lt;speed&gt;</code>限速下载。默认单位为bytes/s，’k’或’K’指定使用单位KB/s，可以使用’m’或’M’指定使用单位MB/s，’g’或’G’指定使用单位GB/s。如<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O --limit-rate 100K http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>指定限速为100KB/s。<br>限速是限制平均速度，某时刻的突发速度可能超过限制速度，但平均速度会低于限制速度。<br>如果同时使用了-Y/–speed-limit限制了最低下载速度，-Y/–speed-limit选择优先级更高。因此如果-Y/–speed-limit指定的值高于限制的速度，那么限制的速度回被突破，以保证最低下载速度有效（因为如果低于-Y/–speed-limit指定的最低下载速度，下载会被取消）。</p>
+<h2 id="y-Y-限制速度"><a href="#y-Y-限制速度" class="headerlink" title="-y/-Y 限制速度"></a>-y/-Y 限制速度</h2><p>使用参数<code>-y/--speed-time &lt;time&gt;</code>或<code>-Y/--speed-limit &lt;speed&gt;</code>限制速度。<br>网速太慢时取消下载。</p>
+<ul>
+<li>-Y指定最低速度。使用-y指定超时时间而未指定最低速度时，最低速度默认为1.</li>
+<li>-y指定超时时间，即低于最低速度多次时间时取消下载。使用-Y指定最低速度而未指定超时时间时，超时时间默认为30。</li>
+</ul>
+<h2 id="z-–time-cond-更新下载"><a href="#z-–time-cond-更新下载" class="headerlink" title="-z/–time-cond 更新下载"></a>-z/–time-cond 更新下载</h2><p>使用参数<code>-z/--time-cond &lt;date expression&gt;</code>设置只在更新时下载。具体的时间格式请参考<code>man 3 curl_getdate</code>（这个只有在安装了libcurl开发库之后才有），或者<a href="http://curl.haxx.se/libcurl/c/curl_getdate.html" target="_blank" rel="noopener">curl_getdate在线文档</a>。<br>如果时间格式解析失败，curl将会把此字段理解为文件名，从文件中读取时间。<br>需要网页中有相关字段表明最后更新日期。<br>如curl_getdate在线文档网页内有字段:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Page updated June 20, 2012.</span><br></pre></td></tr></table></figure></p>
+<p>表明网页最后更新日期是2012-06-20，因此执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z 20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
+<p>curl_getdate.html在2012-06-20以后被更新，会被下载。而在日期前加上”-“，则表示相反意思，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z -20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
+<p>只有 curl_getdate.html 在2012-06-20之前被更新才会下载。因此此命令不会下载curl_getdate.html。</p>
+<h2 id="文件批量下载"><a href="#文件批量下载" class="headerlink" title="文件批量下载"></a>文件批量下载</h2><p>通过使用正则表达式，可以对有一定规律的文件批量下载。如我们在PHP服务器的/var/www下新建a、b两个目录，新建如下文件：<br><code>a/1.php a/2.php...a/7.php,b/1.php b/2.php...b/5.php</code><br>PHP文件内容相同，都为输出绝对路径，用以标志文件的不同：<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="keyword">__FILE__</span> ;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>可以使用命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O http://127.0.0.1/&#123;a,b&#125;/[1-7].php</span><br></pre></td></tr></table></figure></p>
+<p>批量下载文件。<br>a/1.php-a/7.php会保存在当前目录下的1.php-7.php中。b/1.php-b/5.php如果也保存在当前目录下的1.php-5.php的话，会覆盖以前的文件。因此curl会把b/1.php-b/5.php的内容在终端输出而不会保存文件。而执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl <span class="string">"http://10.1.1.103/&#123;a,b&#125;/[1-7].php"</span> -o <span class="string">"#1_#2.php"</span></span><br></pre></td></tr></table></figure></p>
+<p>则会使用“目录<em>文件”的形式命名文件，避免文件名冲突。<br>{}、[]类似于正则表达式中的语法，用以取得多个文件。#加数字的形式用以取得正则表达式的当前值。<br>如#1表示第一个正则表达式的当前值，上例中即为{a,b}的值。<br>当下载<code>http://10.1.1.103/a/1.php</code>时，#1为“a”，#2为“1”，#1</em>#2.php即为“a_1.php”。从而完成批量文件的自动命名。</p>
+<p>注：注意此时网址包含在双引号中，这是因为如果不被包含在引号中，{}中的内容无法使用#1的形式引用，会出现如下错误<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">internal error: invalid pattern type (0)</span><br><span class="line">Warning: bad output glob!</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实日常使用，我们更多使用wget下载文件。相比wget，curl功能更具体一些。<br>关于二者的区别，请参考后续文章。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -508,6 +508,88 @@
         <tag>curl</tag>
         <tag>linux curl</tag>
         <tag>http协议</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间</title>
+    <url>/2012/08/linux-curl-example-post-to-baidu-hi/</url>
+    <content><![CDATA[<p>前六篇之后，我们对curl的基本使用已经有了一定的了解。下面我们就在实际场景中使用我们的所学。<br>本篇实例目标为编写linux脚本,使用curl完成发布文章至百度空间。<br>下文将从百度空间登陆到发表文章，对每个过程的HTTP进行分析，并编写脚本实现。</p>
+<h2 id="工欲善其事，必先利其器"><a href="#工欲善其事，必先利其器" class="headerlink" title="工欲善其事，必先利其器"></a>工欲善其事，必先利其器</h2><p>抓包分析我们使用chrome自带的Developer Tools。<br>实际分析过程中最好把Developer Tools的Network标签左下角的“Preserve Log upon Navigation”选中，如下图圈中处：<br><img src="/img/developertoolspreserve.jpg" alt="Chrome Developer Tools Preserve Log upon Navigation"><br>单击变为红色即可。<br>此选项的作用在于当当前页面跳转到其他网页时，保存原来的日志记录。<br>默认不保存，比如在登陆成功一个网站后，自动跳转到其他网页，这样登陆网站过程中的记录都不保存。我们就没有办法对登陆过程进行具体分析。</p>
+<h2 id="POST登陆"><a href="#POST登陆" class="headerlink" title="POST登陆"></a>POST登陆</h2><h3 id="1-操作过程"><a href="#1-操作过程" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>登陆我们采用网址<code>https://passport.baidu.com/?login</code>，而不使用网址<code>http://hi.baidu.com/index.htm</code>或<code>http://hi.baidu.com/go/login</code> 右侧的登陆框。<br>这是因为后者可能因为百度空间改版等原因改变，而前者是百度账号的登陆界面，变化的几率要小。而且后者界面很多图片等元素，不利于我们抓包分析。</p>
+<h3 id="2-登陆过程分析"><a href="#2-登陆过程分析" class="headerlink" title="2. 登陆过程分析"></a>2. 登陆过程分析</h3><p>登陆成功后找到<code>/?login</code>的POST包，如下图：<br><img src="/img/DeveloperToolsBaiduLogin.jpg" alt="Developer Tools Baidu Login HTTP Analy"><br>主要显示了状态信息、请求头部（Request Headers）、POST数据（Form Data）和响应头部（Response Heades）。<br>Query String Parameters是对GET的参数的解析，即网址中的?login。一般网址中“?”后面的都应该是参数，具体请参考Linux下cURL使用教程之二：HTTP协议概述中“GET命令”一节。<br><a id="more"></a><br>请求头部如下（view source模式）：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /?login HTTP/1.1 Host: passport.baidu.com Connection: keep-alive Content-Length: 215 Cache-Control: max-age=0 Origin: https://passport.baidu.com User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 Content-Type: application/x-www-form-urlencoded Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8 Referer: https://passport.baidu.com/?login Accept-Encoding: gzip,deflate,sdch Accept-Language: zh-CN,zh;q=0.8 Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3 Cookie: BAIDU_WISE_UID=...无关cookie代码，很长，略去</span><br></pre></td></tr></table></figure></p>
+<p>POST数据如下（view decoded模式，因为curl可以完成urlencode，我们发送明文即可）：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tpl_ok:</span><br><span class="line">next_target:</span><br><span class="line">tpl:</span><br><span class="line">skip_ok:</span><br><span class="line">aid:</span><br><span class="line">need_pay:</span><br><span class="line">need_coin:</span><br><span class="line">pay_method:</span><br><span class="line">u: .%2F</span><br><span class="line">return_method: get</span><br><span class="line">more_param:</span><br><span class="line">return_type:</span><br><span class="line">psp_tt: 0</span><br><span class="line">password: youcan&apos;tsee</span><br><span class="line">safeflg: 0</span><br><span class="line">isphone: false</span><br><span class="line">username: Stackeye</span><br><span class="line">verifycode:</span><br><span class="line">mem_pass: on</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-登陆过程curl脚本"><a href="#3-登陆过程curl脚本" class="headerlink" title="3. 登陆过程curl脚本"></a>3. 登陆过程curl脚本</h3><p>百度要求的不严格，因此我们不考虑来源页面（Referer）等信息，只注意隐藏User-Agent字段。同时保存cookie供后续使用。脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br></pre></td></tr></table></figure></p>
+<p>实验发现其他字段非必要，因此舍弃。</p>
+<h2 id="POST发表文章"><a href="#POST发表文章" class="headerlink" title="POST发表文章"></a>POST发表文章</h2><h3 id="1-操作过程-1"><a href="#1-操作过程-1" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>点击“我的空间”，进入<a href="http://hi.baidu.com/home，然后点击“文字“，进入到`http://hi.baidu.com/pub/show/createtext`，随便写些内容，右侧加些标签，发表即可。" target="_blank" rel="noopener">http://hi.baidu.com/home，然后点击“文字“，进入到`http://hi.baidu.com/pub/show/createtext`，随便写些内容，右侧加些标签，发表即可。</a></p>
+<h3 id="2-过程分析"><a href="#2-过程分析" class="headerlink" title="2. 过程分析"></a>2. 过程分析</h3><p>找到对createtext的POST包。POST的url为<code>http://hi.baidu.com/pub/submit/createtext</code>。<br>请求头中没有我们关心的字段：cookie不用具体分析，Referer等字段我们不去关注。</p>
+<p>POST数据如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">title: Stackeye&apos;s title</span><br><span class="line">tags[]: stackeyetag</span><br><span class="line">content: &lt;p&gt;Stackeye&amp;#39;s&amp;nbsp;content&lt;/p&gt;&lt;p&gt;This&amp;nbsp;is&amp;nbsp;for&amp;nbsp;curl&amp;nbsp;learning&amp;nbsp;test.&lt;/p&gt;</span><br><span class="line">private: 0</span><br><span class="line">imgnum: 0</span><br><span class="line">bdstoken: 01ae260f7a99a896a16dfa8d9f75cf16</span><br><span class="line">qbid:</span><br><span class="line">refer: http://hi.baidu.com/home</span><br><span class="line">multimedia[]: undefined#undefined#undefined#undefined</span><br><span class="line">private1: 0</span><br><span class="line">qing_request_source:</span><br></pre></td></tr></table></figure></p>
+<p>title是文章标题，tags是标签，content是内容。<br>除此之外还有一个bdstoken字段猜不出其含义。多次测试发现，其他字段基本固定，而bdstoken字段在每次退出重新登陆后就会发生变化。<br>这种字段来源有三种可能性：</p>
+<ul>
+<li>此字段没有实际意义<br>比如只是个简单的标志，服务器端并不校验此字段值。</li>
+<li>服务器生成，然后在POST之前传给客户端<br>需要我们分析POST之前数据包的响应数据。因为可能的数据包不多（一般来讲，图片、css、js等的包可以直接排除）。</li>
+<li>POST之前的某个网页动态生成<br>比如此网页或之前的某个网页上的js、Ajax等在客户端执行的函数生成。<br>这个需要审视此网页和之前的每个网页中的js等代码，甚至需要动态调试，比较麻烦。因此我们最后考虑这种情况。</li>
+</ul>
+<h3 id="3-寻找bdstoken字段"><a href="#3-寻找bdstoken字段" class="headerlink" title="3. 寻找bdstoken字段"></a>3. 寻找bdstoken字段</h3><p>编写脚本，bdstoken传递格式类似的随机值，文章发表失败。<br>寻找之前的数据包，我们从后向前找，查找每个text/html等网页类型的数据包的Response内容。<br>Developer Tools的搜索功能搜索不到，可以右键数据包”save all as har“保存为har文件，用记事本打开即可查找。但是不能批量保存，比较繁琐。<br>更简单的解决方式是使用wireshark抓包，wireshark的字符串搜索可以搜索到。<br>我们很快找到在GET的createtext页面（<code>http://hi.baidu.com/pub/show/createtext</code>）里有bdstoken字段，GET及bdstoken取出语句：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=<span class="string">""</span></span><br><span class="line"><span class="comment">#`cat baidu002.html |grep bdstoken=|awk -F "bdstoken=" '&#123;print $2&#125;'|awk -F "\&amp;" '&#123;print $1&#125;'`</span></span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#check before submit</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure></p>
+<p>脚本中使用了awk用于从html代码中提取bdstoken字段，HTML中相关内容为：<br><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://passport.baidu.com?logout&amp;bdstoken=393d8ef656bf74c8f739aa3ae5262f94&amp;u=http://hi.baidu.com/pub/show/createtext"</span>&gt;</span>退出<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>“bdstoken=”作为前分割标志，“&amp;”作为结束标志即可。</p>
+<h3 id="4-curl脚本"><a href="#4-curl脚本" class="headerlink" title="4. curl脚本"></a>4. curl脚本</h3><ul>
+<li><p>POST过程<br>使用的cookie是第一版步产生的bdcookie001<br>这是因为基本上只有第一步登陆的过程产生重要的cookie信息，其他步产生的cookie是非必须的。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is for curl learning test."</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>验证成功与否：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>资源清理语句：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><h3 id="1-POST文章时，title、content中不能含有特殊字符"><a href="#1-POST文章时，title、content中不能含有特殊字符" class="headerlink" title="1. POST文章时，title、content中不能含有特殊字符"></a>1. POST文章时，title、content中不能含有特殊字符</h3><p>title、content中不能含有双引号不能转义的特殊字符，如$,\,<code>。
+单引号不转义除单引号之外的所有特殊字符。而且在title=&quot;Stackeye&#39;s title&quot;和--data-urlencode title=&quot;$title&quot; \两处都使用单引号的会出现错误。
+因此如果实际应用的话，还需要另外一个特殊字符替换函数，替换$,\,</code>和双引号。<br>shell脚本对大批量文字的处理比较繁琐吃力。<br>因此实际场景中，遇到对文字处理较多的场景，shell脚本+curl的方式只作为测试手段探究原理与逻辑，程序使用Java、PHP、Python、C等更强大的语言实现。</p>
+<h3 id="2-没有错误重试"><a href="#2-没有错误重试" class="headerlink" title="2. 没有错误重试"></a>2. 没有错误重试</h3><p>可以使用如下循环进行错误重试：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#retry after fail</span></span><br><span class="line">COUNTER=0</span><br><span class="line"><span class="comment">#当失败时循环5次</span></span><br><span class="line"><span class="keyword">while</span> [ fail ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> [ <span class="variable">$COUNTER</span> -gt 5 ];<span class="keyword">then</span></span><br><span class="line">                <span class="built_in">echo</span> error</span><br><span class="line">                <span class="built_in">exit</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        sleep 60</span><br><span class="line">        <span class="comment">#curl语句</span></span><br><span class="line">        COUNTER=`expr <span class="variable">$COUNTER</span> + 1`</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="3-文件权限"><a href="#3-文件权限" class="headerlink" title="3. 文件权限"></a>3. 文件权限</h3><p>文件中保存有账户密码，记得设置文件属性为700，避免密码泄露。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>完整脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"By Stackeye's blog"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"www.stackeye.com"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Change the file mod to 700 to keep your password safe!"</span></span><br><span class="line"></span><br><span class="line">username=<span class="string">""</span></span><br><span class="line">password=<span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#login</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br><span class="line"></span><br><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=`cat baidu002.html |grep bdstoken=|awk -F <span class="string">"bdstoken="</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\&amp;"</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#submit the article</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is line2!"</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment">#delete temp files</span></span><br><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure></p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解密Redis持久化</title>
+    <url>/2017/04/redis-persistence-demystified/</url>
+    <content><![CDATA[<p>本文主要是对<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">antirez博客</a>的翻译。其实<a href="http://blog.nosqlfan.com/html/3813.html" target="_blank" rel="noopener"></a>nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。</p>
+<p>首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久化的工作原理，Redis的持久化如何可靠，以及与其它数据库的对比。</p>
+<h2 id="操作系统和磁盘"><a href="#操作系统和磁盘" class="headerlink" title="操作系统和磁盘"></a>操作系统和磁盘</h2><h3 id="写操作的流程"><a href="#写操作的流程" class="headerlink" title="写操作的流程"></a>写操作的流程</h3><p>我们应该考虑的第一件事是对于数据库的持久化，我们的期望是什么。因此我们将一个简单的写操作中发生的事情可视化：</p>
+<ol>
+<li>客户端发送写命令到数据库（数据库在客户端内存中）</li>
+<li>数据库接收到写操作（数据在服务器内存中）</li>
+<li>数据库调用系统调用，将数据写入磁盘（数据在内核缓冲区中）</li>
+<li>操作系统将写缓冲区的数据转移到磁盘控制器上（数据在磁盘缓存中）</li>
+<li>磁盘控制器真正将数据写入到物理介质（数据真正落在磁盘上）<a id="more"></a>
+<blockquote>
+<p>注意：以上是一个各方面简单化的版本，因为实际有更多的cache和buffer。<br>步骤2经常被实现为数据库内部的一个复杂缓存系统。写操作也经常被不同的线程或进程处理。然而数据库或早或晚要将数据写入磁盘，而这就是我们关心的。也就是说，内存中的数据在某个节点必须要被传输到内核（步骤3）。<br>另外一个大的细节省略在步骤3.现实要更复杂，因为大多数高级操作系统内核实现了不同级别的缓存，其中通常包含文件系统级别的chache和一个略小一些的buffer cache。</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="故障分析"><a href="#故障分析" class="headerlink" title="故障分析"></a>故障分析</h3><p>在这个流程中什么时候我们的写操作才是安全的呢？</p>
+<p>如果我们考虑一个仅涉及数据库软件的失效（例如进程被管理员杀掉或崩溃），而不涉及操作系统内核，那成功执行完成步骤3的写操作就被认为是安全的。也就是在write这个系统调用（或其它用于将数据转移到内核的系统调用）返回成功后。在此步骤之后，即使数据库进程崩溃，内核仍然会负责将数据转移到磁盘控制器。</p>
+<p>如果我们考虑一个更灾难性的事件，如电力中断，只有在步骤5执行完成后我们才是安全的。也就是在数据真正被转移到物理设备中时。</p>
+<p>我们可以总结为，数据安全的重要阶段位于步骤3、4、5：</p>
+<h3 id="POSIX-API"><a href="#POSIX-API" class="headerlink" title="POSIX API"></a>POSIX API</h3><h3 id="我们无法控制的部分"><a href="#我们无法控制的部分" class="headerlink" title="我们无法控制的部分"></a>我们无法控制的部分</h3><h3 id="数据损坏"><a href="#数据损坏" class="headerlink" title="数据损坏"></a>数据损坏</h3><h2 id="Redis持久化实现"><a href="#Redis持久化实现" class="headerlink" title="Redis持久化实现"></a>Redis持久化实现</h2><h3 id="RDB快照"><a href="#RDB快照" class="headerlink" title="RDB快照"></a>RDB快照</h3><h3 id="AOF文件"><a href="#AOF文件" class="headerlink" title="AOF文件"></a>AOF文件</h3><h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><p>appendfsync no<br>appendfsync everysec<br>appendfsync always<br>为什么pipeline不同<br>AOF和Redis事务</p>
+<h3 id="与PostgreSQL和MySQL的对比"><a href="#与PostgreSQL和MySQL的对比" class="headerlink" title="与PostgreSQL和MySQL的对比"></a>与PostgreSQL和MySQL的对比</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h2 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h2><h2 id="附录：关于重启阶段的笔记"><a href="#附录：关于重启阶段的笔记" class="headerlink" title="附录：关于重启阶段的笔记"></a>附录：关于重启阶段的笔记</h2>]]></content>
+      <categories>
+        <category>Redis</category>
+      </categories>
+      <tags>
+        <tag>redis</tag>
+        <tag>nosql</tag>
+        <tag>aof</tag>
+        <tag>rdb</tag>
       </tags>
   </entry>
   <entry>
@@ -687,107 +769,6 @@
       </tags>
   </entry>
   <entry>
-    <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
-    <url>/2013/03/gateway-performance-test-desc/</url>
-    <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
-<ol>
-<li>简介及性能指标介绍 - 本篇</li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
-</ol>
-<a id="more"></a>
-<h2 id="性能测试简介"><a href="#性能测试简介" class="headerlink" title="性能测试简介"></a>性能测试简介</h2><p>以下解释来自百度百科：</p>
-<blockquote>
-<p>性能测试是通过自动化的测试<strong>工具</strong>模拟多种正常、峰值以及异常<strong>负载</strong>条件来对系统的各项性能指标进行测试。负载测试和压力测试都属于性能测试，两者可以结合进行。通过负载测试，确定在各种工作负载下系统的性能，目标是测试当负载逐渐增加时，系统各项性能指标的变化情况。压力测试是通过确定一个系统的<strong>瓶颈</strong>或者不能接受的性能点，来获得系统能提供的最大服务级别的测试。</p>
-</blockquote>
-<p>其中有三个关键词需要关注：</p>
-<ul>
-<li>工具：性能测试一般需要的压力较大较复杂，单纯依靠手工很难做到，因此一般需要专业化的设备、工具，或编写自动化测试脚本完成。网关类产品一般要求的负载较高，在千兆、万兆设置更高级别，一般需要专业配置千兆万兆网卡的硬件设备，如IAXA等，价格较昂贵。而其它产品一般也需要如Loadruner、Jmeter等专业化的性能测试软件并根据场景编写脚本完成。</li>
-<li>负载：性能测试有别于功能测试的点就在于使用的负载较高。而且负载的构造需要根据实际的场景才有价值，并需要使用特定的工具或自行研发软件实现。</li>
-<li>瓶颈：逐渐加大负载到达瓶颈。测试中比较重要的就是各个性能拐点，因为各个拐点往往都有重要的意义。如保持最优响应的拐点、延迟急剧增加的拐点、系统彻底瘫痪的拐点。持续测试找到各个拐点，对于产品的调优、部署及运维都有很大的价值。<br><img src="/img/jmeter-result.png" alt="性能测试结果"></li>
-</ul>
-<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
-<ul>
-<li>性能测试，对产品负载压力承受能力的测试。</li>
-<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
-<li>网关类产品，部署作为网关的设备及软件。</li>
-<li>IDS，入侵检测系统</li>
-<li>IPS，入侵防御系统</li>
-<li>UTM，对防火墙、IDS\、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
-<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
-<li>DUT，devices under test，测试设备。</li>
-</ul>
-<h2 id="性能指标名词解释"><a href="#性能指标名词解释" class="headerlink" title="性能指标名词解释"></a>性能指标名词解释</h2><p>网络安全类产品或网关类产品常见的性能指标有：</p>
-<ul>
-<li>RFC2544 四项值（吞吐量、延迟、丢包率、背靠背）</li>
-<li>TCP 的每秒新建连接数（CPS）</li>
-<li>HTTP 的每秒处理事务数（TPS）、HTTP 有效吞吐量（HTTP Throughput）</li>
-<li>最大并发连接数等</li>
-</ul>
-<p>除此之外，部分评测机构或客户也会根据自己的实际情况增加性能指标，如：IPS/UTM下的HTTP有效吞吐量和每秒新建，Mail协议（SMTP/POP3/IMAP）的有效吞吐量和新建，特殊场景的混合流量（如加入恶意流量）的吞吐量等。<br>可参考业界标杆Fortinet的<a href="https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/Fortinet_Product_Matrix.pdf" target="_blank" rel="noopener">性能测试报告</a>。<br><img src="/img/fortinet-product-matrix-sample.png" alt="Fortinet product matrix"></p>
-<p>下面我们先认识一下各性能指标名词的含义。本篇只介绍各名词的含义，测试方法后续章节中说明。</p>
-<h3 id="RFC2544-四项值"><a href="#RFC2544-四项值" class="headerlink" title="RFC2544 四项值"></a>RFC2544 四项值</h3><p><a href="https://tools.ietf.org/html/rfc1242" target="_blank" rel="noopener">RFC1242</a>文档中定义了吞吐量（Throughput）、延迟（Latency）、丢包率（Frame Loss）、背靠背（Back-to-Back）四个标准术语。<br><a href="https://www.ietf.org/rfc/rfc2544.txt" target="_blank" rel="noopener">RFC2544</a>是RFC组织提出的用于评测网络互联设备（防火墙、IDS、交换机路由器等）的国际标准，其中主要对RFC1242 中定义的性能评测参数的具体测试方法、结果的提交形式作了较详细的规定。</p>
-<p>下面将对这四项值是做为重点进行介绍。</p>
-<h4 id="吞吐量（Throughput）"><a href="#吞吐量（Throughput）" class="headerlink" title="吞吐量（Throughput）"></a>吞吐量（Throughput）</h4><p>吞吐量是指被测设备在不丢包的情况下，所能转发的最大速率或最大流量。通常测试结果以每秒通过的最大数据包数（PPS）或比特数（Mb/s）。<br>用于反映被测设备所能够处理的最大的数据流量，重在测试被测设备的转发能力。<br>结果值越大越好。<br>吞吐量比较通用，适用于绝大多数软件系统的性能测试。</p>
-<h4 id="延迟（Latency）"><a href="#延迟（Latency）" class="headerlink" title="延迟（Latency）"></a>延迟（Latency）</h4><p>发送一定数量的数据包，记录中间数据包发出的时间T1，以及经由被测设备转发后到达接收端口的时间T2：Latency＝T2－T1。延迟的测试结果以毫秒（ms）或微秒（μs）表示。<br>测试延迟是在测试过程中不存在丢包的条件下进行的，也就是说在测试延迟时，先要知道被测设备的吞吐量，从而定义发包的速率。<br>延迟用于反映被测设备处理数据包的速度。<br>延迟越小，表明设备处理速度越快。<br>延迟比较通用，是大多数软件系统性能测试的重要指标。</p>
-<h4 id="丢包率（Frame-Loss）"><a href="#丢包率（Frame-Loss）" class="headerlink" title="丢包率（Frame Loss）"></a>丢包率（Frame Loss）</h4><p>丢包率是指在一定的负载下，由于缺乏资源而未能被转发的包占应该转发的包数的百分比。<br>用于反映被测设备承受特定负载能力。<br>结果值越小越好。</p>
-<h4 id="背靠背（Back-to-Back）"><a href="#背靠背（Back-to-Back）" class="headerlink" title="背靠背（Back-to-Back）"></a>背靠背（Back-to-Back）</h4><p>以能够产生的最大的速率，发送一定长度的数据包，并不断改变单次发送的数据包数目，直到被测设备能够完全转发所有发送的数据包而不丢包，这个包数就是该设备的背对背值。<br>用于反映被测设备处理突发数据的缓存能力。背对背的值越大，路由器的缓存能力就越强，处理突发数据包的能力越强。</p>
-<h3 id="TCP每秒新建连接数（CPS）"><a href="#TCP每秒新建连接数（CPS）" class="headerlink" title="TCP每秒新建连接数（CPS）"></a>TCP每秒新建连接数（CPS）</h3><p>TCP每秒新建是在业界提到最多的一个。这个性能指标出自<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档。全称是 Maximum TCP Connection Establishment Rate（最大TCP 建立速率），大家习惯将这个指标称为CPS（TCPConnection Per Second）。<br>TCP每秒新建速率是指在被测设备能够成功建立所有请求连接的条件下，所能承受的最大TCP 连接建立速度。其测试采用迭代搜索算法，每次迭代过程中，以低于被测设备所能承受的最大并发连接数发起速率不同的TCP 连接请求，直到得到所有连接成功建立的最大速率。<br>TCP每秒新建速率以连接数/秒表示结果，其值越大越好。<br>注：TCP Connection Establishment已在<a href="https://tools.ietf.org/html/rfc2647" target="_blank" rel="noopener">RFC2647</a>文档中进行定义。</p>
-<h3 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h3><p>TPS性能指标是反映被测设备应用层的新建速率，这个性能指标也出自RFC3511文档。全称是Maximum HTTP Transaction Rate（最大HTTP传输事务速率），大家习惯将这个指标称为TPS（HTTPTransaction Per Second）。<br>HTTP的每秒事务数是指在被测设备能够成功建立连接的条件下，所能承受的最大的HTTP 协议的请求/回应操作的速度。其测试采用反复搜索过程，每次反复过程中，以低于被测设备所能承受的最大处理速率，直到所有连接被成功建立并且有对相应的请求。<br>结果以连接数/秒表示结果。其值越大越好。</p>
-<h3 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h3><p>HTTP有效吞吐量是反映被测设备在应用层的最大传输速率，这个性能指标在RFC3511文档中没有明确描述，但可以通过将HTTP Transaction Rate调整转化为HTTP有效吞吐量的测试方法。HTTP有效吞吐量是指在被测设备能够成功建立连接的条件下，在同一时间内所能承受的最大的有效数据量。<br>测试结果值越大越好。</p>
-<h3 id="最大并发连接数"><a href="#最大并发连接数" class="headerlink" title="最大并发连接数"></a>最大并发连接数</h3><p>最大并发连接数性能指标是反映被测设备最大的会话条目数，这个性能指标也出自RFC3511文档。全称是 Concurrent TCP Connection Capacity。最大并发连接数是指在被测设备能够成功建立连接的条件下，所能同时承受的最大的链接条目数，也反映了被测设备维持多个会话的能力。<br>测试结果值越大越好。</p>
-<h3 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h3><p>在<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档中主要描述了HTTP协议的性能测试，但随着产品及技术的大幅度更新，这往往已经不能满足客户或厂商的需求。我们还需要测试其它协议的性能，通常以应用层为主：包括FTP协议、Mail协议等。但测试的内容基本都是一样的，以每秒新建（每秒会话）和吞吐量为主。只需将HTTP协议变为其它应用层协议即可。</p>
-<p>随着网关产品尤其是网络安全类产品的发展，性能测试的范围不再局限于防火墙功能上的性能测试，还新增加了对其它功能如IPS、AV（防病毒）和UTM（集成安全网关）等的性能测试。但可以看到，这些功能的增加对于测试过程或者测试方法而言其实没有直接的影响，仍然要使用原来的测试过程或测试方法。下篇我们将介绍具体的测试方法。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是简介及测试方法的概念介绍。所有的性能指标中，RFC2544的四项指标是其中比较重要的部分且目前基本以形成标准，下篇文章将对其进行介绍。</p>
-]]></content>
-      <categories>
-        <category>Testing</category>
-      </categories>
-      <tags>
-        <tag>性能测试</tag>
-        <tag>ips</tag>
-        <tag>NGFW</tag>
-        <tag>防火墙</tag>
-        <tag>spi firewall</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之三：curl基本使用</title>
-    <url>/2012/08/linux-curl-basic-usage/</url>
-    <content><![CDATA[<p>在介绍完<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">cURL简介</a>和需要的<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">HTTP协议概述</a>之后。终于可以回归正题，进入curl的使用方法。</p>
-<h2 id="curl命令格式"><a href="#curl命令格式" class="headerlink" title="curl命令格式"></a>curl命令格式</h2><p>基本的使用用法如下：<br><code>curl [选项] [URL...]</code></p>
-<h2 id="GET一个网页"><a href="#GET一个网页" class="headerlink" title="GET一个网页"></a>GET一个网页</h2><p><code>curl http://www.baidu.com</code><br>网页源码将被打印出来。</p>
-<h3 id="o-output-lt-file-gt-指定保存目录"><a href="#o-output-lt-file-gt-指定保存目录" class="headerlink" title="-o/--output &lt;file&gt;指定保存目录"></a><code>-o/--output &lt;file&gt;</code>指定保存目录</h3><p>为便于后续处理，我们将网页内容保存在文件中：<br><code>curl -o stackeye.html http://www.stackeye.com</code><br>此时仍会显示进度条等信息。</p>
-<h3 id="s-silent静默模式"><a href="#s-silent静默模式" class="headerlink" title="-s/--silent静默模式"></a><code>-s/--silent</code>静默模式</h3><p>通过脚本结合curl可以实现很复杂的功能，而在脚本中调用curl，我们不需要进度条等信息。如执行：<br><code>curl -s -o stackeye.html http://www.stackeye.com</code><br>将不会显示任何信息。<br><a id="more"></a></p>
-<h2 id="v-–verbose查看通信过程、调试。"><a href="#v-–verbose查看通信过程、调试。" class="headerlink" title="-v/–verbose查看通信过程、调试。"></a>-v/–verbose查看通信过程、调试。</h2><p>这个参数可以清晰的查看到curl的通信过程，以便于调试，如执行：<br><code>curl -v http://www.baidu.com</code><br>返回结果如下，可以清晰的看到curl发出的HTTP请求及服务器返回的HTTP响应：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">* About to connect() to www.baidu.com port 80 (#0)</span><br><span class="line">*   Trying 119.75.218.77... connected</span><br><span class="line">* Connected to www.baidu.com (119.75.218.77) port 80 (#0)</span><br><span class="line">&gt; GET / HTTP/1.1</span><br><span class="line">&gt; User-Agent: curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18</span><br><span class="line">&gt; Host: www.baidu.com</span><br><span class="line">&gt; Accept: */*</span><br><span class="line">&gt;</span><br><span class="line">&lt; HTTP/1.1 200 OK</span><br><span class="line">&lt; Date: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Server: BWS/1.0</span><br><span class="line">&lt; Content-Length: 8216</span><br><span class="line">&lt; Content-Type: text/html;charset=gbk</span><br><span class="line">&lt; Cache-Control: private</span><br><span class="line">&lt; Expires: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Set-Cookie: BAIDUID=AF0E3C36DBB60C0D7C29DE11705028D7:FG=1; expires=Wed, 01-Aug-42 12:39:15 GMT; path=/; domain=.baidu.com</span><br><span class="line">&lt; P3P: CP=&quot; OTI DSP COR IVA OUR IND COM &quot;</span><br><span class="line">&lt; Connection: Keep-Alive</span><br><span class="line">&lt;</span><br><span class="line">&lt;!doctype html&gt;以下为HTML内容，略</span><br></pre></td></tr></table></figure></p>
-<p>以下所有命令都可以通过加入-v选项，查看具体通信过程。<br>更详细的调试信息可以使用–trace-ascii选项，如：<br><code>curl --trace-ascii debug.txt http://www.baidu.com</code></p>
-<h2 id="A-–user-agent指定User-Agent字段"><a href="#A-–user-agent指定User-Agent字段" class="headerlink" title="-A/–user-agent指定User-Agent字段"></a>-A/–user-agent指定User-Agent字段</h2><p>此选项字段用于指定HTTP请求头的User-Agent字段，即客户端（如浏览器）类型。<br>很多网站为了防止自动化程序采集，仅允许浏览器访问，最简单的办法就是通过User-Agent字段识别客户端类型做出处理。而如下命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p><code>&quot;Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)&quot;</code>为firefox的UserAgent值。<br>通过-A指定User-Agent字段，使curl伪装成Firefox，从而绕过网站的检测。<br>User-Agent字段可以通过抓包分析得到，或者通过chrome的Developer Tools、Firefox的Firebug等工具得到。<br>而如果一个网站对浏览器的限制也很严格的话，那我们甚至可以通过修改User-Agent伪装成百度蜘蛛或者googlebot突破限制，因为基于SEO的考虑，网站对搜索引擎蜘蛛的限制很小。</p>
-<h2 id="e-–referer-设置Referer"><a href="#e-–referer-设置Referer" class="headerlink" title="-e/–referer 设置Referer"></a>-e/–referer <url>设置Referer</url></h2><p>此选项字段用于指定HTTP请求头中的Referer字段，即来源网页。<br>为了防盗链，很多网页尤其是图片等可下载资源会检测Referer字段，对于非自己站内的来源全部屏蔽掉，此时我们就需要这个参数。<br>通过执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com http://www.stackeye.com</span><br><span class="line">http://www.stackeye.com将检测到来源网站为http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
-<h2 id="cookie使用"><a href="#cookie使用" class="headerlink" title="cookie使用"></a>cookie使用</h2><p>cookie的介绍参考上一篇。<br>我们登录网站后，为保持登录状态，需要使用cookie信息。</p>
-<h3 id="D-–dump-header-保存协议头部信息"><a href="#D-–dump-header-保存协议头部信息" class="headerlink" title="-D/–dump-header 保存协议头部信息"></a>-D/–dump-header 保存协议头部信息</h3><p><code>-D/--dump-header &lt;file&gt;</code>保存协议头部信息<br>头部信息中包含最常使用的cookie信息，如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -D stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会将头部信息保存至stackeyecookie.txt中。</p>
-<h3 id="b-–cookie-指定cookie"><a href="#b-–cookie-指定cookie" class="headerlink" title="-b/–cookie 指定cookie"></a>-b/–cookie 指定cookie</h3><p><code>-b/--cookie &lt;name=data&gt;/&lt;file&gt;</code>指定cookie<br>-b后可直接加-D保存的文件，curl会自动从中读取出cookie值，而且-b选项不会修改此文件。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -b stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会自动将stackeyecookie.txt中cookie信息附加至HTTP请求头中。</p>
-<p>结合-D和-b参数，即可完成cookie的保存和后续使用。</p>
-<p>cookie的形式就是“属性:值”对形式，-b后可直接以“属性=值”的形式给出cookie，当有多个属性时以分号间隔且包含在双引号中。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -b <span class="string">"user=Adeploy;pass=password"</span> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会将cookie信息<code>user=Adeploy;pass=password</code>附加在HTTP请求头中。</p>
-<h2 id="Redirects重定向"><a href="#Redirects重定向" class="headerlink" title="Redirects重定向"></a>Redirects重定向</h2><p>打开某些网页，网页会显示“ 3XX Moved Permanently ”，即网页被移动到其他位置，新位置一般由HTTP响应头中的Location字段给出。<br>重定向一般是因为网站结构调整后，避免用户访问原来页面出现404错误。<br>而另一类常见的用法就是在登陆成功后，网页显示成功信息，然后将用户重定向至内容页面。<br><code>-L/--location</code>选项可以自动跟踪重定向。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇只介绍简单的curl使用选项，下篇将结合实例具体说明。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>SQLAlchemy简介及在OpenStack中的使用</title>
     <url>/2015/07/sqlalchemy-intro/</url>
     <content><![CDATA[<p>SQLAlchemy是Python编程语言下的一款开源软件，提供了SQL工具包及对象关系映射(ORM)工具。</p>
@@ -862,39 +843,6 @@
         <tag>web</tag>
         <tag>orm</tag>
         <tag>sqlalchemy</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>解密Redis持久化</title>
-    <url>/2017/04/redis-persistence-demystified/</url>
-    <content><![CDATA[<p>本文主要是对<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">antirez博客</a>的翻译。其实<a href="http://blog.nosqlfan.com/html/3813.html" target="_blank" rel="noopener"></a>nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。</p>
-<p>首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久化的工作原理，Redis的持久化如何可靠，以及与其它数据库的对比。</p>
-<h2 id="操作系统和磁盘"><a href="#操作系统和磁盘" class="headerlink" title="操作系统和磁盘"></a>操作系统和磁盘</h2><h3 id="写操作的流程"><a href="#写操作的流程" class="headerlink" title="写操作的流程"></a>写操作的流程</h3><p>我们应该考虑的第一件事是对于数据库的持久化，我们的期望是什么。因此我们将一个简单的写操作中发生的事情可视化：</p>
-<ol>
-<li>客户端发送写命令到数据库（数据库在客户端内存中）</li>
-<li>数据库接收到写操作（数据在服务器内存中）</li>
-<li>数据库调用系统调用，将数据写入磁盘（数据在内核缓冲区中）</li>
-<li>操作系统将写缓冲区的数据转移到磁盘控制器上（数据在磁盘缓存中）</li>
-<li>磁盘控制器真正将数据写入到物理介质（数据真正落在磁盘上）<a id="more"></a>
-<blockquote>
-<p>注意：以上是一个各方面简单化的版本，因为实际有更多的cache和buffer。<br>步骤2经常被实现为数据库内部的一个复杂缓存系统。写操作也经常被不同的线程或进程处理。然而数据库或早或晚要将数据写入磁盘，而这就是我们关心的。也就是说，内存中的数据在某个节点必须要被传输到内核（步骤3）。<br>另外一个大的细节省略在步骤3.现实要更复杂，因为大多数高级操作系统内核实现了不同级别的缓存，其中通常包含文件系统级别的chache和一个略小一些的buffer cache。</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="故障分析"><a href="#故障分析" class="headerlink" title="故障分析"></a>故障分析</h3><p>在这个流程中什么时候我们的写操作才是安全的呢？</p>
-<p>如果我们考虑一个仅涉及数据库软件的失效（例如进程被管理员杀掉或崩溃），而不涉及操作系统内核，那成功执行完成步骤3的写操作就被认为是安全的。也就是在write这个系统调用（或其它用于将数据转移到内核的系统调用）返回成功后。在此步骤之后，即使数据库进程崩溃，内核仍然会负责将数据转移到磁盘控制器。</p>
-<p>如果我们考虑一个更灾难性的事件，如电力中断，只有在步骤5执行完成后我们才是安全的。也就是在数据真正被转移到物理设备中时。</p>
-<p>我们可以总结为，数据安全的重要阶段位于步骤3、4、5：</p>
-<h3 id="POSIX-API"><a href="#POSIX-API" class="headerlink" title="POSIX API"></a>POSIX API</h3><h3 id="我们无法控制的部分"><a href="#我们无法控制的部分" class="headerlink" title="我们无法控制的部分"></a>我们无法控制的部分</h3><h3 id="数据损坏"><a href="#数据损坏" class="headerlink" title="数据损坏"></a>数据损坏</h3><h2 id="Redis持久化实现"><a href="#Redis持久化实现" class="headerlink" title="Redis持久化实现"></a>Redis持久化实现</h2><h3 id="RDB快照"><a href="#RDB快照" class="headerlink" title="RDB快照"></a>RDB快照</h3><h3 id="AOF文件"><a href="#AOF文件" class="headerlink" title="AOF文件"></a>AOF文件</h3><h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><p>appendfsync no<br>appendfsync everysec<br>appendfsync always<br>为什么pipeline不同<br>AOF和Redis事务</p>
-<h3 id="与PostgreSQL和MySQL的对比"><a href="#与PostgreSQL和MySQL的对比" class="headerlink" title="与PostgreSQL和MySQL的对比"></a>与PostgreSQL和MySQL的对比</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h2 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h2><h2 id="附录：关于重启阶段的笔记"><a href="#附录：关于重启阶段的笔记" class="headerlink" title="附录：关于重启阶段的笔记"></a>附录：关于重启阶段的笔记</h2>]]></content>
-      <categories>
-        <category>Redis</category>
-      </categories>
-      <tags>
-        <tag>redis</tag>
-        <tag>nosql</tag>
-        <tag>aof</tag>
-        <tag>rdb</tag>
       </tags>
   </entry>
   <entry>
@@ -974,6 +922,104 @@
         <tag>keepalive</tag>
         <tag>vip</tag>
         <tag>LVS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>buildbot实战</title>
+    <url>/2014/11/buildbot-in-action/</url>
+    <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
+<ul>
+<li>监控代码仓库</li>
+<li>代码仓库有变化后，立即拉取代码</li>
+<li>执行build、部署、测试及发布工作</li>
+<li>反馈结果</li>
+</ul>
+<p>我们对这样一个工具的一般要求为：</p>
+<ul>
+<li>轻量级，安装、配置简单，本身耗费资源较少</li>
+<li>高效率，较快的完成自动化任务</li>
+<li>通用性强，在不同的操作系统，甚至与不同的代码系统兼容</li>
+<li>易扩展、配置及管理，能较简单的配置自动化任务</li>
+</ul>
+<p>Buildbot和Jenkins都能很好的满足我们这些要求。但相比Jenkins，buildbot更轻量级，部署配置更为简单。<br>Web界面也更简单美观一些。</p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>buildbot架构比较简单，主要分为三部分：</p>
+<ul>
+<li>版本控制层<br>外部版本控制，通过插件或主动触发的方式触发buildbot执行任务。</li>
+<li>任务执行层<br>master接收任务后，调度其slave执行任务，并获取到返回的结果</li>
+<li>通知层<br>master获取结果后，可通过邮件、IRC等方式进行通知。</li>
+</ul>
+<p>其中重要的主体是master和slave，其主要采用星形拓扑结构，一个集群中可以多个master、多个slave。master主要负责任务接收、调度并通知任务，slave负责具体的任务执行。各节点本身无状态，横向扩展性很好。<br><a id="more"></a><br><img src="/img/buildbot-overview.png" alt="buildbot架构"></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="pip安装"><a href="#pip安装" class="headerlink" title="pip安装"></a>pip安装</h3><p>建议使用pip安装，避免麻烦的依赖问题。<br>同时当前对python3版本支持不太好，建议使用python2.7版本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install gcc python-devel </span><br><span class="line">yum install python-dateutil15 git expect</span><br><span class="line"><span class="comment"># master安装</span></span><br><span class="line">pip install buildbot</span><br><span class="line"><span class="comment"># salve安装</span></span><br><span class="line">pip install buildbot-slave</span><br></pre></td></tr></table></figure></p>
+<p>如果是python2.6的话，因为最新版本的Twisted需要python2.7，所以需要提前指定版本安装：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install Twisted==15.1.0</span><br></pre></td></tr></table></figure></p>
+<p>为充分利用资源，同一台机器可配置为多个master、slave：可使用不同用户或virtualenv，每个用户或virtualenv环境部署为一个节点。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install virtualenv</span><br></pre></td></tr></table></figure></p>
+<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>最近看到<a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">buildbot官方</a>给出了Dockerfile(但Dockerfile地址是错的，可以自行在github代码中查找)，可下载后自行构建镜像使用，运行后即可使用：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Download Buildbot Dockerfile.</span></span><br><span class="line">wget https://raw.githubusercontent.com/buildbot/buildbot/master/master/Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the Buildbot container (it will take a few minutes to download packages)</span></span><br><span class="line">docker build -t buildbot - &lt; Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Run buildbot</span></span><br><span class="line">CONTAINER_ID=$(docker run -d -p 8010:8010 -p 22 buildbot)</span><br></pre></td></tr></table></figure></p>
+<p>然后打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可。</p>
+<h2 id="创建及运行"><a href="#创建及运行" class="headerlink" title="创建及运行"></a>创建及运行</h2><h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildbot create-master master</span><br><span class="line"><span class="comment"># 配置文件</span></span><br><span class="line">mv master/master.cfg.sample master/master.cfg</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildbot start master</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f master/twistd.log</span><br></pre></td></tr></table></figure>
+<p>buildbot会在当前目录下创建master名称的目录，以上为<code>master</code>。<br>看到最后显示<code>BuildMaster is running</code>即为启动成功，此时可通过<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>访问，默认用户名密码都是<code>pyflakes</code>。</p>
+<h3 id="slave"><a href="#slave" class="headerlink" title="slave"></a>slave</h3><p>创建slave时需要指定mater的地址，或者修改配置文件指定。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildslave create-slave slave1 localhost:9989 slave1 pass</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildslave start slave</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f slave/twistd.log</span><br></pre></td></tr></table></figure></p>
+<p>create-slave的参数分布是：slave目录、master、名字、密码。其中master默认都采用9989与slave通信。名字、密码必须与master的master.cfg中配置的一致：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'slaves'</span>] = [buildslave.BuildSlave(<span class="string">"example-slave"</span>, <span class="string">"pass"</span>)]</span><br></pre></td></tr></table></figure></p>
+<h3 id="预览"><a href="#预览" class="headerlink" title="预览"></a>预览</h3><p>此时打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可看到如下页面：<br><img src="/img/buildbot-index.png" alt="buildbot预览"><br>其中Buildslaves页面可查看到我们新添加的example-slave，且状态为<code>Idle</code>。<br>而Waterfall页面可查看到当前的builder，目前只有runtest，点进去点击forcebuild即可进行测试build。成功后记录显示为绿色。</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>Buildbot的配置文件为<code>.cfg</code>后缀的python脚本，使用python语法。如上文slave的定义就是一个python list的定义。</p>
+<h3 id="master配置"><a href="#master配置" class="headerlink" title="master配置"></a>master配置</h3><p>主要配置如下。</p>
+<ul>
+<li>BUILDSLAVES<br>slave的定义，以list的形式呈现。需要主要名字和密码与slave一致。<br>其中protocols可定义与slave的通信方式，包括端口等。</li>
+<li><p>CHANGESOURCES<br>指定需要监控的源代码地址。格式如下，其中可指定git地址、工作目录、分支、监控周期等。可定义多个，每个append进list即可。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c[&apos;change_source&apos;] = []</span><br><span class="line">c[&apos;change_source&apos;].append(changes.GitPoller(</span><br><span class="line">        &apos;git://github.com/buildbot/pyflakes.git&apos;,</span><br><span class="line">        workdir=&apos;gitpoller-workdir&apos;, branch=&apos;master&apos;,</span><br><span class="line">        pollinterval=300))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>SCHEDULERS<br>scheduler指定何时、如何触发执行builder，其中builder在BUILDERS中定义。下文定义了两个scheduler：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'schedulers'</span>] = []</span><br><span class="line"><span class="comment"># 定义每小时运行的scheduler</span></span><br><span class="line">hourlyscheduler = Periodic(name = <span class="string">"hourly"</span>,</span><br><span class="line">                           builderNames = [<span class="string">"simplebuild"</span>],</span><br><span class="line">                           periodicBuildTimer = <span class="number">3600</span>)</span><br><span class="line"><span class="comment"># 定义手动触发的scheduler</span></span><br><span class="line">c[<span class="string">'schedulers'</span>].append(schedulers.ForceScheduler(</span><br><span class="line">                            name=<span class="string">"force"</span>,</span><br><span class="line">                            builderNames=[<span class="string">"master"</span>]))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>BUILDERS<br>builder定义具体执行的任务内容，由一系列的步骤组成。每个步骤定义在step中，factory包含一系列的step，builder通过指定factory等参数创建。可定义多个builder。<br>代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义factory</span></span><br><span class="line">factory = util.BuildFactory()</span><br><span class="line"><span class="comment"># 定义具体step</span></span><br><span class="line">factory.addStep(steps.Git(repourl=<span class="string">'git://github.com/buildbot/pyflakes.git'</span>, mode=<span class="string">'incremental'</span>))</span><br><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"trial"</span>, <span class="string">"pyflakes"</span>]))</span><br><span class="line"><span class="comment"># 创建builder</span></span><br><span class="line">c[<span class="string">'builders'</span>] = []</span><br><span class="line"><span class="comment"># 指定名称、使用的slave、factory</span></span><br><span class="line">c[<span class="string">'builders'</span>].append(</span><br><span class="line">    util.BuilderConfig(name=<span class="string">"master"</span>,</span><br><span class="line">      slavenames=[<span class="string">"master"</span>],</span><br><span class="line">      factory=factory))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>STATUS TARGETS<br>此处定义buildbot对外通知build信息的方式。最基本的方式就是显示在页面中，因此此处同时定义了页面的认证方式，即登录使用的用户名、密码在此处修改。同时可定义IRC、邮件等通知方式。</p>
+</li>
+<li>PROJECT IDENTITY<br>此处主要为buildbot的基本信息，如title、超链接、url等。</li>
+<li>DB URL<br>此处定义使用的数据库，默认使用sqlite，地址为本地文件路径。</li>
+</ul>
+<h3 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h3><p>slave的定义主要在<code>buildbot.tac</code>文件中，可用于定义使用的master及slave基本信息。</p>
+<h2 id="启动及使用"><a href="#启动及使用" class="headerlink" title="启动及使用"></a>启动及使用</h2><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><ul>
+<li>启动<br>master、slave的启动上文已提及，子命令为start，参数为路径。</li>
+<li>停止、重启<br>stop和restart，其余同start</li>
+<li>master重新加载配置<br><code>buildbot reconfig master</code>即可重新加载配置。</li>
+</ul>
+<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>平时比较常用手动触发build，即forcebuild：web页面登录-&gt;Builders-&gt;选择builder-&gt;Force Build-&gt;在Waterfall查看打包结果及详细日志。<br><img src="/img/buildbot-waterfall.png" alt="buildbot waterfall"><br>注意：只有登录后才有build权限。</p>
+<h3 id="各页面介绍"><a href="#各页面介绍" class="headerlink" title="各页面介绍"></a>各页面介绍</h3><p>Buildbot比较方便的一点是全部通过页面来进行操作。主要页面介绍如下：</p>
+<ul>
+<li>Waterfall，以瀑布流的方式显示build任务，可点击任务查看详情、执行操作等</li>
+<li>Grid/T-Grid，以对应的方式显示build任务</li>
+<li>Console，还在开发中，当前主要显示revision信息</li>
+<li>Builders，定义的所有builder</li>
+<li>Recent Builds，最近的build</li>
+<li>Buildslaves，定义的所有slave</li>
+<li>Changesources，定义的所有代码仓库</li>
+<li>JSON API，对外提供的JSON API文档</li>
+</ul>
+<h2 id="高级使用"><a href="#高级使用" class="headerlink" title="高级使用"></a>高级使用</h2><h3 id="多分支build"><a href="#多分支build" class="headerlink" title="多分支build"></a>多分支build</h3><p>定义一个Changesource。<br>定义多个schedulers，分别对应不同分支。<br>定义多个factory，其中的step除branch不同外，其余step通用。通用的step可一次定义，多次使用。<br>builder分别指定分支和factory。</p>
+<h3 id="多项目build"><a href="#多项目build" class="headerlink" title="多项目build"></a>多项目build</h3><p>新版本可使用此功能，但不太推荐。buildbot的一个master还是更多的擅长对一个项目的管理。<br>需要定义多个Changesource，然后在其它定义时通过<code>project</code>和<code>repository</code>参数指定项目。</p>
+<h3 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h3><p>通过检查step的返回结果判断是否执行成功，规则同shell：0为成功，其它失败。<br>因此如果step中调用了自己的脚本，需要保证按上述规则返回结果。</p>
+<h3 id="添加参数"><a href="#添加参数" class="headerlink" title="添加参数"></a>添加参数</h3><p>使用<code>util.Property</code>获得网页上指定的参数，可设置默认值：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"bash"</span>, <span class="string">"autorpm.sh"</span>, util.Property(<span class="string">'project'</span>, default=<span class="string">''</span>)]))</span><br></pre></td></tr></table></figure></p>
+<p>在build页面通过name/value指定，如：<br><img src="/img/buildbot-param.png" alt="buildbot指定参数"></p>
+<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><p>实际使用中发现，buildslave所创建的文件，权限都为600或700。<br>这样会造成如cp到apache目录时，apache无法读取文件。<br>通过官方文档查看到slave启动时有umask选项：</p>
+<blockquote>
+<p>–umask<br>This is a string (generally an octal representation of an integer) which will cause the buildslave process’ umask value to be set shortly after initialization.<br>The twistddaemonization utility forces the umask to 077 at startup (which means that all files created by the buildslave or its child processes will be unreadable by any user other than the buildslave account).<br>If you want build products to be readable by other accounts, you can add –umask=022 to tell the buildslave to fix the umask after twistd clobbers it.<br>If you want build products to be writable by other accounts too, use –umask=000, but this is likely to be a security problem.</p>
+</blockquote>
+<p>通过修改slave目录下的buildbot.tac，修改：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">umask = 022</span><br></pre></td></tr></table></figure></p>
+<p>然后重启slave解决此问题:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">buildbot stop slave1</span><br><span class="line">buildbot stop slave2</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://build.chromium.org/p/chromium/console" target="_blank" rel="noopener">chromium buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">docker安装buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/tour.html" target="_blank" rel="noopener">quick tour of buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/fiveminutes.html" target="_blank" rel="noopener">Buildbot in 5 minutes</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>openstack</category>
+      </categories>
+      <tags>
+        <tag>openstack</tag>
+        <tag>ci</tag>
+        <tag>持续集成</tag>
       </tags>
   </entry>
 </search>
