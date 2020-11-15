@@ -1,6 +1,263 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>自动化测试实践：自动化测试的思考总结</title>
+    <url>/2013/09/auto-testing-summary/</url>
+    <content><![CDATA[<p>目前所在的团队一直主要负责部门产品的自动化测试方案。团队在自动化测试方面已经有了几年的探索，但直到最近才真正发挥作用大大提升了产品的测试效率，在这个过程中走了很多的弯路。<br>以下是我这一个阶段以来做自动化测试的思考及总结，有一些大的方向上的讨论，也有一些细节的探讨，希望给大家参考。</p>
+<h2 id="关于要不要做"><a href="#关于要不要做" class="headerlink" title="关于要不要做"></a>关于要不要做</h2><p>相信还有很多人对自动化测试有疑问，或者因为种种原因不愿意引入自动化测试。以下总结了一些反对自动化测试的论点：</p>
+<ul>
+<li>自动化实现较难<br>一般领域内都有可用的自动化测试框架，是这个领域内大家在自动化测试领域探索后的经验总结。在使用正确框架的基础上，自动化测试的实现并不复杂。</li>
+<li>自动化成本太高<br>下文中将会详细解释，如果设计合理，并有正确的预期，自动化的收益远大于成本。</li>
+<li>项目规模较小，没必要做自动化测试<br>以我们自动化项目的经验，越早做自动化测试，越容易实现，成功率越高。因此可以说成本越低，受益越高。</li>
+<li>会限制产品的灵活性<br>需求的频繁变更确实是自动化的灾难。但一般如果需求需要频繁变更，往往预示着其它问题。</li>
+</ul>
+<a id="more"></a>
+<h3 id="手工测试的局限"><a href="#手工测试的局限" class="headerlink" title="手工测试的局限"></a>手工测试的局限</h3><ul>
+<li>大量机械、重复性的工作效率较低、测试结果可能不准确<br>总结一个词：boring</li>
+<li>很难满足需要模拟大量数据、大量并发量的测试场景<br>比如无法实现系统可靠性测试，如对关键业务进行持续数十天的7*24小时测试</li>
+<li>很难适合敏捷开发过程,无法在短时间内完成大量的测试用例的回归<br>对于测试标准严格的大型软件产品，测试用例的数量可能是以“万”为单位的，全部手工回归一遍需要几人月的工作量！</li>
+</ul>
+<h3 id="自动化测试的引入"><a href="#自动化测试的引入" class="headerlink" title="自动化测试的引入"></a>自动化测试的引入</h3><p>自动化测试就是使用软件来控制测试用例的执行,将实际测试结果与预期结果进行比较,并提供测试预置条件设置、测试逻辑控制以及测试报告生成等重要功能。<br>软件甚至计算机、机器的出现，是为提高人的效率。既然机械、重复性的劳动较多，为何不将这部分工作软件化、自动化？<br>自动化测试可以极大的提升回归测试的工作效率，并简化稳定性测试、兼容性测试等负载类测试的难度,在保障产品质量和持续构建等方面起到举足轻重的作用。</p>
+<h3 id="自动化测试的好处"><a href="#自动化测试的好处" class="headerlink" title="自动化测试的好处"></a>自动化测试的好处</h3><p>简单说几点自动化能带来的好处：</p>
+<ul>
+<li>快速接收；</li>
+<li>持续回归；</li>
+<li>节约人力成本；</li>
+<li>完成人力难以实现的测试，如扩展到性能及稳定性测试。</li>
+</ul>
+<p>当然有些场景下自动化测试是不适合的。</p>
+<h3 id="自动化测试的代价"><a href="#自动化测试的代价" class="headerlink" title="自动化测试的代价"></a>自动化测试的代价</h3><ul>
+<li>开发维护成本<br>特别是从零开始的阶段，自动化会有些挑战。其次是提高测试代码的稳定性，需要付出很大经历。</li>
+<li>对开发流程的挑战、对开发规范的检验<br>自动化测试非常依赖标准的流程，如果没有较好的开发规范，开发人员随意变更代码、测试用例维护不完善，都会导致自动化的推动困难重重。</li>
+</ul>
+<h3 id="对自动化测试的正确预期"><a href="#对自动化测试的正确预期" class="headerlink" title="对自动化测试的正确预期"></a>对自动化测试的正确预期</h3><p>很多自动化项目失败的原因是对于自动化没有合理的预期，大多期望太高。</p>
+<ul>
+<li>自动化测试无法取代手工测试<br>只能取代其中机械重复的部分，“无脑工作量”，越高的智能需要越大的投入。单为测试来说，难以实现且不太值得。</li>
+<li>自动化代码需要持续的维护<br>提高自动化的覆盖度、提高稳定性、与需求变更保持同步，所有这些都需要持续投入进行开发维护。</li>
+<li>但自动化测试确实会带来很大的好处<br>成功的自动化项目能为项目节省至少50%的人力成本，且可以实现一些手工难以实现的功能。</li>
+</ul>
+<h2 id="关于如何做"><a href="#关于如何做" class="headerlink" title="关于如何做"></a>关于如何做</h2><p>接下来探讨一下如何做的一些问题。</p>
+<h3 id="自动化测试的前提"><a href="#自动化测试的前提" class="headerlink" title="自动化测试的前提"></a>自动化测试的前提</h3><p>一个项目、产品，可不可以、值不值得做自动化测试，主要有一下几个前提需要考虑：</p>
+<ul>
+<li><p>需求变动不频繁<br>如果需求，特别是测试的接口（如界面、输出的结果展现）变化频繁，自动化代码的维护无法赶上产品迭代的速度，这种情况下不建议引入自动化测试，而应该等产品稳定、需求收敛后再考虑自动化。否则会导致自动化成本过高，而实际未来得及使用就已经失效了。<br>但同时需要注意的是，如果在项目开始后还频繁变更需求，那往往是项目遇到了比较大的问题。此时应该慎重的考虑整个项目，而不只是仅考虑自动化是否该引入了。</p>
+</li>
+<li><p>项目周期长，并且有迭代<br>项目周期长，才有足够的时间开发自动化测试代码，并确保能真正用上。如果自动化未完成，项目已经结束，那自动化就多余了。<br>而且最好项目有持续迭代。否则如果只需要测试一次或几次，自动化带来的收益太小了。</p>
+</li>
+<li><p>模拟可以实现并且是有效的<br>自动化的过程就是模拟人使用软件的过程。对于无法用软件模拟的动作（如验证码的测试），是无法自动化的。<br>并且模拟必须是有效有价值的。朋友分享的案例是app测试时的定位问题：app中用到了定位，为了方便测试，编写了修改定位的脚本对app进行测试。但实际测试后发现无法测试全面，很多问题只有在实际场景中才会出现。</p>
+</li>
+</ul>
+<h3 id="从简单做起"><a href="#从简单做起" class="headerlink" title="从简单做起"></a>从简单做起</h3><p>二八定律同样适合于自动化测试：提高自动化覆盖度的过程中你会发现80%的工作量集中在20%的测试用例上。然而这也意味着，我们往往只需要投入20%的工作量，即可实现80%的自动化。<br>因此自动化的过程要从实现的简单到困难，开始阶段往往收益比例是最大的。举例我接手的一个自动化项目，测试输入是5000+网站，其中80%只有打开首页这一个动作，10%还需要一个登陆动作，剩下只有不到10%才涉及发帖子等其它复杂的、个性化操作。如果按照从易到难的顺序实现，很容易就可以自动化80%，甚至90%，剩下的10%仍然采用手工测试都会大大减少人工测试的成本。</p>
+<h3 id="按照标准项目来做"><a href="#按照标准项目来做" class="headerlink" title="按照标准项目来做"></a>按照标准项目来做</h3><p>绝大多数自动化项目最终失败的原因是没有把自动化作为一个正式的产品项目来看。<br>自动化测试的项目也是一个标准的软件项目，也应该遵循一些标准的开发流程。如前期也需要确定需求，也需要考虑敏捷、持续迭代，也需要做好自己的测试。<br>实现中容易陷入一些困惑，其实是因为我们忽略了某些流程。典型的如没有做好前期需求收集的识别，完全按使用者说的去做，结果做出来一个并不实用的傻瓜式的自动化方案。再比如没有做好测试，导致测试脚本不稳定。这些都可能导致项目流产。</p>
+<h3 id="要不要做成傻瓜式"><a href="#要不要做成傻瓜式" class="headerlink" title="要不要做成傻瓜式"></a>要不要做成傻瓜式</h3><p>自动化的一个比较大的陷阱就是试图做成傻瓜式，特别是没有专业的产品经理为自动化提取需求的情况下。以下是一个典型的傻瓜式自动化测试需求：测试人员只做测试设计，再做一些配置或工具录制，自动化的测试用例就生成了。之后所有的测试工作交由自动化测试完成。<br>事实证明，这种方案的代价远远大于收益，缺点如下：</p>
+<ul>
+<li>傻瓜化往往需要开发额外的工具<br>越智能的工具，带来越高的开发成本。而且这些工具往往不通用。</li>
+<li><p>自动化脚本质量不高，且维护成本太高<br>比如以录制来说，自动生成的脚本往往有各种问题，效率不高，需要手动调整；而且一旦交互或需求变化，可能很多用例都需要重新录制。而且可能会生成一些复杂难以被人理解的代码，遇见问题时调试困难。</p>
+</li>
+<li><p>所需的培训成本并不低<br>这些工具往往需要使用特定的规则。比如之前看到一个自动化方案，通过一些规定的词汇指定各步骤，然后解析自动生成测试脚本。任何一个词汇不满足要求就生成失败，还要智能的去解析变量，几乎就是重造了一个编译器。<br>但其实回头想一下有没有必要创建一套特定的不通用的规则、重造一门语言？为什么不简单的去要求使用人员去学习一套通用的规则、学习一门语言，如python、tcl？只需要最简单的入门即可。</p>
+</li>
+</ul>
+<h3 id="关于UI测试"><a href="#关于UI测试" class="headerlink" title="关于UI测试"></a>关于UI测试</h3><p>如前所讲，自动化要从易到难，UI测试相比其它自动化测试（典型的如CLI测试），就属于比较难的阶段。<br>但若使用类似于selenium的UI自动化框架，实现并不是很复杂。但UI测试的表现不太稳定，需要付出很多的努力使得用例稳定。典型的如打开网页点击按钮这个简单的动作，实际测试发现总会有一定概率下，这个按钮不出现，而且重现调查也很难找到原因。<br>在这种情况下，建议先demo实验下，可行后从易到难实现。</p>
+<h3 id="测试阶段"><a href="#测试阶段" class="headerlink" title="测试阶段"></a>测试阶段</h3><p>哪些测试阶段应该自动化测试？严格说起来，只分为三个阶段：</p>
+<ul>
+<li>单元测试应该做，但更多应该开发人员，或者更详细一些，代码的编写者维护单元测试用例。</li>
+<li>集成测试和系统测试等开发迭代过程中的测试，应该自动化，并且是自动化的主要使用场景。</li>
+<li>发散测试/探索性测试，不应该自动化，因为要发挥人的灵活性，弥补自动化测试的不足。</li>
+</ul>
+<h2 id="关于实现细节"><a href="#关于实现细节" class="headerlink" title="关于实现细节"></a>关于实现细节</h2><p>让我们深入细节，探讨一些深入的点。</p>
+<h3 id="工具或框架的选择"><a href="#工具或框架的选择" class="headerlink" title="工具或框架的选择"></a>工具或框架的选择</h3><p>尽量选择开源的工具或框架：</p>
+<ul>
+<li>方便定制化开发</li>
+<li>非开源软件很多内部逻辑不透明，可能难以大规模扩展</li>
+<li>技术积累、沉淀，使用开源软件能使团队得到更多的技术积累</li>
+<li>节省费用，很多收费的自动化测试工具很贵，使用开源软件可积累一大笔费用</li>
+</ul>
+<p>UI的自动化测试，推荐使用开源的selenium。在我们的项目中，使用selenium实现了绝大多数UI测试需要的功能，而且很容易扩展。<br>CLI的自动化测试选择要多一些，可以简单的使用shell脚本，或python、tcl等更加高级、功能更强大的语言。<br>针对某些特定框架、语言，如js，框架本身可能提供了一些自动化测试框架，因为它可能会用到语言或框架的一些特性，推荐优先使用。</p>
+<h3 id="测试环境"><a href="#测试环境" class="headerlink" title="测试环境"></a>测试环境</h3><p>测试环境的自动部署也是很重要的。虽然不是必须，比如可以在手工搭建好的环境上进行测试。但是对于复杂的环境，或者测试的扩展是很重要的。<br>基础设施部分建议使用虚拟机+pxe实现，软件建议使用配置管理工具实现。</p>
+<h3 id="函数库封装"><a href="#函数库封装" class="headerlink" title="函数库封装"></a>函数库封装</h3><p>如前文所说，我们应该将自动化测试作为一个标准项目来开发。因此也应该进行分层设计，核心的库与具体业务解耦。</p>
+<ul>
+<li>核心库封装各基础功能，建议由自动化团队负责维护；</li>
+<li>具体用例通过调用核心库实现，由测试人员维护。</li>
+</ul>
+<p>这样如果产品接口发生的变更（如登录发生了变化），只需要简单的更新核心库及部分用例即可。如果每个脚本单独实现，此时就需要更新所有依赖此接口的用例。<br>不要单独编写每个测试用例，简单到容易的过程中容易犯这个错误。<br>并且用例之间尽量保持独立，否则不容易扩展，逻辑太复杂。如果一个用例的过程被多次使用，那说明应该封装了。</p>
+<h3 id="sleep的使用"><a href="#sleep的使用" class="headerlink" title="sleep的使用"></a>sleep的使用</h3><p>等待某些条件达成时，最简单的方式就是使用sleep。<br>但sleep的时间设置多少？如果过少，可能条件还未达成；如果过多，会导致执行变慢。而且不同的环境，需要的等待时间不同。<br>所有这些会导致测试的不稳定。因此因减少sleep的使用，而应该实时的去检测条件。这样会增加代码量，但会减少不稳定导致的错误。</p>
+<h2 id="关于弥补不足"><a href="#关于弥补不足" class="headerlink" title="关于弥补不足"></a>关于弥补不足</h2><p>自动化是通过代码模拟人的动作，存在天然的不足。如果能做到足够的精确和高效，那它所具有的人工智能的价值已经超越被测试软件的价值了。<br>幸运的是，我们可以通过一些不太高成本的方式弥补其不足。</p>
+<h3 id="不稳定如何解决"><a href="#不稳定如何解决" class="headerlink" title="不稳定如何解决"></a>不稳定如何解决</h3><p>因为代码的实现及环境因素等，自动化代码难免会出现不稳定的情况，可采取如下方式：</p>
+<ul>
+<li>多次测试，多次测试一排除偶然性的影响，但也不能忽略偶然性bug出现的可能</li>
+<li>专人排查，对所有出错的用例进行排查，定位是产品问题、测试代码问题，还是环境问题。这就要求自动化测试过程中记录足够的日志信息</li>
+<li>持续维护，持续维护代码，保持与主干项目同步，并增强稳定性</li>
+<li>代码自测，做好测试代码的自测，提高测试代码的质量</li>
+</ul>
+<h3 id="加强探测性测试"><a href="#加强探测性测试" class="headerlink" title="加强探测性测试"></a>加强探测性测试</h3><p>自动化尽可能的模仿人，但相似度越高，代价越大；<br>探测性测试可以用较小的成本获得大的受益，同时可检测自动化测试是否有效。</p>
+<h3 id="如何跟踪软件迭代的进度"><a href="#如何跟踪软件迭代的进度" class="headerlink" title="如何跟踪软件迭代的进度"></a>如何跟踪软件迭代的进度</h3><p>自动化的价值就是能及时的对产品进行测试，因此对开发进度有比较高的要求，特别是在项目持续迭代时：</p>
+<ul>
+<li>尽早介入，最好能在详细设计阶段开始自动化开发，但这需要与产品开发人员约定好接口</li>
+<li>模块化的封装，封装后可减少修改</li>
+<li>变更太快的项目，会导致自动化测试无法维护，只能等版本稳定</li>
+</ul>
+<h2 id="团队实际经验"><a href="#团队实际经验" class="headerlink" title="团队实际经验"></a>团队实际经验</h2><p>最后说下团队实际的经验，大体分为3个阶段：</p>
+<ol>
+<li>录制阶段<br>此阶段团队的大部分精力用来开发一个录制的工具：开启录制后，只需要测试人员执行一遍测试，工具即可记录并自动生成自动化代码。同上所述，这个工具的开发本身是不太容易的，而且实际也很难用于别的项目，录制出的脚本也需要再去修改。遇到需求变更，一般都需要重新录制。<br>开始的两年团队一直在重复这个困局：项目开始，团队开始开发维护录制工具；项目集成测试，团队开始录制维护脚本；项目接近释放，录制勉强完成，用来做一次验收测试；开始下一轮循环。<br>此阶段自动化几乎无法实际使用。此阶段的成果在于通过虚拟机+PXE的方式，产品的自动部署流程基本打通。</li>
+<li>脚本阶段<br>经过2年的开发，团队发现录制工具并不实用，而且开发维护的成本较大，自动化进度很慢。因此决定同时采用录制、脚本编写两种方式，开始从易到难的自动化测试用例，并编写模板培训测试人员使用。<br>因为很多用例步骤都是重复的，通过复制粘贴的形式，自动化了很多测试用例，自动化进度大大加快。<br>这个阶段自动化覆盖度大大提高，但是代码质量不高，维护成本很高。</li>
+<li>封装自动化库阶段<br>最终终于将自动化作为一个标准的项目进行开发：产品经理协助提取分析需求；代码解耦，封装核心库，并持续维护提高稳定性，逐渐扩展到UI测试；持续培训测试人员实现自动化，并review其代码。<br>到这个阶段，前期花费巨大精力的录制工具几乎已经被抛弃。<br>经过这个阶段，自动化覆盖度达到90%，因不稳定原因导致的用例失败率降低到10%。</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>综上，自动化测试绝大多数情况下是很有价值的。<br>但是需要遵循一些规则，建议将自动化测试项目规范的作为一个产品去开发，并尽可能将敏捷的思想应用其中。</p>
+]]></content>
+      <categories>
+        <category>Testing</category>
+      </categories>
+      <tags>
+        <tag>自动化测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十三：curl vs wget</title>
+    <url>/2012/09/curl-vs-wget/</url>
+    <content><![CDATA[<p>curl和wget有很多地方是相同的，很多场景下二者都可以使用。那面对一个复杂问题的时候，我们怎么决定使用哪个工具呢？本篇通过对二者进行比较，从而对此提供思路。<br>本篇主要参考<a href="http://daniel.haxx.se/docs/curl-vs-wget.html" target="_blank" rel="noopener">curl官方的文档</a>，翻译加整理。</p>
+<h2 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h2><ul>
+<li>都是可通过FTP/HTTP/HTTPS协议下载文件的命令行工具；</li>
+<li>都可以发送HTTP POST请求；</li>
+<li>都支持cookie的使用；</li>
+<li>都被设计为无界面（UI），可在如脚本中使用；</li>
+<li>都是开源且免费的软件。</li>
+</ul>
+<a id="more"></a>
+<h2 id="不同点"><a href="#不同点" class="headerlink" title="不同点"></a>不同点</h2><h3 id="curl"><a href="#curl" class="headerlink" title="curl"></a>curl</h3><ul>
+<li>curl是基于libcurl库实现，因此特性来源于libcurl库。libcurl库跨平台、开源且免费，因此curl不只是一个命令行工具</li>
+<li>管道。curl在传统的UNIX风格的基础上加以扩展，对输入输出做出更多的处理，从而贯彻了”everything is a pipe” 的设计思想。</li>
+<li>单点传送（Single shot）。curl被设计为用于数据的单点传送。它只会传送用户指定的URLS，并不包含任何递归下载的逻辑，也不对html进行任何解析。</li>
+<li>更多协议支持。目前curl 支持的协议有： FTP, FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, LDAP, LDAPS, FILE, POP3, IMAP, SMTP 和 RTSP 。Wget仅仅支持 HTTP, HTTPS 和 FTP。（协议的支持情况可能会随着时间发展而变化。）</li>
+<li>更多平台支持，便于移植。与wget相比，curl可在更多平台上编译和运行。比如OS/400, TPF 和其他很多非UNIX的平台。</li>
+<li>更强大的SSL库和SSL支持。curl能应用于多个不同的 SSL/TLS 库, 并提供了更多的可控性和对协议细节更广泛的支持。</li>
+<li>curl支持更多的HTTP认证方式。尤其是当你使用HTTP代理的时候，curl支持Basic, Digest, NTLM and Negotiate认证方式（参见<a href="https://adeployblog.appspot.com/2012/08/17/http-auth-schemes.html" target="_blank" rel="noopener">HTTP认证模式</a>）。</li>
+<li>libcurl库支持多种不同的SOCKS代理，基于libcurl实现的curl工具也支持。而wget不支持。</li>
+<li>双向通信。 curl 提供了上传能力，Wget仅仅支持HTTP POST方式。</li>
+<li>HTTP multipart/form-data 的发送能力。 这使得用户可以进行HTTP上传，更好的模拟浏览器的行为从而更大程度的实现HTTP操作的自动化，提供了更多操作的可能。</li>
+<li>压缩。 curl 支持GZIP和 inflate Content-Encoding 并且自动进行解压缩操作。</li>
+<li>curl提供并执行Transfer-Encoded HTTP的解压缩，而wget不会</li>
+<li>curl在7.27.0之后，提供对<a href="http://en.wikipedia.org/wiki/Metalink" target="_blank" rel="noopener">metalink</a>的支持（好吧，百度百科对metalink的解释是不对的， 百度百科说的是oracle公司的一个服务）。而wget需要依靠一个Google Summer开源项目才能支持metalink。</li>
+</ul>
+<h3 id="wget"><a href="#wget" class="headerlink" title="wget"></a>wget</h3><ul>
+<li>wget仅仅是一个命令行工具。没有库提供使用。</li>
+<li>递归下载支持。wget相比curl最大的优点在于对递归下载的支持，甚至下载一个资源如网页或FTP目录指向的所有资源。</li>
+<li>wget下载时无需指定保存文件名。而curl需要使用-o或-O指定。</li>
+<li>wget仅支持GnuTLS 和 OpenSSL两种SSL库。</li>
+<li>wget仅支持HTTP代理的基本认证（Basic auth）。</li>
+<li>wget不支持SOCKS代理。</li>
+<li>wget项目更老，基于GPL开源协议，隶属GNU项目。curl基于MIT开源协议，不隶属于任何组织，版权由作者一人所有。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>wput仅是一个单独的工具，不进行讨论。<br>参考：<a href="http://daniel.haxx.se/docs/curl-vs-wget.html" target="_blank" rel="noopener">curl vs Wget</a></p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+        <tag>wget</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
+    <url>/2013/03/gateway-performance-test-desc/</url>
+    <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
+<ol>
+<li>简介及性能指标介绍 - 本篇</li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
+</ol>
+<a id="more"></a>
+<h2 id="性能测试简介"><a href="#性能测试简介" class="headerlink" title="性能测试简介"></a>性能测试简介</h2><p>以下解释来自百度百科：</p>
+<blockquote>
+<p>性能测试是通过自动化的测试<strong>工具</strong>模拟多种正常、峰值以及异常<strong>负载</strong>条件来对系统的各项性能指标进行测试。负载测试和压力测试都属于性能测试，两者可以结合进行。通过负载测试，确定在各种工作负载下系统的性能，目标是测试当负载逐渐增加时，系统各项性能指标的变化情况。压力测试是通过确定一个系统的<strong>瓶颈</strong>或者不能接受的性能点，来获得系统能提供的最大服务级别的测试。</p>
+</blockquote>
+<p>其中有三个关键词需要关注：</p>
+<ul>
+<li>工具：性能测试一般需要的压力较大较复杂，单纯依靠手工很难做到，因此一般需要专业化的设备、工具，或编写自动化测试脚本完成。网关类产品一般要求的负载较高，在千兆、万兆设置更高级别，一般需要专业配置千兆万兆网卡的硬件设备，如IAXA等，价格较昂贵。而其它产品一般也需要如Loadruner、Jmeter等专业化的性能测试软件并根据场景编写脚本完成。</li>
+<li>负载：性能测试有别于功能测试的点就在于使用的负载较高。而且负载的构造需要根据实际的场景才有价值，并需要使用特定的工具或自行研发软件实现。</li>
+<li>瓶颈：逐渐加大负载到达瓶颈。测试中比较重要的就是各个性能拐点，因为各个拐点往往都有重要的意义。如保持最优响应的拐点、延迟急剧增加的拐点、系统彻底瘫痪的拐点。持续测试找到各个拐点，对于产品的调优、部署及运维都有很大的价值。<br><img src="/img/jmeter-result.png" alt="性能测试结果"></li>
+</ul>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS\、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>DUT，devices under test，测试设备。</li>
+</ul>
+<h2 id="性能指标名词解释"><a href="#性能指标名词解释" class="headerlink" title="性能指标名词解释"></a>性能指标名词解释</h2><p>网络安全类产品或网关类产品常见的性能指标有：</p>
+<ul>
+<li>RFC2544 四项值（吞吐量、延迟、丢包率、背靠背）</li>
+<li>TCP 的每秒新建连接数（CPS）</li>
+<li>HTTP 的每秒处理事务数（TPS）、HTTP 有效吞吐量（HTTP Throughput）</li>
+<li>最大并发连接数等</li>
+</ul>
+<p>除此之外，部分评测机构或客户也会根据自己的实际情况增加性能指标，如：IPS/UTM下的HTTP有效吞吐量和每秒新建，Mail协议（SMTP/POP3/IMAP）的有效吞吐量和新建，特殊场景的混合流量（如加入恶意流量）的吞吐量等。<br>可参考业界标杆Fortinet的<a href="https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/Fortinet_Product_Matrix.pdf" target="_blank" rel="noopener">性能测试报告</a>。<br><img src="/img/fortinet-product-matrix-sample.png" alt="Fortinet product matrix"></p>
+<p>下面我们先认识一下各性能指标名词的含义。本篇只介绍各名词的含义，测试方法后续章节中说明。</p>
+<h3 id="RFC2544-四项值"><a href="#RFC2544-四项值" class="headerlink" title="RFC2544 四项值"></a>RFC2544 四项值</h3><p><a href="https://tools.ietf.org/html/rfc1242" target="_blank" rel="noopener">RFC1242</a>文档中定义了吞吐量（Throughput）、延迟（Latency）、丢包率（Frame Loss）、背靠背（Back-to-Back）四个标准术语。<br><a href="https://www.ietf.org/rfc/rfc2544.txt" target="_blank" rel="noopener">RFC2544</a>是RFC组织提出的用于评测网络互联设备（防火墙、IDS、交换机路由器等）的国际标准，其中主要对RFC1242 中定义的性能评测参数的具体测试方法、结果的提交形式作了较详细的规定。</p>
+<p>下面将对这四项值是做为重点进行介绍。</p>
+<h4 id="吞吐量（Throughput）"><a href="#吞吐量（Throughput）" class="headerlink" title="吞吐量（Throughput）"></a>吞吐量（Throughput）</h4><p>吞吐量是指被测设备在不丢包的情况下，所能转发的最大速率或最大流量。通常测试结果以每秒通过的最大数据包数（PPS）或比特数（Mb/s）。<br>用于反映被测设备所能够处理的最大的数据流量，重在测试被测设备的转发能力。<br>结果值越大越好。<br>吞吐量比较通用，适用于绝大多数软件系统的性能测试。</p>
+<h4 id="延迟（Latency）"><a href="#延迟（Latency）" class="headerlink" title="延迟（Latency）"></a>延迟（Latency）</h4><p>发送一定数量的数据包，记录中间数据包发出的时间T1，以及经由被测设备转发后到达接收端口的时间T2：Latency＝T2－T1。延迟的测试结果以毫秒（ms）或微秒（μs）表示。<br>测试延迟是在测试过程中不存在丢包的条件下进行的，也就是说在测试延迟时，先要知道被测设备的吞吐量，从而定义发包的速率。<br>延迟用于反映被测设备处理数据包的速度。<br>延迟越小，表明设备处理速度越快。<br>延迟比较通用，是大多数软件系统性能测试的重要指标。</p>
+<h4 id="丢包率（Frame-Loss）"><a href="#丢包率（Frame-Loss）" class="headerlink" title="丢包率（Frame Loss）"></a>丢包率（Frame Loss）</h4><p>丢包率是指在一定的负载下，由于缺乏资源而未能被转发的包占应该转发的包数的百分比。<br>用于反映被测设备承受特定负载能力。<br>结果值越小越好。</p>
+<h4 id="背靠背（Back-to-Back）"><a href="#背靠背（Back-to-Back）" class="headerlink" title="背靠背（Back-to-Back）"></a>背靠背（Back-to-Back）</h4><p>以能够产生的最大的速率，发送一定长度的数据包，并不断改变单次发送的数据包数目，直到被测设备能够完全转发所有发送的数据包而不丢包，这个包数就是该设备的背对背值。<br>用于反映被测设备处理突发数据的缓存能力。背对背的值越大，路由器的缓存能力就越强，处理突发数据包的能力越强。</p>
+<h3 id="TCP每秒新建连接数（CPS）"><a href="#TCP每秒新建连接数（CPS）" class="headerlink" title="TCP每秒新建连接数（CPS）"></a>TCP每秒新建连接数（CPS）</h3><p>TCP每秒新建是在业界提到最多的一个。这个性能指标出自<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档。全称是 Maximum TCP Connection Establishment Rate（最大TCP 建立速率），大家习惯将这个指标称为CPS（TCPConnection Per Second）。<br>TCP每秒新建速率是指在被测设备能够成功建立所有请求连接的条件下，所能承受的最大TCP 连接建立速度。其测试采用迭代搜索算法，每次迭代过程中，以低于被测设备所能承受的最大并发连接数发起速率不同的TCP 连接请求，直到得到所有连接成功建立的最大速率。<br>TCP每秒新建速率以连接数/秒表示结果，其值越大越好。<br>注：TCP Connection Establishment已在<a href="https://tools.ietf.org/html/rfc2647" target="_blank" rel="noopener">RFC2647</a>文档中进行定义。</p>
+<h3 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h3><p>TPS性能指标是反映被测设备应用层的新建速率，这个性能指标也出自RFC3511文档。全称是Maximum HTTP Transaction Rate（最大HTTP传输事务速率），大家习惯将这个指标称为TPS（HTTPTransaction Per Second）。<br>HTTP的每秒事务数是指在被测设备能够成功建立连接的条件下，所能承受的最大的HTTP 协议的请求/回应操作的速度。其测试采用反复搜索过程，每次反复过程中，以低于被测设备所能承受的最大处理速率，直到所有连接被成功建立并且有对相应的请求。<br>结果以连接数/秒表示结果。其值越大越好。</p>
+<h3 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h3><p>HTTP有效吞吐量是反映被测设备在应用层的最大传输速率，这个性能指标在RFC3511文档中没有明确描述，但可以通过将HTTP Transaction Rate调整转化为HTTP有效吞吐量的测试方法。HTTP有效吞吐量是指在被测设备能够成功建立连接的条件下，在同一时间内所能承受的最大的有效数据量。<br>测试结果值越大越好。</p>
+<h3 id="最大并发连接数"><a href="#最大并发连接数" class="headerlink" title="最大并发连接数"></a>最大并发连接数</h3><p>最大并发连接数性能指标是反映被测设备最大的会话条目数，这个性能指标也出自RFC3511文档。全称是 Concurrent TCP Connection Capacity。最大并发连接数是指在被测设备能够成功建立连接的条件下，所能同时承受的最大的链接条目数，也反映了被测设备维持多个会话的能力。<br>测试结果值越大越好。</p>
+<h3 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h3><p>在<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档中主要描述了HTTP协议的性能测试，但随着产品及技术的大幅度更新，这往往已经不能满足客户或厂商的需求。我们还需要测试其它协议的性能，通常以应用层为主：包括FTP协议、Mail协议等。但测试的内容基本都是一样的，以每秒新建（每秒会话）和吞吐量为主。只需将HTTP协议变为其它应用层协议即可。</p>
+<p>随着网关产品尤其是网络安全类产品的发展，性能测试的范围不再局限于防火墙功能上的性能测试，还新增加了对其它功能如IPS、AV（防病毒）和UTM（集成安全网关）等的性能测试。但可以看到，这些功能的增加对于测试过程或者测试方法而言其实没有直接的影响，仍然要使用原来的测试过程或测试方法。下篇我们将介绍具体的测试方法。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是简介及测试方法的概念介绍。所有的性能指标中，RFC2544的四项指标是其中比较重要的部分且目前基本以形成标准，下篇文章将对其进行介绍。</p>
+]]></content>
+      <categories>
+        <category>Testing</category>
+      </categories>
+      <tags>
+        <tag>性能测试</tag>
+        <tag>ips</tag>
+        <tag>NGFW</tag>
+        <tag>防火墙</tag>
+        <tag>spi firewall</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十二：ftp及其他协议</title>
+    <url>/2012/08/curl-ftp-usage/</url>
+    <content><![CDATA[<p>在<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">Linux下cURL使用教程之一：cURL简介</a>里，提到curl支持多种协议。本篇就以ftp协议为主，对curl对其他协议的操作进行简介。</p>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>基本使用方法同HTTP没有区别：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl ftp://ftp.cisco.com/pub/mibs/</span><br></pre></td></tr></table></figure></p>
+<p>只不过ftp一般会有用户名密码，所有在命令中要加上用户名密码：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -O ftp://ftp_server/index.php</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl ftp:// ftpuser:ftppass ftp://ftp_server/index.php</span><br></pre></td></tr></table></figure></p>
+<h2 id="上传文件"><a href="#上传文件" class="headerlink" title="上传文件"></a>上传文件</h2><p>使用-T选项。具体请参考<a href="https://adeployblog.appspot.com/2012/08/11/linux-curl-basic-usage-upload-file.html" target="_blank" rel="noopener">Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</a>。<a id="more"></a><br>上传一个文件：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T myfile.txt ftp://ftp.testserver.com</span><br></pre></td></tr></table></figure></p>
+<p>上传多个文件：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T <span class="string">"&#123;file1,file2&#125;"</span> ftp://ftp.testserver.com</span><br></pre></td></tr></table></figure></p>
+<p>从标准输入获得文件内容：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T - ftp://ftp.testserver.com/myfile_1.txt</span><br></pre></td></tr></table></figure></p>
+<p>这个命令会将标准输入的内容保存在<a href="ftp://ftp.testserver.com/myfile_1.txt中。" target="_blank" rel="noopener">ftp://ftp.testserver.com/myfile_1.txt中。</a></p>
+<h2 id="FTP四种模式"><a href="#FTP四种模式" class="headerlink" title="FTP四种模式"></a>FTP四种模式</h2><p>FTP有两种基本模式：PASV和PORT，也即主动模式和被动模式。在二者基础上分别有两种扩展：ERSV和EPRT。具体请参考相关RFC文档。<br>curl默认使用EPSV模式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
+<p>会看到curl执行了EPSV命令。–eprt参数显式指定使用EPRT模式。<br>使用<code>--disable-epsv</code>选项禁用EPSV而使用PASV：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --<span class="built_in">disable</span>-epsv ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
+<p>使用<code>-P/--ftp-port &lt;address&gt;</code>选项指定使用EPRT，其中address参数可以指定为“-”，指定使用FTP控制连接相同的地址：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ftp-port - ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
+<p>会看到使用了EPRT命令。<br>而使用<code>--disable-epsv</code>选项，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ftp-port - --<span class="built_in">disable</span>-epsv ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
+<p>及指定了使用PORT模式。</p>
+<h2 id="其他协议"><a href="#其他协议" class="headerlink" title="其他协议"></a>其他协议</h2><p>以SMTP协议发邮件为例，执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ssl --mail-rcpt <span class="built_in">test</span>@163.com --mail-from <span class="built_in">test</span>@163.com smtp://smtp.163.com -u <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
+<p>–ssl指定使用SSL， smtp://一定要加在url上，否则curl会使用默认的HTTP协议。</p>
+<p>之后，按提示输入如下内容：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Subject: Testing</span><br><span class="line">This is a test mail</span><br><span class="line">.</span><br></pre></td></tr></table></figure></p>
+<p>即可发送邮件。<br>但是估计是有防作弊机制，测试发现163、GMAIL的SMTP发信都失败，提示“curl: (67) Access denied: 500”，追踪详细过程，发现是“MAIL FROM: <a href="mailto:test@163.com" target="_blank" rel="noopener">test@163.com</a>”这句提示语法错误。不知道是什么原因。<br>但是使用自己搭建的邮件服务器测试成功。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+        <tag>ftp</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>buildbot实战</title>
     <url>/2014/11/buildbot-in-action/</url>
     <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
@@ -99,45 +356,14 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之十二：ftp及其他协议</title>
-    <url>/2012/08/curl-ftp-usage/</url>
-    <content><![CDATA[<p>在<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">Linux下cURL使用教程之一：cURL简介</a>里，提到curl支持多种协议。本篇就以ftp协议为主，对curl对其他协议的操作进行简介。</p>
-<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>基本使用方法同HTTP没有区别：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl ftp://ftp.cisco.com/pub/mibs/</span><br></pre></td></tr></table></figure></p>
-<p>只不过ftp一般会有用户名密码，所有在命令中要加上用户名密码：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -O ftp://ftp_server/index.php</span><br></pre></td></tr></table></figure></p>
-<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl ftp:// ftpuser:ftppass ftp://ftp_server/index.php</span><br></pre></td></tr></table></figure></p>
-<h2 id="上传文件"><a href="#上传文件" class="headerlink" title="上传文件"></a>上传文件</h2><p>使用-T选项。具体请参考<a href="https://adeployblog.appspot.com/2012/08/11/linux-curl-basic-usage-upload-file.html" target="_blank" rel="noopener">Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</a>。<a id="more"></a><br>上传一个文件：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T myfile.txt ftp://ftp.testserver.com</span><br></pre></td></tr></table></figure></p>
-<p>上传多个文件：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T <span class="string">"&#123;file1,file2&#125;"</span> ftp://ftp.testserver.com</span><br></pre></td></tr></table></figure></p>
-<p>从标准输入获得文件内容：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T - ftp://ftp.testserver.com/myfile_1.txt</span><br></pre></td></tr></table></figure></p>
-<p>这个命令会将标准输入的内容保存在<a href="ftp://ftp.testserver.com/myfile_1.txt中。" target="_blank" rel="noopener">ftp://ftp.testserver.com/myfile_1.txt中。</a></p>
-<h2 id="FTP四种模式"><a href="#FTP四种模式" class="headerlink" title="FTP四种模式"></a>FTP四种模式</h2><p>FTP有两种基本模式：PASV和PORT，也即主动模式和被动模式。在二者基础上分别有两种扩展：ERSV和EPRT。具体请参考相关RFC文档。<br>curl默认使用EPSV模式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
-<p>会看到curl执行了EPSV命令。–eprt参数显式指定使用EPRT模式。<br>使用<code>--disable-epsv</code>选项禁用EPSV而使用PASV：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --<span class="built_in">disable</span>-epsv ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
-<p>使用<code>-P/--ftp-port &lt;address&gt;</code>选项指定使用EPRT，其中address参数可以指定为“-”，指定使用FTP控制连接相同的地址：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ftp-port - ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
-<p>会看到使用了EPRT命令。<br>而使用<code>--disable-epsv</code>选项，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ftp-port - --<span class="built_in">disable</span>-epsv ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
-<p>及指定了使用PORT模式。</p>
-<h2 id="其他协议"><a href="#其他协议" class="headerlink" title="其他协议"></a>其他协议</h2><p>以SMTP协议发邮件为例，执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ssl --mail-rcpt <span class="built_in">test</span>@163.com --mail-from <span class="built_in">test</span>@163.com smtp://smtp.163.com -u <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
-<p>–ssl指定使用SSL， smtp://一定要加在url上，否则curl会使用默认的HTTP协议。</p>
-<p>之后，按提示输入如下内容：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Subject: Testing</span><br><span class="line">This is a test mail</span><br><span class="line">.</span><br></pre></td></tr></table></figure></p>
-<p>即可发送邮件。<br>但是估计是有防作弊机制，测试发现163、GMAIL的SMTP发信都失败，提示“curl: (67) Access denied: 500”，追踪详细过程，发现是“MAIL FROM: <a href="mailto:test@163.com" target="_blank" rel="noopener">test@163.com</a>”这句提示语法错误。不知道是什么原因。<br>但是使用自己搭建的邮件服务器测试成功。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-        <tag>ftp</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网关类产品的性能测试之四：测试工具、注意事项及经验总结</title>
-    <url>/2013/04/gateway-performance-test-summary/</url>
-    <content><![CDATA[<p>前面我们介绍了各性能指标项的测试方法。本篇主要概述测试工具、测试拓扑及经验总结。</p>
+    <title>网关类产品的性能测试之三：其它指标测试方法</title>
+    <url>/2013/03/gateway-performance-test-others/</url>
+    <content><![CDATA[<p>本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>中的定义，并根据实际需求，更新或舍弃了部分指标项。</p>
 <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p>
 <ol>
 <li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/" target="_blank" rel="noopener">简介及性能指标介绍</a></li>
 <li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
+<li>其它指标测试方法 - 本篇</li>
 <li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
 </ol>
 <h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
@@ -151,32 +377,36 @@
 <li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
 <li>被测设备，devices under test，测试设备。</li>
 </ul>
-<h2 id="性能测试工具"><a href="#性能测试工具" class="headerlink" title="性能测试工具"></a>性能测试工具</h2><p>对于网关类产品，一般要求的性能值比较高，因此测试一般使用专用的硬件设备。<br>常用硬件设备有IAXA等。<br>常用的测试软件有：</p>
-<ul>
-<li><a href="https://iperf.fr/" target="_blank" rel="noopener">iperf</a></li>
-<li><a href="http://jmeter.apache.org/" target="_blank" rel="noopener">Jmeter</a>使用Java编写，主要用于软件的性能测试，但也可扩展用于网络性能测试。机器配置足够的情况下，流量可打到上百M。</li>
-<li><a href="http://tomahawk.sourceforge.net/" target="_blank" rel="noopener">tomahawk</a>是一个回放数据包的工具，也可完成部分性能测试。</li>
-<li>而软件的性能测试常用的LoadRunner，一般难以用于网络的性能测试。</li>
-</ul>
+<h2 id="其它性能指标测试方法"><a href="#其它性能指标测试方法" class="headerlink" title="其它性能指标测试方法"></a>其它性能指标测试方法</h2><p>以下主要包括CPS、TPS、HTTP吞吐、TCP最大连接数及其它性能指标的测试方法。</p>
 <a id="more"></a>
-<h2 id="测试拓扑"><a href="#测试拓扑" class="headerlink" title="测试拓扑"></a>测试拓扑</h2><p>前文主要介绍了2－7层的性能测试方法，除此之外我们还需要注意测试拓扑结构。<br>从物理环境上看，性能测试拓扑是比较单一的，没有多少复杂度：测试仪表连接被测设备，就可开始测试。需要注意的是测试仪中的制定的测试拓扑，在每次性能测试开始前，我们都需要明确客户端数目、服务器数目、源IP、目的IP和NAT等。以下为根据实际的测试经验简单总结一下性能测试在拓扑制定上需要注意的事项。</p>
+<h2 id="TCP每秒新建（CPS）"><a href="#TCP每秒新建（CPS）" class="headerlink" title="TCP每秒新建（CPS）"></a>TCP每秒新建（CPS）</h2><p>CPS测试的目的是确定最大的TCP连接建立速度。在RFC3511文档中对TCP每秒新建的测试方法进行了定义，同时也明确了测试过程中得参数设置。但在实际评测或客户验证时，对于CPS的配置却有一些出入。这里需要我们注意的事项请参见下列说明。</p>
 <ol>
-<li>在测试2－7层的性能时，测试仪和被测设备的转发模式我们一般会选择透明模式或者路由模式。<br>透明模式相当于二层，被测设备的配置相对简单，配置相应的转发规则即可。测试仪表的配置中源IP地址和目的IP地址要在相同的地址网段中，客户端和服务器的数目不应大于IP地址数，客户端的数目建议大于服务器端数目。<br>路由模式相当于三层，被测设备的配置相对复杂一些，需要配置接口的IP地址、路由表及相应的转发规则等。测试仪表的配置中源IP地址和目的IP地址要与被测设备的接口IP地址相对应，并且需要配置ARP响应机制或IPv6地址的学习机制，其它与配置透明模式的一致。</li>
-<li>在测试2－3层的性能，特别是RFC2544四项值时，建议测试仪采用UDP协议做为测试的承载协议。<br>当然，也有一些客户会选择IP层或者TCP层做为承载协议。这里没有硬性的规定，但大部分评测机构或者客户都会选择UDP协议进行测试。<br>当选择UDP协议进行测试时，UDP协议的端口号应避免已知的常用协议，如DNS的53端口，TFTP的69端口等，当然也没有硬性的规定。建议使用UDP端口7或0做为源和目的端口，或者直接使用测试仪的默认端口即可。</li>
-<li>在测试4－7层的性能时，需要注意客户端与服务器之间的对应关系。TODO<br>在测试需求或测试要求中，我们可能会遇到多个客户端对应一台服务器或者多个客户端对应多台服务器的情况。<br>在多对一的环境中，控制客户端数目不要过多，应根据被测设备应用的实际场景确定数目，源IP地址和目的IP地址建议使用一个C类网段。<br>在多对多的环境中，会出现两种测试拓扑结构。其中一种是多对一的单一叠加方式，另一种是全部混搭方式。这两者的客户端请求方式存在很大的差异。全部混搭方式要比单一叠加的方式更接近实际的应用场景，而这正是我们搭建测试拓扑的关键。如果被测设备足够好，无论采用哪种方式，性能结果都不应该有变化。因此，建议在测试4－7层的性能时，应采用全部混搭的方式搭建拓扑结构。</li>
-<li>在测试4－7层的性能时，还应注意源IP地址与目的IP地址的数目。<br>前面我们提到在多对一的测试拓扑中，建议使用一个C类地址段。在多对多的测试拓扑中，可以使用一个C类地址段，也可以使用多个C类地址段或一个B类地址段。<br>这里建议在多对多的测试拓扑结构中，决定使用几个地址段时，应参考被测设备在实际应用场景所能承受的最大负载。比如，将一个百兆的网关类设备放在一个数据中心的出口处显然不太适合，所以在测试时给它分配一个B类地址段或多个C类地址段，也显然不适合。<br>在设计和搭建测试拓扑时，应充分考虑被测设备所应用的场景，从而给它量身定做源IP地址和目的IP地址、甚至是客户端与服务器的数量等。</li>
+<li>TCP每秒新建的参数配置，应根据客户或评测机构的实际情况进行配置。<br>有的客户在测试CPS时，只关注TCP层的建立速度，使TCP连接建立成功即可，此关注的实际是TCP连接三次握手的过程（SYN，SYN ACK ，ACK），而且连接处于OPEN状态。而有的客户关注的是TCP的完整链接状态：包括三次握手建立、持续和关闭；而且在关闭过程中，又可以选择发送TCP FIN或者RST报文的方式。因此，在测试CPS前应与客户沟通测试的参数设置。</li>
+<li>在RFC3511文档中，描述了在测试CPS时，采用HTTP1.1的协议，并且响应Get请求。<br>而在有些评测机构中，在测试CPS时确实会采用HTTP1.0甚至TCP或其它基于TCP的协议进行测试。无论是否采用HTTP协议，对于CPS的测试过程基本没有影响，只是多了一个GET请求和应答。但传输的文件大小将会占用被测设备很大的系统资源，从而导致测试结果偏小。在RFC3511中，没有明确应答数据的大小，所以这里我们可以设置为1byte甚至更小。</li>
+<li>在测试过程中，应采用反复搜索的方式，以确定被测设备可以接受的TCP连接的最大请求速率。测试周期建议在10分钟以上。</li>
+<li>如上文所述，基于使用协议的不同，CPS可以分为L4（传输层）CPS和L7（应用层）CPS。而且大部分的厂商和客户都基本认同这两种CPS的叫法。</li>
 </ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过本篇相信大家对性能测试有了一更深入的理解，以下是一些经验总结及注意事项。</p>
+<h2 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h2><p>TPS是指最大HTTP传输速率，考察被测设备的应用层处理能力。在RFC3511文档中要求协议使用HTTP1.0或者HTTP1.1。整个过程包括TCP三次握手以后执行HTTP事务请求（GET或者POST），并且得到答应，然后关闭TCP连接。需要注意的事项请参见下列说明。</p>
 <ol>
-<li>对于网络安全类产品或网关类产品，RFC2544四项值一直作为性能测试的首要测试指标，从1999年发布一直使用至今。<br>业界有人认为RFC2544四项值已经不太适用于现代的产品，特别是对于IPS、AV和UTM的产品。但无可否认的是，RFC2544四项值是最能反映产品在底层转发的性能，而且从侧面反映了产品在低层转发过程中的稳定性。所以，RFC2544四项值将会被一直延用，并且作为一个重要测试指标一直延用下去。</li>
-<li>在网络安全类产品或网关类产品中，RFC3511对于4－7层的性能测试方法的定义过于模糊。<br>这使得4－7层的性能测试存在很大的争议，比如请求文件的大小、每条连接中请求的次数、协议版本、客户端与服务器数目等，都是争义的内容。特别是当产品集成了IPS、AV 和UTM功能后，在测试的细节上争义更为严重。比如URL地址是否相同、文件类型的变化、文件内容是否相同、IP地址端口的遍历、客户端与服务器所使用的软件及软件版本等。一个细微的不同，可能就会导致测试结果不同。所以，在对4－7层进行性能测试时，一定要与客户或评测机构沟通，指定相关的细节，从而验证产品的真实性能。同时，做为性能测试人员，在制定测试方法和测试拓扑时，应充分考虑被测设备所能应用的场景。这样的测试结果才是真实、可信并且有意义的。</li>
-<li>在此系列文章中没有介绍混合流量的性能测试，特别是应用层协议的混合流量性能测试。<br>首先无论是单一协议还是混合协议，主要关注新建速率和吞吐量值。而且混合流量中吞吐量的结果，可能是大家最为关注的。但混合流量中各协议的分配比例，没有一个权威的机构支撑，也难有哪个机构能够支撑。因为网络环境中的应用千变万化，网络实际应用场景也大不相同，比如教育网、中小企业、政府机构、金隔业场景等。混合流量没有一个统一的模板，所以在指定协议分配比例时，多数是参考评测机构发布的数据或者凭借自身经验指定的模板。因此，混合流量的性能测试没有在本篇中涉及。</li>
-<li>对于性能测试人员，不仅要了解产品特性，还要对协议有一定的了解。<br>特别是应用层的协议，了解各协议的数据处理流程，从而指定客户端请求与服务器的应答等过程。</li>
-<li>性能测试也要有需求意识。<br>性能测试人员要懂得倾听，明白哪些是客户最想了解的，哪些是评测机构最想知道的。只有了解到需求，才能制定一份符合产品的测试方法，才能得出产品的真实性能结果。</li>
+<li>HTTP1.0和HTTP1.1协议的区别<br>在HTTP1.0 协议中，每对请求/应答都使用一个新的连接。每次请求都需要客户端与服务器建立一个TCP连接，服务器收到请求并且返回应答后，会立即断开TCP连接。<br>而HTTP1.1协议是可以保持这种连接状态，是可持久的。在一个TCP连接上可以传输多个HTTP请求/应答。当传输完成后，必须采用三次握手或四次握手的方法关闭链接（FIN，ACK，FIN ACK，ACK ） 。</li>
+<li>请求/应答的文件大小<br>在RFC3511文档中没有明确说明文件的大小及类型。在测试TPS前一定要向客户或评测机构了解要求的请求文件的大小及类型。有些机构中采用1 字节或者100字节的文件，而有些机构则采用1K字节或者4K字节，文件类型也多种多样。所以，应多与客户或者评测机构进行实际的沟通。<br>建议采用文件大小为1K字节、文件类型为文本文件；当采用HTTP1.0 协议时，建议Get 1次；当采用HTTP1.1协议时，建议Get 10次或者更多。</li>
+<li>通过1可以看到，在测试TPS时，采用HTTP1.0协议或采用HTTP1.1协议测试同一款被测设备，会得到两种不同的测试结果<br>因为HTTP协议本身的原因，使得在传输过程中得到的事务数会有所不同。理论上讲，HTTP1.1 协议的传输事务数要高于HTTP1.0协议。但这并不能反映HTTP1.1 的每秒连接数要高于HTTP1.0的每秒连接数。<br>同时需要注意到，测试HTTP TPS时如果采用HTTP1.0，其实和TCP的L7 CPS的性能一样。从测试方法和测试过程中看，两者基本没有区别。<br>所以，在测试HTTP TPS时，一定要了解客户的关注重点，而且要与客户沟通采用哪个版本的HTTP协议。</li>
 </ol>
+<h2 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h2><p>在RFC3511文档中没有明确描述HTTP有效吞吐量的测试方法，但通过TPS的测试方法，我们可以根据要求来编写HTTP有效吞吐量的方法。需要注意的事项请参见下列说明。</p>
+<ol>
+<li>在TPS节，我们知道了HTTP1.0和HTTP1.1之间的区别<br>在测试HTTP有效吞吐量时，应减少TCP的建立和关闭连接的消耗和延迟。所以在测试HTTP有效吞吐量时，建议采用HTTP1.1协议。</li>
+<li>在测试HTTP有效吞吐量时，建议采用请求/应答的模式<br>而且在HTTP1.1协议中，可以执行8个或8个以上的请求命令（GET）。请求的文件大小建议为64K字节的文本文件。当然，在实际测试过程中请求文件的大小及类型，应与客户或评测机构进行沟通。当请求命令越多，请求的文件越大，那么HTTP的吞吐量也就越大。</li>
+</ol>
+<h2 id="最大TCP并发连接数"><a href="#最大TCP并发连接数" class="headerlink" title="最大TCP并发连接数"></a>最大TCP并发连接数</h2><p>在RFC3511文档中描述的最大TCP并发连接数测试，是采用一种反复搜索机制进行，在每次反复过程中以低于被测设备所能承受的连接速率发送不同数量的并发连接，直至得出被测设备的最大TCP并发连接数。需要注意的事项请参见下列说明。</p>
+<ol>
+<li>在测试最大TCP并发连接数所采用的协议<br>有些客户或厂商为了追求更高的数值，在测试此项时采用TCP层协议。而一些评测机构或客户要求在测试最大TCP并发连接数时采用HTTP协议，并且要求有请求/答应机制。</li>
+<li>在测试最大TCP并发连接数时使用应用层协议(HTTP)，请求/应答的传输文件大小会直接影响测试结果<br>如果应用层流量很大，被测设备会使用很大的系统资源去处理包转发或包检查等，从而导致一些请求无法被处理，引起测试结果偏小；反之测试结果会偏大。这里建议当使用HTTP协议进行测试时，请求的文件不应过大，应在1Byte左右。</li>
+<li>在测试最大TCP并发连接数时，无论采用TCP协议还是采用应用层协议，都应考虑实际测试需要<br>从1中我们知道，采用TCP协议进行测试对被测设备的压力要小，并且每条连接中的负载也比较小，被测设备在转发或处理时比较容易，从而很容易达到测试的数目要求。但这并不是说采用TCP协议就是没有意义的，它从另一角度反映了被测设备能维持TCP连接的最大数量。<br>而如2中采用HTTP协议进行测试，会加大被测设备的压力，使得占用被测设备的资源去处理包转发或包检查。而且请求文件大小的不同，会引起测试结果发生偏差。在实际测试过程中，我们应与客户或评测机构进行沟通，从而测试出被测设备的真实能力，是否满足其要求。</li>
+</ol>
+<h2 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h2><p>如上，我们可以看出在TCP或应用层测试中，主要包括<strong>三个重要的指标</strong>：每秒新建、有效吞吐量和最大并发连接数。<br>其实应用层的性能测试，无论是FTP协议、Mail协议还是其它的应用协议都离不开这三个测试指标项。所以，在对其它应用层协议进行测试时，也应像HTTP协议测试一样：明确测试文件的大小，明确每条链接的负载，明确每个请求/应答的过程等。测试过程、测试方法及测试结果的计算衡量基本都与HTTP测试类似。这就要求测试人员对应用层协议要有一定的理解，甚至对每个关键字的作用要有初步的判定。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍了TCP/HTTP层的性能指标的测试方法，并由此扩展到其它所有需要的应用层的性能测试方法。</p>
 <h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
 <li><a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a></li>
-<li><a href="http://wenku.baidu.com/link?url=Ih8o0RQ8OcRMoiJHO4yaJTDqPKz5NYt--mc63aeUQCQlrruS_KXQsnWf_AG7U73vo5ciytSLZNyGQTB5kPY9-xn7E4rScqtQGAy8U8ucD_O###" target="_blank" rel="noopener">网络安全产品的性能测试研究</a> - 阐述较为全面的硕士论文</li>
 </ul>
 ]]></content>
       <categories>
@@ -188,6 +418,8 @@
         <tag>NGFW</tag>
         <tag>防火墙</tag>
         <tag>spi firewall</tag>
+        <tag>CPS</tag>
+        <tag>TPS</tag>
       </tags>
   </entry>
   <entry>
@@ -304,163 +536,14 @@
       </tags>
   </entry>
   <entry>
-    <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
-    <url>/2013/03/gateway-performance-test-desc/</url>
-    <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
-<ol>
-<li>简介及性能指标介绍 - 本篇</li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
-</ol>
-<a id="more"></a>
-<h2 id="性能测试简介"><a href="#性能测试简介" class="headerlink" title="性能测试简介"></a>性能测试简介</h2><p>以下解释来自百度百科：</p>
-<blockquote>
-<p>性能测试是通过自动化的测试<strong>工具</strong>模拟多种正常、峰值以及异常<strong>负载</strong>条件来对系统的各项性能指标进行测试。负载测试和压力测试都属于性能测试，两者可以结合进行。通过负载测试，确定在各种工作负载下系统的性能，目标是测试当负载逐渐增加时，系统各项性能指标的变化情况。压力测试是通过确定一个系统的<strong>瓶颈</strong>或者不能接受的性能点，来获得系统能提供的最大服务级别的测试。</p>
-</blockquote>
-<p>其中有三个关键词需要关注：</p>
-<ul>
-<li>工具：性能测试一般需要的压力较大较复杂，单纯依靠手工很难做到，因此一般需要专业化的设备、工具，或编写自动化测试脚本完成。网关类产品一般要求的负载较高，在千兆、万兆设置更高级别，一般需要专业配置千兆万兆网卡的硬件设备，如IAXA等，价格较昂贵。而其它产品一般也需要如Loadruner、Jmeter等专业化的性能测试软件并根据场景编写脚本完成。</li>
-<li>负载：性能测试有别于功能测试的点就在于使用的负载较高。而且负载的构造需要根据实际的场景才有价值，并需要使用特定的工具或自行研发软件实现。</li>
-<li>瓶颈：逐渐加大负载到达瓶颈。测试中比较重要的就是各个性能拐点，因为各个拐点往往都有重要的意义。如保持最优响应的拐点、延迟急剧增加的拐点、系统彻底瘫痪的拐点。持续测试找到各个拐点，对于产品的调优、部署及运维都有很大的价值。<br><img src="/img/jmeter-result.png" alt="性能测试结果"></li>
-</ul>
-<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
-<ul>
-<li>性能测试，对产品负载压力承受能力的测试。</li>
-<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
-<li>网关类产品，部署作为网关的设备及软件。</li>
-<li>IDS，入侵检测系统</li>
-<li>IPS，入侵防御系统</li>
-<li>UTM，对防火墙、IDS\、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
-<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
-<li>DUT，devices under test，测试设备。</li>
-</ul>
-<h2 id="性能指标名词解释"><a href="#性能指标名词解释" class="headerlink" title="性能指标名词解释"></a>性能指标名词解释</h2><p>网络安全类产品或网关类产品常见的性能指标有：</p>
-<ul>
-<li>RFC2544 四项值（吞吐量、延迟、丢包率、背靠背）</li>
-<li>TCP 的每秒新建连接数（CPS）</li>
-<li>HTTP 的每秒处理事务数（TPS）、HTTP 有效吞吐量（HTTP Throughput）</li>
-<li>最大并发连接数等</li>
-</ul>
-<p>除此之外，部分评测机构或客户也会根据自己的实际情况增加性能指标，如：IPS/UTM下的HTTP有效吞吐量和每秒新建，Mail协议（SMTP/POP3/IMAP）的有效吞吐量和新建，特殊场景的混合流量（如加入恶意流量）的吞吐量等。<br>可参考业界标杆Fortinet的<a href="https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/Fortinet_Product_Matrix.pdf" target="_blank" rel="noopener">性能测试报告</a>。<br><img src="/img/fortinet-product-matrix-sample.png" alt="Fortinet product matrix"></p>
-<p>下面我们先认识一下各性能指标名词的含义。本篇只介绍各名词的含义，测试方法后续章节中说明。</p>
-<h3 id="RFC2544-四项值"><a href="#RFC2544-四项值" class="headerlink" title="RFC2544 四项值"></a>RFC2544 四项值</h3><p><a href="https://tools.ietf.org/html/rfc1242" target="_blank" rel="noopener">RFC1242</a>文档中定义了吞吐量（Throughput）、延迟（Latency）、丢包率（Frame Loss）、背靠背（Back-to-Back）四个标准术语。<br><a href="https://www.ietf.org/rfc/rfc2544.txt" target="_blank" rel="noopener">RFC2544</a>是RFC组织提出的用于评测网络互联设备（防火墙、IDS、交换机路由器等）的国际标准，其中主要对RFC1242 中定义的性能评测参数的具体测试方法、结果的提交形式作了较详细的规定。</p>
-<p>下面将对这四项值是做为重点进行介绍。</p>
-<h4 id="吞吐量（Throughput）"><a href="#吞吐量（Throughput）" class="headerlink" title="吞吐量（Throughput）"></a>吞吐量（Throughput）</h4><p>吞吐量是指被测设备在不丢包的情况下，所能转发的最大速率或最大流量。通常测试结果以每秒通过的最大数据包数（PPS）或比特数（Mb/s）。<br>用于反映被测设备所能够处理的最大的数据流量，重在测试被测设备的转发能力。<br>结果值越大越好。<br>吞吐量比较通用，适用于绝大多数软件系统的性能测试。</p>
-<h4 id="延迟（Latency）"><a href="#延迟（Latency）" class="headerlink" title="延迟（Latency）"></a>延迟（Latency）</h4><p>发送一定数量的数据包，记录中间数据包发出的时间T1，以及经由被测设备转发后到达接收端口的时间T2：Latency＝T2－T1。延迟的测试结果以毫秒（ms）或微秒（μs）表示。<br>测试延迟是在测试过程中不存在丢包的条件下进行的，也就是说在测试延迟时，先要知道被测设备的吞吐量，从而定义发包的速率。<br>延迟用于反映被测设备处理数据包的速度。<br>延迟越小，表明设备处理速度越快。<br>延迟比较通用，是大多数软件系统性能测试的重要指标。</p>
-<h4 id="丢包率（Frame-Loss）"><a href="#丢包率（Frame-Loss）" class="headerlink" title="丢包率（Frame Loss）"></a>丢包率（Frame Loss）</h4><p>丢包率是指在一定的负载下，由于缺乏资源而未能被转发的包占应该转发的包数的百分比。<br>用于反映被测设备承受特定负载能力。<br>结果值越小越好。</p>
-<h4 id="背靠背（Back-to-Back）"><a href="#背靠背（Back-to-Back）" class="headerlink" title="背靠背（Back-to-Back）"></a>背靠背（Back-to-Back）</h4><p>以能够产生的最大的速率，发送一定长度的数据包，并不断改变单次发送的数据包数目，直到被测设备能够完全转发所有发送的数据包而不丢包，这个包数就是该设备的背对背值。<br>用于反映被测设备处理突发数据的缓存能力。背对背的值越大，路由器的缓存能力就越强，处理突发数据包的能力越强。</p>
-<h3 id="TCP每秒新建连接数（CPS）"><a href="#TCP每秒新建连接数（CPS）" class="headerlink" title="TCP每秒新建连接数（CPS）"></a>TCP每秒新建连接数（CPS）</h3><p>TCP每秒新建是在业界提到最多的一个。这个性能指标出自<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档。全称是 Maximum TCP Connection Establishment Rate（最大TCP 建立速率），大家习惯将这个指标称为CPS（TCPConnection Per Second）。<br>TCP每秒新建速率是指在被测设备能够成功建立所有请求连接的条件下，所能承受的最大TCP 连接建立速度。其测试采用迭代搜索算法，每次迭代过程中，以低于被测设备所能承受的最大并发连接数发起速率不同的TCP 连接请求，直到得到所有连接成功建立的最大速率。<br>TCP每秒新建速率以连接数/秒表示结果，其值越大越好。<br>注：TCP Connection Establishment已在<a href="https://tools.ietf.org/html/rfc2647" target="_blank" rel="noopener">RFC2647</a>文档中进行定义。</p>
-<h3 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h3><p>TPS性能指标是反映被测设备应用层的新建速率，这个性能指标也出自RFC3511文档。全称是Maximum HTTP Transaction Rate（最大HTTP传输事务速率），大家习惯将这个指标称为TPS（HTTPTransaction Per Second）。<br>HTTP的每秒事务数是指在被测设备能够成功建立连接的条件下，所能承受的最大的HTTP 协议的请求/回应操作的速度。其测试采用反复搜索过程，每次反复过程中，以低于被测设备所能承受的最大处理速率，直到所有连接被成功建立并且有对相应的请求。<br>结果以连接数/秒表示结果。其值越大越好。</p>
-<h3 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h3><p>HTTP有效吞吐量是反映被测设备在应用层的最大传输速率，这个性能指标在RFC3511文档中没有明确描述，但可以通过将HTTP Transaction Rate调整转化为HTTP有效吞吐量的测试方法。HTTP有效吞吐量是指在被测设备能够成功建立连接的条件下，在同一时间内所能承受的最大的有效数据量。<br>测试结果值越大越好。</p>
-<h3 id="最大并发连接数"><a href="#最大并发连接数" class="headerlink" title="最大并发连接数"></a>最大并发连接数</h3><p>最大并发连接数性能指标是反映被测设备最大的会话条目数，这个性能指标也出自RFC3511文档。全称是 Concurrent TCP Connection Capacity。最大并发连接数是指在被测设备能够成功建立连接的条件下，所能同时承受的最大的链接条目数，也反映了被测设备维持多个会话的能力。<br>测试结果值越大越好。</p>
-<h3 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h3><p>在<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档中主要描述了HTTP协议的性能测试，但随着产品及技术的大幅度更新，这往往已经不能满足客户或厂商的需求。我们还需要测试其它协议的性能，通常以应用层为主：包括FTP协议、Mail协议等。但测试的内容基本都是一样的，以每秒新建（每秒会话）和吞吐量为主。只需将HTTP协议变为其它应用层协议即可。</p>
-<p>随着网关产品尤其是网络安全类产品的发展，性能测试的范围不再局限于防火墙功能上的性能测试，还新增加了对其它功能如IPS、AV（防病毒）和UTM（集成安全网关）等的性能测试。但可以看到，这些功能的增加对于测试过程或者测试方法而言其实没有直接的影响，仍然要使用原来的测试过程或测试方法。下篇我们将介绍具体的测试方法。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是简介及测试方法的概念介绍。所有的性能指标中，RFC2544的四项指标是其中比较重要的部分且目前基本以形成标准，下篇文章将对其进行介绍。</p>
-]]></content>
-      <categories>
-        <category>Testing</category>
-      </categories>
-      <tags>
-        <tag>性能测试</tag>
-        <tag>ips</tag>
-        <tag>NGFW</tag>
-        <tag>防火墙</tag>
-        <tag>spi firewall</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>HTTP认证模式</title>
-    <url>/2012/08/http-auth-schemes/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在研究curl和httpclient，用到了HTTP认证相关的知识。<br>但是搜索之后发现，网上居然没有很全面的HTTP认证模式的介绍，尤其是中文的文章。<br>因此结合MS的<a href="http://msdn.microsoft.com/en-us/library/ms789031.aspx" target="_blank" rel="noopener">Understanding HTTP Authentication</a>和<a href="http://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html" target="_blank" rel="noopener">HttpClient Tutorial</a>翻译加个人理解写了一篇。</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本篇博文简介了几种HTTP认证模式。文章内容要求读者对HTTP请求、响应的基本结构，HTTP状态码和HTTP协议头有一定的了解。<br>请参考<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">Linux下cURL使用教程之二：HTTP协议概述</a>。</p>
-<h2 id="HTTP访问认证框架"><a href="#HTTP访问认证框架" class="headerlink" title="HTTP访问认证框架"></a>HTTP访问认证框架</h2><p>HTTP协议（RFC2616）定义了一个简单的访问认证模式框架。此框架假设有若干页面（被保护资源，也称作realm，区域），只能被特定的人访问，这些人可以在服务器要求时提供凭证。<br>当客户端如浏览器访问一个位于保护区域（protected realm）中的页面时，服务器返回包含401未认证状态码和www认证头（WWW-Authenticate header field）的响应。返回的认证头中必须含有至少一个适用于请求页面的认证要求（challenge）。<br>然后客户端发起第二次请求，此次请求在请求头中包含了试用于服务器认证要求的认证头域。<br>如果服务器接受了客户端提供的凭证，它将返回客户端请求的页面。否则，服务端会返回另一个401未认证响应以提示客户端认证失败。<br>具体认证响应头和请求头的内容取决于认证的方式。RFC2616中定义了两种广泛使用的认证模式：<br>HTTP基本认证（HTTP  Basic authentication）和HTTP摘要认证（HTTP Digest authentication）。<br>此外常用的还有NTLM、SPNEGO（HTTP协商认证，HTTP Negotiate authentication，是其一种）和Kerberos认证方式。<br><a id="more"></a></p>
-<h2 id="认证模式"><a href="#认证模式" class="headerlink" title="认证模式"></a>认证模式</h2><h3 id="1-基本认证Basic-Access-Authentication"><a href="#1-基本认证Basic-Access-Authentication" class="headerlink" title="1. 基本认证Basic Access Authentication"></a>1. 基本认证Basic Access Authentication</h3><p>基本认证是基于用户名密码的。<br>服务端的401响应中包含一个认证要求（authentication challenge），此认证要求中含有“Basic”关键字和一个用以表明访问的被保护资源名称的“名称=值”对，如下：<br><code>WWW-Authenticate: Basic realm=&quot;Protected page&quot;</code><br>如果你使用的浏览器，浏览器在接收到401响应时，将会弹出窗口让你输入用户名密码，然后发送认证请求。认证请求中同样包含”Basic”关键字，此外还有Base64编码后的用户名密码，如下：<br><code>Authorization: Basic QWRlcGxveSdzIGJsb2c=</code><br>服务器将用户名密码解码后比对，成功匹配后即认证成功。<br>因为Base64不算是一种加密方法：无密钥的可逆加密，任何人都可解密（百度搜索一下”在线解码“一大堆）。因此基本认证被认为是明文传输，安全性不好。极易出现密码被窃听和重放攻击等安全性问题。<br>如果资源需要更高强度的保护，请使用其他认证方法。</p>
-<h3 id="2-摘要认证HTTP-Digest-authentication"><a href="#2-摘要认证HTTP-Digest-authentication" class="headerlink" title="2. 摘要认证HTTP Digest authentication"></a>2. 摘要认证HTTP Digest authentication</h3><p>摘要认证被设计用来弥补基本认证的缺点。摘要认证基于请求-响应（challenge-response）模式，而且使用了哈希加密算法（常用为MD5），从而某些程度上解决了基本认证安全性的问题。<br>服务器返回的初始401响应的www认证头（WWW-Authenticate header）中多出了一个称为nonce的随机数的字段。服务端保证每个401响应中的nonce值唯一。如：<br><code>Authorization: Digest username=&quot;admin&quot;, realm=&quot;HiPER&quot;</code><br>接下来的客户端响应中将包含由用户名、密码、nonce和其他信息组成的数据的哈希值（如使用MD5加密）。所有被加密的数据服务端也具有，因此服务端执行同样加密过程。如果二者一直则认证成功。<br>因为如MD5等哈希加密算法是不可逆的，因此用户名密码明文无法被窃听破解。因为服务器对同一个nonce的请求只接受一次客户端请求，从而能避免重放攻击。<br>但是，digest的安全性也有缺点：</p>
-<ul>
-<li>只有密码密码被加密，而客户端最终请求的被保护资源是明文传送的，可被窃听</li>
-<li>客户端无法确认服务端的正确身份，缺少对服务端的认证方式</li>
-<li>近年来，随着计算机性能的提高等因素，传统高强度加密算法的破解已成可能。而MD5更是已有破解方法。</li>
-</ul>
-<p>更多安全性问题请参考RFC2617。</p>
-<h3 id="3-NTML"><a href="#3-NTML" class="headerlink" title="3. NTML"></a>3. NTML</h3><p>NTML由微软开发，使用于Windows平台。被认为是比摘要认证更安全的认证方式。<br>它使用Windows凭证（Windows credentials）来传递认证数据，而不是使用未编码的用户名密码。<br>NTML要求服务器与客户端做出多次数据交换，服务器和所有其中的代理都必须支持永久连接（persistent connections）才能完成认证。</p>
-<h3 id="4-Kerberos"><a href="#4-Kerberos" class="headerlink" title="4. Kerberos"></a>4. Kerberos</h3><p>服务器与客户端通过第三方的Kerberos服务器完成认证。具体请参见<a href="http://baike.baidu.com/view/306687.htm" target="_blank" rel="noopener">百度百科条目</a>和<a href="http://zh.wikipedia.org/wiki/Kerberos" target="_blank" rel="noopener">维基百科条目</a>。<br>Kerberose相比NTML有很大改善：速度快，而且允许相互认证、认证代理和简单的信任关系。参考<a href="http://msdn.microsoft.com/en-us/library/aa480475.aspx" target="_blank" rel="noopener">KERBEROS vs NTLM</a>。</p>
-<h3 id="5-SPNEGO"><a href="#5-SPNEGO" class="headerlink" title="5. SPNEGO"></a>5. SPNEGO</h3><p>全称是Simple and Protected GSS-API Negotiation，是微软提供的一种使用<a href="http://baike.baidu.com/view/1551940.htm" target="_blank" rel="noopener">GSS-API</a>认证机制的安全协议，用于使Webserver共享Windows Credentials，它扩展了Kerberos(一种网络认证协议)。<br>SPNEGO适用于客户端需要认证，但是客户端服务端都不清楚对方支持什么认证协议的场合。<br>SPENGO其实是一种”伪认证机制“（pseudo-mechanism），用以协商出真正的认证机制。<br>最常见的是微软的HTTP协商认证扩展（HTTP Negotiate authentication extension），协商的最终机制在NTML和Kerberos中选择。Kerberos因其优点优先使用。<br>百度词条对此认证的解释是不够准确的，准确的解释可以参考<a href="http://en.wikipedia.org/wiki/SPNEGO" target="_blank" rel="noopener">维基百科条目</a>。</p>
-<h2 id="认证方式选择"><a href="#认证方式选择" class="headerlink" title="认证方式选择"></a>认证方式选择</h2><p>选择何种认证方式取决于资源要被保护的程度。不需要保护的资源使用基本认证方式。因为认证会导致更多的数据传输，可能影响用户体验。<br>认证方式最弱的是基本认证，最强的是协商认证。服务端在WWW-Authentication提供自己支持的认证方式，供客户端任意选择。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>RFC2616-HTTP协议<br>RFC2617-HTTP认证：基本认证和摘要认证<br>RFC1321-MD5摘要加密逻辑<br><a href="http://frontier.userland.com/stories/storyReader$2159" target="_blank" rel="noopener">HTTP Authentication Schemes</a></p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之四：curl基本使用实例</title>
-    <url>/2012/08/linux-curl-basic-usage-example/</url>
-    <content><![CDATA[<p>本篇主要结合编写的PHP程序实例对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage/" target="_blank" rel="noopener">curl基本使用</a>进行具体说明。</p>
-<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="HTTP服务器"><a href="#HTTP服务器" class="headerlink" title="HTTP服务器"></a>HTTP服务器</h3><p>建议<code>Ubuntu+Apache+PHP</code>，方便简洁:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install apache2 php5</span><br></pre></td></tr></table></figure></p>
-<p>即可。</p>
-<h3 id="网页"><a href="#网页" class="headerlink" title="网页"></a>网页</h3><p>以下为测试使用的服务器端代码，全部使用php实现。</p>
-<ul>
-<li>curldemo.php，用于输出User-Agent、Referer、Cookie信息：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_USER_AGENT'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">'HTTP_REFERER'</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_REFERER'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_COOKIE[<span class="string">'user'</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user="</span>.$_COOKIE[<span class="string">'user'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">        setcookie(<span class="string">"user"</span>,<span class="string">""</span>,time()<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<a id="more"></a>
-<ul>
-<li><p>curlfollow.php，设置cookie后跳转至curldemo.php（使用js跳转，curl不会执行js函数，因此只有在浏览器中才会自动跳转）：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    setcookie(<span class="string">"user"</span>,<span class="string">"Stackeye"</span>);</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;script&gt;window.location =\"curldemo.php\";&lt;/script&gt;"</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>curl301.php，重定向至curldemo.php（header重定向后Referer字段为空，设置的cookie也不保存）：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    Header( <span class="string">"HTTP/1.1 301 Moved Permanently"</span> ) ;</span><br><span class="line">    Header( <span class="string">"Location: curldemo.php"</span> );</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>curldeny.php，对User-Agent/Referer/cookie有严格要求，才会显示最终内容：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">CurlDeny-PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">	I<span class="string">'ll deny all http requests,&lt;br&gt;</span></span><br><span class="line"><span class="string">	except your User-agent contains "Mozilla/4.0",&lt;br&gt;</span></span><br><span class="line"><span class="string">	your referer contains "www.baidu.com",&lt;br&gt;</span></span><br><span class="line"><span class="string">	and your cookie user is "Stackeye"!&lt;br&gt;</span></span><br><span class="line"><span class="string">	If you succeed,you will see "You finally get it"!&lt;br&gt;&lt;br&gt;</span></span><br><span class="line"><span class="string">&lt;?php</span></span><br><span class="line"><span class="string">    if(strpos($_SERVER['</span>HTTP_USER_AGENT<span class="string">'],"Mozilla/4.0")!==false)</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">    	echo "&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;".$_SERVER['</span>HTTP_USER_AGENT<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    	if(isset($_SERVER['</span>HTTP_REFERER<span class="string">'])</span></span><br><span class="line"><span class="string">         &amp;&amp;strpos($_SERVER['</span>HTTP_REFERER<span class="string">'],"www.stackeye.com")!==false)</span></span><br><span class="line"><span class="string">    	&#123;</span></span><br><span class="line"><span class="string">    		echo "&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;".$_SERVER['</span>HTTP_REFERER<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    		if(isset($_COOKIE['</span>user<span class="string">'])&amp;&amp;strcmp($_COOKIE['</span>user<span class="string">'],"Stackeye")==0)</span></span><br><span class="line"><span class="string">    		&#123;</span></span><br><span class="line"><span class="string">    	      echo "&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user=".$_COOKIE['</span>user<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">            setcookie("user","",time()-1);</span></span><br><span class="line"><span class="string">            echo "You finally get it!&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    		&#125;</span></span><br><span class="line"><span class="string">    		else</span></span><br><span class="line"><span class="string">    		    echo "\n&lt;br&gt;&lt;br&gt;I'</span>m sorry but you are so close!&lt;br&gt;\n<span class="string">";</span></span><br><span class="line"><span class="string">    	&#125;</span></span><br><span class="line"><span class="string">    	else</span></span><br><span class="line"><span class="string">    	    echo "</span>\n&lt;br&gt;&lt;br&gt;I<span class="string">'m sorry but you are so close!&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    else</span></span><br><span class="line"><span class="string">        echo "\n&lt;br&gt;&lt;br&gt;I'</span>m sorry but you are so close!&lt;br&gt;\n<span class="string">" ;</span></span><br><span class="line"><span class="string">?&gt;</span></span><br><span class="line"><span class="string">&lt;br&gt;</span></span><br><span class="line"><span class="string">&lt;a href="</span>http:<span class="comment">//www.stackeye.com" target="_blank"&gt;Stackeye's Blog&lt;/a&gt;</span></span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>setcookie.php，设置cookie的user字段，用以访问curldeny.php:</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">SetCookie-PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">	I just set the cookie,&lt;br&gt; </span><br><span class="line">	with which you can get the curldeny.php.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    setcookie(<span class="string">"user"</span>,<span class="string">"Stackeye"</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>以上PHP文件放入服务器根目录下即可（Ubuntu+Apache下默认为<code>/var/www</code>）。以下默认服务器地址为本机127.0.0.1。</p>
-<h2 id="curl访问任务"><a href="#curl访问任务" class="headerlink" title="curl访问任务"></a>curl访问任务</h2><p>使用curl命令完成如下任务。</p>
-<h3 id="1-伪装成Firefox访问curldemo-php"><a href="#1-伪装成Firefox访问curldemo-php" class="headerlink" title="1. 伪装成Firefox访问curldemo.php"></a>1. 伪装成Firefox访问curldemo.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure>
-<p>保存的html文件可以用浏览器打开查看。</p>
-<h3 id="2-伪装来源页面为www-stackeye-com访问curldemo-php"><a href="#2-伪装来源页面为www-stackeye-com访问curldemo-php" class="headerlink" title="2. 伪装来源页面为www.stackeye.com访问curldemo.php"></a>2. 伪装来源页面为<a href="http://www.stackeye.com访问curldemo.php" target="_blank" rel="noopener">www.stackeye.com访问curldemo.php</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o curlex.html -e http://www.stackeye.com http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure>
-<h3 id="3-伪装成Firefox访问curlfollow-php，并保存cookie文件"><a href="#3-伪装成Firefox访问curlfollow-php，并保存cookie文件" class="headerlink" title="3. 伪装成Firefox访问curlfollow.php，并保存cookie文件"></a>3. 伪装成Firefox访问curlfollow.php，并保存cookie文件</h3><p>然后使用保存的cookie文件，伪装成firefox，访问curldemo.php<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curlfollow.html -D cookie001.txt http://127.0.0.1/curlfollow.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html -D cookie002.txt -b cookie001.txt http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure></p>
-<p>curldemo.html将显示user的值为Stackeye。</p>
-<h3 id="4-伪装成Firefox并直接使用cookie值访问curldemo-php"><a href="#4-伪装成Firefox并直接使用cookie值访问curldemo-php" class="headerlink" title="4. 伪装成Firefox并直接使用cookie值访问curldemo.php"></a>4. 伪装成Firefox并直接使用cookie值访问curldemo.php</h3><p>cookie中user值为Stackeye，pass值为password<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html -D cookie002.txt -b “user=Stackeye;pass=password” \</span><br><span class="line">http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure></p>
-<p>curldemo.html将显示user的值为Stackeye，pass值为password。</p>
-<h3 id="5-不自动跟踪重定向访问curl301-php"><a href="#5-不自动跟踪重定向访问curl301-php" class="headerlink" title="5. 不自动跟踪重定向访问curl301.php"></a>5. 不自动跟踪重定向访问curl301.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -v -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curl301.html http://127.0.0.1/curl301.php</span><br></pre></td></tr></table></figure>
-<p>因为此时curl301.html文件内容为空，我们只能通过-v查看具体内容。<br>可以看到curl只访问了curl301.php</p>
-<h3 id="6-自动跟踪重定向访问curl301-php"><a href="#6-自动跟踪重定向访问curl301-php" class="headerlink" title="6. 自动跟踪重定向访问curl301.php"></a>6. 自动跟踪重定向访问curl301.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -L -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curl301.html http://127.0.0.1/curl301.php</span><br></pre></td></tr></table></figure>
-<p>此时打开curl301.html会看到curldemo.php的内容，说明curl自动根据重定向去访问了curldemo.php。</p>
-<h3 id="7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”"><a href="#7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”" class="headerlink" title="7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”"></a>7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o setcookie.html -D cookie001.txt http://127.0.0.1/setcookie.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldeny.html -e http://www.adeploy.com -D cookie002.txt -b cookie001.txt \</span><br><span class="line">http://127.0.0.1/curldeny.php</span><br></pre></td></tr></table></figure>
-<p>打开curldeny.html文件，可看到“You finally get it!”信息。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是针对curl基本用法的实例以加深理解和掌握。实际操作中，登陆、发帖等操作还会用到提交表单相关操作，下篇将进行讲解。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网关类产品的性能测试之三：其它指标测试方法</title>
-    <url>/2013/03/gateway-performance-test-others/</url>
-    <content><![CDATA[<p>本篇主要介绍除RFC2544四项指标外的其它指标的测试方法。其中的性能测试项主要来源于<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>中的定义，并根据实际需求，更新或舍弃了部分指标项。</p>
+    <title>网关类产品的性能测试之四：测试工具、注意事项及经验总结</title>
+    <url>/2013/04/gateway-performance-test-summary/</url>
+    <content><![CDATA[<p>前面我们介绍了各性能指标项的测试方法。本篇主要概述测试工具、测试拓扑及经验总结。</p>
 <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p>
 <ol>
 <li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/" target="_blank" rel="noopener">简介及性能指标介绍</a></li>
 <li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
-<li>其它指标测试方法 - 本篇</li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
 <li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
 </ol>
 <h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
@@ -474,36 +557,32 @@
 <li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
 <li>被测设备，devices under test，测试设备。</li>
 </ul>
-<h2 id="其它性能指标测试方法"><a href="#其它性能指标测试方法" class="headerlink" title="其它性能指标测试方法"></a>其它性能指标测试方法</h2><p>以下主要包括CPS、TPS、HTTP吞吐、TCP最大连接数及其它性能指标的测试方法。</p>
+<h2 id="性能测试工具"><a href="#性能测试工具" class="headerlink" title="性能测试工具"></a>性能测试工具</h2><p>对于网关类产品，一般要求的性能值比较高，因此测试一般使用专用的硬件设备。<br>常用硬件设备有IAXA等。<br>常用的测试软件有：</p>
+<ul>
+<li><a href="https://iperf.fr/" target="_blank" rel="noopener">iperf</a></li>
+<li><a href="http://jmeter.apache.org/" target="_blank" rel="noopener">Jmeter</a>使用Java编写，主要用于软件的性能测试，但也可扩展用于网络性能测试。机器配置足够的情况下，流量可打到上百M。</li>
+<li><a href="http://tomahawk.sourceforge.net/" target="_blank" rel="noopener">tomahawk</a>是一个回放数据包的工具，也可完成部分性能测试。</li>
+<li>而软件的性能测试常用的LoadRunner，一般难以用于网络的性能测试。</li>
+</ul>
 <a id="more"></a>
-<h2 id="TCP每秒新建（CPS）"><a href="#TCP每秒新建（CPS）" class="headerlink" title="TCP每秒新建（CPS）"></a>TCP每秒新建（CPS）</h2><p>CPS测试的目的是确定最大的TCP连接建立速度。在RFC3511文档中对TCP每秒新建的测试方法进行了定义，同时也明确了测试过程中得参数设置。但在实际评测或客户验证时，对于CPS的配置却有一些出入。这里需要我们注意的事项请参见下列说明。</p>
+<h2 id="测试拓扑"><a href="#测试拓扑" class="headerlink" title="测试拓扑"></a>测试拓扑</h2><p>前文主要介绍了2－7层的性能测试方法，除此之外我们还需要注意测试拓扑结构。<br>从物理环境上看，性能测试拓扑是比较单一的，没有多少复杂度：测试仪表连接被测设备，就可开始测试。需要注意的是测试仪中的制定的测试拓扑，在每次性能测试开始前，我们都需要明确客户端数目、服务器数目、源IP、目的IP和NAT等。以下为根据实际的测试经验简单总结一下性能测试在拓扑制定上需要注意的事项。</p>
 <ol>
-<li>TCP每秒新建的参数配置，应根据客户或评测机构的实际情况进行配置。<br>有的客户在测试CPS时，只关注TCP层的建立速度，使TCP连接建立成功即可，此关注的实际是TCP连接三次握手的过程（SYN，SYN ACK ，ACK），而且连接处于OPEN状态。而有的客户关注的是TCP的完整链接状态：包括三次握手建立、持续和关闭；而且在关闭过程中，又可以选择发送TCP FIN或者RST报文的方式。因此，在测试CPS前应与客户沟通测试的参数设置。</li>
-<li>在RFC3511文档中，描述了在测试CPS时，采用HTTP1.1的协议，并且响应Get请求。<br>而在有些评测机构中，在测试CPS时确实会采用HTTP1.0甚至TCP或其它基于TCP的协议进行测试。无论是否采用HTTP协议，对于CPS的测试过程基本没有影响，只是多了一个GET请求和应答。但传输的文件大小将会占用被测设备很大的系统资源，从而导致测试结果偏小。在RFC3511中，没有明确应答数据的大小，所以这里我们可以设置为1byte甚至更小。</li>
-<li>在测试过程中，应采用反复搜索的方式，以确定被测设备可以接受的TCP连接的最大请求速率。测试周期建议在10分钟以上。</li>
-<li>如上文所述，基于使用协议的不同，CPS可以分为L4（传输层）CPS和L7（应用层）CPS。而且大部分的厂商和客户都基本认同这两种CPS的叫法。</li>
+<li>在测试2－7层的性能时，测试仪和被测设备的转发模式我们一般会选择透明模式或者路由模式。<br>透明模式相当于二层，被测设备的配置相对简单，配置相应的转发规则即可。测试仪表的配置中源IP地址和目的IP地址要在相同的地址网段中，客户端和服务器的数目不应大于IP地址数，客户端的数目建议大于服务器端数目。<br>路由模式相当于三层，被测设备的配置相对复杂一些，需要配置接口的IP地址、路由表及相应的转发规则等。测试仪表的配置中源IP地址和目的IP地址要与被测设备的接口IP地址相对应，并且需要配置ARP响应机制或IPv6地址的学习机制，其它与配置透明模式的一致。</li>
+<li>在测试2－3层的性能，特别是RFC2544四项值时，建议测试仪采用UDP协议做为测试的承载协议。<br>当然，也有一些客户会选择IP层或者TCP层做为承载协议。这里没有硬性的规定，但大部分评测机构或者客户都会选择UDP协议进行测试。<br>当选择UDP协议进行测试时，UDP协议的端口号应避免已知的常用协议，如DNS的53端口，TFTP的69端口等，当然也没有硬性的规定。建议使用UDP端口7或0做为源和目的端口，或者直接使用测试仪的默认端口即可。</li>
+<li>在测试4－7层的性能时，需要注意客户端与服务器之间的对应关系。TODO<br>在测试需求或测试要求中，我们可能会遇到多个客户端对应一台服务器或者多个客户端对应多台服务器的情况。<br>在多对一的环境中，控制客户端数目不要过多，应根据被测设备应用的实际场景确定数目，源IP地址和目的IP地址建议使用一个C类网段。<br>在多对多的环境中，会出现两种测试拓扑结构。其中一种是多对一的单一叠加方式，另一种是全部混搭方式。这两者的客户端请求方式存在很大的差异。全部混搭方式要比单一叠加的方式更接近实际的应用场景，而这正是我们搭建测试拓扑的关键。如果被测设备足够好，无论采用哪种方式，性能结果都不应该有变化。因此，建议在测试4－7层的性能时，应采用全部混搭的方式搭建拓扑结构。</li>
+<li>在测试4－7层的性能时，还应注意源IP地址与目的IP地址的数目。<br>前面我们提到在多对一的测试拓扑中，建议使用一个C类地址段。在多对多的测试拓扑中，可以使用一个C类地址段，也可以使用多个C类地址段或一个B类地址段。<br>这里建议在多对多的测试拓扑结构中，决定使用几个地址段时，应参考被测设备在实际应用场景所能承受的最大负载。比如，将一个百兆的网关类设备放在一个数据中心的出口处显然不太适合，所以在测试时给它分配一个B类地址段或多个C类地址段，也显然不适合。<br>在设计和搭建测试拓扑时，应充分考虑被测设备所应用的场景，从而给它量身定做源IP地址和目的IP地址、甚至是客户端与服务器的数量等。</li>
 </ol>
-<h2 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h2><p>TPS是指最大HTTP传输速率，考察被测设备的应用层处理能力。在RFC3511文档中要求协议使用HTTP1.0或者HTTP1.1。整个过程包括TCP三次握手以后执行HTTP事务请求（GET或者POST），并且得到答应，然后关闭TCP连接。需要注意的事项请参见下列说明。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过本篇相信大家对性能测试有了一更深入的理解，以下是一些经验总结及注意事项。</p>
 <ol>
-<li>HTTP1.0和HTTP1.1协议的区别<br>在HTTP1.0 协议中，每对请求/应答都使用一个新的连接。每次请求都需要客户端与服务器建立一个TCP连接，服务器收到请求并且返回应答后，会立即断开TCP连接。<br>而HTTP1.1协议是可以保持这种连接状态，是可持久的。在一个TCP连接上可以传输多个HTTP请求/应答。当传输完成后，必须采用三次握手或四次握手的方法关闭链接（FIN，ACK，FIN ACK，ACK ） 。</li>
-<li>请求/应答的文件大小<br>在RFC3511文档中没有明确说明文件的大小及类型。在测试TPS前一定要向客户或评测机构了解要求的请求文件的大小及类型。有些机构中采用1 字节或者100字节的文件，而有些机构则采用1K字节或者4K字节，文件类型也多种多样。所以，应多与客户或者评测机构进行实际的沟通。<br>建议采用文件大小为1K字节、文件类型为文本文件；当采用HTTP1.0 协议时，建议Get 1次；当采用HTTP1.1协议时，建议Get 10次或者更多。</li>
-<li>通过1可以看到，在测试TPS时，采用HTTP1.0协议或采用HTTP1.1协议测试同一款被测设备，会得到两种不同的测试结果<br>因为HTTP协议本身的原因，使得在传输过程中得到的事务数会有所不同。理论上讲，HTTP1.1 协议的传输事务数要高于HTTP1.0协议。但这并不能反映HTTP1.1 的每秒连接数要高于HTTP1.0的每秒连接数。<br>同时需要注意到，测试HTTP TPS时如果采用HTTP1.0，其实和TCP的L7 CPS的性能一样。从测试方法和测试过程中看，两者基本没有区别。<br>所以，在测试HTTP TPS时，一定要了解客户的关注重点，而且要与客户沟通采用哪个版本的HTTP协议。</li>
+<li>对于网络安全类产品或网关类产品，RFC2544四项值一直作为性能测试的首要测试指标，从1999年发布一直使用至今。<br>业界有人认为RFC2544四项值已经不太适用于现代的产品，特别是对于IPS、AV和UTM的产品。但无可否认的是，RFC2544四项值是最能反映产品在底层转发的性能，而且从侧面反映了产品在低层转发过程中的稳定性。所以，RFC2544四项值将会被一直延用，并且作为一个重要测试指标一直延用下去。</li>
+<li>在网络安全类产品或网关类产品中，RFC3511对于4－7层的性能测试方法的定义过于模糊。<br>这使得4－7层的性能测试存在很大的争议，比如请求文件的大小、每条连接中请求的次数、协议版本、客户端与服务器数目等，都是争义的内容。特别是当产品集成了IPS、AV 和UTM功能后，在测试的细节上争义更为严重。比如URL地址是否相同、文件类型的变化、文件内容是否相同、IP地址端口的遍历、客户端与服务器所使用的软件及软件版本等。一个细微的不同，可能就会导致测试结果不同。所以，在对4－7层进行性能测试时，一定要与客户或评测机构沟通，指定相关的细节，从而验证产品的真实性能。同时，做为性能测试人员，在制定测试方法和测试拓扑时，应充分考虑被测设备所能应用的场景。这样的测试结果才是真实、可信并且有意义的。</li>
+<li>在此系列文章中没有介绍混合流量的性能测试，特别是应用层协议的混合流量性能测试。<br>首先无论是单一协议还是混合协议，主要关注新建速率和吞吐量值。而且混合流量中吞吐量的结果，可能是大家最为关注的。但混合流量中各协议的分配比例，没有一个权威的机构支撑，也难有哪个机构能够支撑。因为网络环境中的应用千变万化，网络实际应用场景也大不相同，比如教育网、中小企业、政府机构、金隔业场景等。混合流量没有一个统一的模板，所以在指定协议分配比例时，多数是参考评测机构发布的数据或者凭借自身经验指定的模板。因此，混合流量的性能测试没有在本篇中涉及。</li>
+<li>对于性能测试人员，不仅要了解产品特性，还要对协议有一定的了解。<br>特别是应用层的协议，了解各协议的数据处理流程，从而指定客户端请求与服务器的应答等过程。</li>
+<li>性能测试也要有需求意识。<br>性能测试人员要懂得倾听，明白哪些是客户最想了解的，哪些是评测机构最想知道的。只有了解到需求，才能制定一份符合产品的测试方法，才能得出产品的真实性能结果。</li>
 </ol>
-<h2 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h2><p>在RFC3511文档中没有明确描述HTTP有效吞吐量的测试方法，但通过TPS的测试方法，我们可以根据要求来编写HTTP有效吞吐量的方法。需要注意的事项请参见下列说明。</p>
-<ol>
-<li>在TPS节，我们知道了HTTP1.0和HTTP1.1之间的区别<br>在测试HTTP有效吞吐量时，应减少TCP的建立和关闭连接的消耗和延迟。所以在测试HTTP有效吞吐量时，建议采用HTTP1.1协议。</li>
-<li>在测试HTTP有效吞吐量时，建议采用请求/应答的模式<br>而且在HTTP1.1协议中，可以执行8个或8个以上的请求命令（GET）。请求的文件大小建议为64K字节的文本文件。当然，在实际测试过程中请求文件的大小及类型，应与客户或评测机构进行沟通。当请求命令越多，请求的文件越大，那么HTTP的吞吐量也就越大。</li>
-</ol>
-<h2 id="最大TCP并发连接数"><a href="#最大TCP并发连接数" class="headerlink" title="最大TCP并发连接数"></a>最大TCP并发连接数</h2><p>在RFC3511文档中描述的最大TCP并发连接数测试，是采用一种反复搜索机制进行，在每次反复过程中以低于被测设备所能承受的连接速率发送不同数量的并发连接，直至得出被测设备的最大TCP并发连接数。需要注意的事项请参见下列说明。</p>
-<ol>
-<li>在测试最大TCP并发连接数所采用的协议<br>有些客户或厂商为了追求更高的数值，在测试此项时采用TCP层协议。而一些评测机构或客户要求在测试最大TCP并发连接数时采用HTTP协议，并且要求有请求/答应机制。</li>
-<li>在测试最大TCP并发连接数时使用应用层协议(HTTP)，请求/应答的传输文件大小会直接影响测试结果<br>如果应用层流量很大，被测设备会使用很大的系统资源去处理包转发或包检查等，从而导致一些请求无法被处理，引起测试结果偏小；反之测试结果会偏大。这里建议当使用HTTP协议进行测试时，请求的文件不应过大，应在1Byte左右。</li>
-<li>在测试最大TCP并发连接数时，无论采用TCP协议还是采用应用层协议，都应考虑实际测试需要<br>从1中我们知道，采用TCP协议进行测试对被测设备的压力要小，并且每条连接中的负载也比较小，被测设备在转发或处理时比较容易，从而很容易达到测试的数目要求。但这并不是说采用TCP协议就是没有意义的，它从另一角度反映了被测设备能维持TCP连接的最大数量。<br>而如2中采用HTTP协议进行测试，会加大被测设备的压力，使得占用被测设备的资源去处理包转发或包检查。而且请求文件大小的不同，会引起测试结果发生偏差。在实际测试过程中，我们应与客户或评测机构进行沟通，从而测试出被测设备的真实能力，是否满足其要求。</li>
-</ol>
-<h2 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h2><p>如上，我们可以看出在TCP或应用层测试中，主要包括<strong>三个重要的指标</strong>：每秒新建、有效吞吐量和最大并发连接数。<br>其实应用层的性能测试，无论是FTP协议、Mail协议还是其它的应用协议都离不开这三个测试指标项。所以，在对其它应用层协议进行测试时，也应像HTTP协议测试一样：明确测试文件的大小，明确每条链接的负载，明确每个请求/应答的过程等。测试过程、测试方法及测试结果的计算衡量基本都与HTTP测试类似。这就要求测试人员对应用层协议要有一定的理解，甚至对每个关键字的作用要有初步的判定。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍了TCP/HTTP层的性能指标的测试方法，并由此扩展到其它所有需要的应用层的性能测试方法。</p>
 <h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
 <li><a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a></li>
+<li><a href="http://wenku.baidu.com/link?url=Ih8o0RQ8OcRMoiJHO4yaJTDqPKz5NYt--mc63aeUQCQlrruS_KXQsnWf_AG7U73vo5ciytSLZNyGQTB5kPY9-xn7E4rScqtQGAy8U8ucD_O###" target="_blank" rel="noopener">网络安全产品的性能测试研究</a> - 阐述较为全面的硕士论文</li>
 </ul>
 ]]></content>
       <categories>
@@ -515,8 +594,6 @@
         <tag>NGFW</tag>
         <tag>防火墙</tag>
         <tag>spi firewall</tag>
-        <tag>CPS</tag>
-        <tag>TPS</tag>
       </tags>
   </entry>
   <entry>
@@ -590,6 +667,35 @@
       </tags>
   </entry>
   <entry>
+    <title>HTTP认证模式</title>
+    <url>/2012/08/http-auth-schemes/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在研究curl和httpclient，用到了HTTP认证相关的知识。<br>但是搜索之后发现，网上居然没有很全面的HTTP认证模式的介绍，尤其是中文的文章。<br>因此结合MS的<a href="http://msdn.microsoft.com/en-us/library/ms789031.aspx" target="_blank" rel="noopener">Understanding HTTP Authentication</a>和<a href="http://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html" target="_blank" rel="noopener">HttpClient Tutorial</a>翻译加个人理解写了一篇。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本篇博文简介了几种HTTP认证模式。文章内容要求读者对HTTP请求、响应的基本结构，HTTP状态码和HTTP协议头有一定的了解。<br>请参考<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">Linux下cURL使用教程之二：HTTP协议概述</a>。</p>
+<h2 id="HTTP访问认证框架"><a href="#HTTP访问认证框架" class="headerlink" title="HTTP访问认证框架"></a>HTTP访问认证框架</h2><p>HTTP协议（RFC2616）定义了一个简单的访问认证模式框架。此框架假设有若干页面（被保护资源，也称作realm，区域），只能被特定的人访问，这些人可以在服务器要求时提供凭证。<br>当客户端如浏览器访问一个位于保护区域（protected realm）中的页面时，服务器返回包含401未认证状态码和www认证头（WWW-Authenticate header field）的响应。返回的认证头中必须含有至少一个适用于请求页面的认证要求（challenge）。<br>然后客户端发起第二次请求，此次请求在请求头中包含了试用于服务器认证要求的认证头域。<br>如果服务器接受了客户端提供的凭证，它将返回客户端请求的页面。否则，服务端会返回另一个401未认证响应以提示客户端认证失败。<br>具体认证响应头和请求头的内容取决于认证的方式。RFC2616中定义了两种广泛使用的认证模式：<br>HTTP基本认证（HTTP  Basic authentication）和HTTP摘要认证（HTTP Digest authentication）。<br>此外常用的还有NTLM、SPNEGO（HTTP协商认证，HTTP Negotiate authentication，是其一种）和Kerberos认证方式。<br><a id="more"></a></p>
+<h2 id="认证模式"><a href="#认证模式" class="headerlink" title="认证模式"></a>认证模式</h2><h3 id="1-基本认证Basic-Access-Authentication"><a href="#1-基本认证Basic-Access-Authentication" class="headerlink" title="1. 基本认证Basic Access Authentication"></a>1. 基本认证Basic Access Authentication</h3><p>基本认证是基于用户名密码的。<br>服务端的401响应中包含一个认证要求（authentication challenge），此认证要求中含有“Basic”关键字和一个用以表明访问的被保护资源名称的“名称=值”对，如下：<br><code>WWW-Authenticate: Basic realm=&quot;Protected page&quot;</code><br>如果你使用的浏览器，浏览器在接收到401响应时，将会弹出窗口让你输入用户名密码，然后发送认证请求。认证请求中同样包含”Basic”关键字，此外还有Base64编码后的用户名密码，如下：<br><code>Authorization: Basic QWRlcGxveSdzIGJsb2c=</code><br>服务器将用户名密码解码后比对，成功匹配后即认证成功。<br>因为Base64不算是一种加密方法：无密钥的可逆加密，任何人都可解密（百度搜索一下”在线解码“一大堆）。因此基本认证被认为是明文传输，安全性不好。极易出现密码被窃听和重放攻击等安全性问题。<br>如果资源需要更高强度的保护，请使用其他认证方法。</p>
+<h3 id="2-摘要认证HTTP-Digest-authentication"><a href="#2-摘要认证HTTP-Digest-authentication" class="headerlink" title="2. 摘要认证HTTP Digest authentication"></a>2. 摘要认证HTTP Digest authentication</h3><p>摘要认证被设计用来弥补基本认证的缺点。摘要认证基于请求-响应（challenge-response）模式，而且使用了哈希加密算法（常用为MD5），从而某些程度上解决了基本认证安全性的问题。<br>服务器返回的初始401响应的www认证头（WWW-Authenticate header）中多出了一个称为nonce的随机数的字段。服务端保证每个401响应中的nonce值唯一。如：<br><code>Authorization: Digest username=&quot;admin&quot;, realm=&quot;HiPER&quot;</code><br>接下来的客户端响应中将包含由用户名、密码、nonce和其他信息组成的数据的哈希值（如使用MD5加密）。所有被加密的数据服务端也具有，因此服务端执行同样加密过程。如果二者一直则认证成功。<br>因为如MD5等哈希加密算法是不可逆的，因此用户名密码明文无法被窃听破解。因为服务器对同一个nonce的请求只接受一次客户端请求，从而能避免重放攻击。<br>但是，digest的安全性也有缺点：</p>
+<ul>
+<li>只有密码密码被加密，而客户端最终请求的被保护资源是明文传送的，可被窃听</li>
+<li>客户端无法确认服务端的正确身份，缺少对服务端的认证方式</li>
+<li>近年来，随着计算机性能的提高等因素，传统高强度加密算法的破解已成可能。而MD5更是已有破解方法。</li>
+</ul>
+<p>更多安全性问题请参考RFC2617。</p>
+<h3 id="3-NTML"><a href="#3-NTML" class="headerlink" title="3. NTML"></a>3. NTML</h3><p>NTML由微软开发，使用于Windows平台。被认为是比摘要认证更安全的认证方式。<br>它使用Windows凭证（Windows credentials）来传递认证数据，而不是使用未编码的用户名密码。<br>NTML要求服务器与客户端做出多次数据交换，服务器和所有其中的代理都必须支持永久连接（persistent connections）才能完成认证。</p>
+<h3 id="4-Kerberos"><a href="#4-Kerberos" class="headerlink" title="4. Kerberos"></a>4. Kerberos</h3><p>服务器与客户端通过第三方的Kerberos服务器完成认证。具体请参见<a href="http://baike.baidu.com/view/306687.htm" target="_blank" rel="noopener">百度百科条目</a>和<a href="http://zh.wikipedia.org/wiki/Kerberos" target="_blank" rel="noopener">维基百科条目</a>。<br>Kerberose相比NTML有很大改善：速度快，而且允许相互认证、认证代理和简单的信任关系。参考<a href="http://msdn.microsoft.com/en-us/library/aa480475.aspx" target="_blank" rel="noopener">KERBEROS vs NTLM</a>。</p>
+<h3 id="5-SPNEGO"><a href="#5-SPNEGO" class="headerlink" title="5. SPNEGO"></a>5. SPNEGO</h3><p>全称是Simple and Protected GSS-API Negotiation，是微软提供的一种使用<a href="http://baike.baidu.com/view/1551940.htm" target="_blank" rel="noopener">GSS-API</a>认证机制的安全协议，用于使Webserver共享Windows Credentials，它扩展了Kerberos(一种网络认证协议)。<br>SPNEGO适用于客户端需要认证，但是客户端服务端都不清楚对方支持什么认证协议的场合。<br>SPENGO其实是一种”伪认证机制“（pseudo-mechanism），用以协商出真正的认证机制。<br>最常见的是微软的HTTP协商认证扩展（HTTP Negotiate authentication extension），协商的最终机制在NTML和Kerberos中选择。Kerberos因其优点优先使用。<br>百度词条对此认证的解释是不够准确的，准确的解释可以参考<a href="http://en.wikipedia.org/wiki/SPNEGO" target="_blank" rel="noopener">维基百科条目</a>。</p>
+<h2 id="认证方式选择"><a href="#认证方式选择" class="headerlink" title="认证方式选择"></a>认证方式选择</h2><p>选择何种认证方式取决于资源要被保护的程度。不需要保护的资源使用基本认证方式。因为认证会导致更多的数据传输，可能影响用户体验。<br>认证方式最弱的是基本认证，最强的是协商认证。服务端在WWW-Authentication提供自己支持的认证方式，供客户端任意选择。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>RFC2616-HTTP协议<br>RFC2617-HTTP认证：基本认证和摘要认证<br>RFC1321-MD5摘要加密逻辑<br><a href="http://frontier.userland.com/stories/storyReader$2159" target="_blank" rel="noopener">HTTP Authentication Schemes</a></p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Linux下cURL使用教程之五：curl基本使用之提交表单</title>
     <url>/2012/08/linux-curl-basic-usage-forms/</url>
     <content><![CDATA[<p>很多时候，我们想获得的内容或者想进行的操作，只有在登陆之后才有权限，此时就需要用到提交表单。<br>表单以HTML的形式呈现给用户，用户使用表单提交数据后，服务端获得表单数据进行处理，然后进行后续操作。比如我们登录的过程，登录的表单呈现给我们，输入用户名密码提交后，服务端获得用户名密码在数据库中查询，以查询结果判定密码正确与否。<br>向HTTP服务器提交数据常用的有GET和POST两种方法。下文针对这两种方法，结合实例说明curl的使用。</p>
@@ -641,52 +747,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</title>
-    <url>/2012/08/linux-curl-basic-usage-upload-file/</url>
-    <content><![CDATA[<p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/" target="_blank" rel="noopener">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
-<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前，所有服务端代码通过php实现。</p>
-<ul>
-<li>file.php，显示文件上传表单：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP File Upload Demo.&lt;br /&gt;</span><br><span class="line">Select a file <span class="keyword">and</span> Submit.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;form action=<span class="string">"upload_file.php"</span> method=<span class="string">"post"</span></span><br><span class="line">enctype=<span class="string">"multipart/form-data"</span>&gt;</span><br><span class="line">&lt;label <span class="keyword">for</span>=<span class="string">"file"</span>&gt;Filename:&lt;/label&gt;</span><br><span class="line">&lt;input type=<span class="string">"file"</span> name=<span class="string">"file"</span> id=<span class="string">"file"</span> /&gt; </span><br><span class="line">&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"submit"</span> value=<span class="string">"Submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<a id="more"></a>
-<ul>
-<li><p>upload_file.php，处理上传的文件。<br>上传文件后，文件先缓存在临时目录中，脚本结束时临时文件被删除。upload_file.php只是简单输出上传文件的信息，而不做实际场景中将临时文件保存至永久目录等进一步处理。但此差异对我们进行curl实验没有任何影响。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a File Upload Process Demo.&lt;br /&gt;</span><br><span class="line">It only shows the information of the file you uploaded.&lt;br /&gt;</span><br><span class="line">The file you uploaded remains temporary,&lt;br /&gt;</span><br><span class="line"><span class="keyword">and</span> is deleted when this script is finished.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span> ($_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] &gt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Error: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Upload: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"name"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Type: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"type"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Size: "</span> . ($_FILES[<span class="string">"file"</span>][<span class="string">"size"</span>] / <span class="number">1024</span>) . <span class="string">" Kb&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Stored in: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"tmp_name"</span>];</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>put.php，处理通过HTTP PUT方法上传的文件。<br>同上，为了安全只输出上传文件信息，不做实际转存处理。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP PUT Demo.&lt;br&gt;</span><br><span class="line">It reads the file you upload using PUT,&lt;br&gt;</span><br><span class="line"><span class="keyword">and</span> prints the content out.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/* PUT data comes in on the stdin stream */</span></span><br><span class="line">$putdata = fopen(<span class="string">"php://input"</span>, <span class="string">"r"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Read the data 1 KB at a time</span></span><br><span class="line"><span class="comment">   and print the content out */</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"The contents of the file you upload:&lt;br&gt;&lt;br&gt;\n"</span>;</span><br><span class="line"><span class="keyword">while</span> ($data = fread($putdata, <span class="number">1024</span>))</span><br><span class="line">    <span class="keyword">echo</span> $data;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="comment">/* Close the streams */</span></span><br><span class="line">fclose($putdata);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><h3 id="F-–form"><a href="#F-–form" class="headerlink" title="-F/–form"></a>-F/–form</h3><p><code>-F/--form &lt;name=content&gt;</code><br>使用<code>Content-Type  multi‐part/form-data</code>的方式提交数据，可用于上传二进制文件。</p>
-<ol>
-<li><p>@的使用<br>一般使用<code>-F file=@filename</code>的形式，其中file为文件表单的name，filename为文件名。@后面的文件作为文件上传处理。</p>
-</li>
-<li><p>&lt;的使用<br>对于&lt;后的文件，curl会读取其内容，而不会作为文件上传。类似-d选项中@的作用。<br>如<br><code>curl -F name=&lt;foobar.txt -Fage=100 http://127.0.0.1/welcome.php</code><br>foobar.txt内容为Adeploy，则此命令与以下命令等价：<br><code>curl -F name=Adeploy -Fage=100 http://127.0.0.1/welcome.php</code><br>而-F @foobar.txt表示将foobar.txt作为文件上传。</p>
-</li>
-<li><p>-F不进行url编码<br>-F与-d类似，都是不对数据进行urlencode编码，而且-F不能与-d或–data-urlencode共用。<br>因此如果上传文件的同时还需要提交其他需要urlencode编码的字段（如中文用户名），就会出现问题。<br>除手动编码外，实用的解决办法是自己编写urlencode函数（网上可以找到Linux脚本实现的urlencode函数或C语言版本、Perl版本、Python），调用即可。</p>
-</li>
-<li><p>使用”type=”指定Content-Type<br>如<code>curl -F &quot;web=@index.html;type=text/html&quot; url.com</code><br>将index.html以text/html的Content-Type上传。</p>
-</li>
-<li><p>使用”filename=”修改上传文件的名字<br>如<code>curl -F &quot;file=@localfile;filename=nameinpost&quot; url.com</code><br>上传localfile并修改文件名字为nameinpost。</p>
-</li>
-</ol>
-<h3 id="–form-string"><a href="#–form-string" class="headerlink" title="–form-string"></a>–form-string</h3><p><code>--form-string &lt;name=string&gt;</code><br>基本同-F，但是此参数后面跟”@”、”&lt;”、”;type=”时，不做特殊含义解析。</p>
-<h3 id="T-–upload-file"><a href="#T-–upload-file" class="headerlink" title="-T/–upload-file"></a>-T/–upload-file</h3><p><code>-T/--upload-file &lt;file&gt;</code><br>使用HTTP的PUT方法上传文件，需要目标URL支持HTTP的PUT方法。<br>可以与-d、–data-urlencode、-F同时使用。</p>
-<h2 id="参数使用实例"><a href="#参数使用实例" class="headerlink" title="参数使用实例"></a>参数使用实例</h2><h3 id="F文件上传"><a href="#F文件上传" class="headerlink" title="-F文件上传"></a>-F文件上传</h3><p>打开file.php选择文件后submit，Developer Tools抓包截图如下：<br><img src="/img/developertools_file.jpg" alt="Developer Tools file上传"><br>注意此时的Content-Type字段是<code>multipart/form-data</code>，主要用于上传文件，具体可参考<a href="http://www.ietf.org/rfc/rfc1867.txt" target="_blank" rel="noopener">RFC1867</a>。<br>分析file.php的源代码可知，表单中file类型的input元素name=file，所以命令如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o file.html -F file=@a.txt http://127.0.0.1/upload_file.php</span><br></pre></td></tr></table></figure></p>
-<h3 id="T文件上传"><a href="#T文件上传" class="headerlink" title="-T文件上传"></a>-T文件上传</h3><p>没有找到正确的PUT表单，因此无法使用Developer Tools跟踪实际提交过程。<br>命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o put.html -T a.txt http://127.0.0.1/put.php</span><br></pre></td></tr></table></figure></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要为使用curl上传文件的操作方法。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Linux下cURL使用教程之三：curl基本使用</title>
     <url>/2012/08/linux-curl-basic-usage/</url>
     <content><![CDATA[<p>在介绍完<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">cURL简介</a>和需要的<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">HTTP协议概述</a>之后。终于可以回归正题，进入curl的使用方法。</p>
@@ -709,6 +769,58 @@
 <p>会将cookie信息<code>user=Adeploy;pass=password</code>附加在HTTP请求头中。</p>
 <h2 id="Redirects重定向"><a href="#Redirects重定向" class="headerlink" title="Redirects重定向"></a>Redirects重定向</h2><p>打开某些网页，网页会显示“ 3XX Moved Permanently ”，即网页被移动到其他位置，新位置一般由HTTP响应头中的Location字段给出。<br>重定向一般是因为网站结构调整后，避免用户访问原来页面出现404错误。<br>而另一类常见的用法就是在登陆成功后，网页显示成功信息，然后将用户重定向至内容页面。<br><code>-L/--location</code>选项可以自动跟踪重定向。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇只介绍简单的curl使用选项，下篇将结合实例具体说明。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之四：curl基本使用实例</title>
+    <url>/2012/08/linux-curl-basic-usage-example/</url>
+    <content><![CDATA[<p>本篇主要结合编写的PHP程序实例对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage/" target="_blank" rel="noopener">curl基本使用</a>进行具体说明。</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="HTTP服务器"><a href="#HTTP服务器" class="headerlink" title="HTTP服务器"></a>HTTP服务器</h3><p>建议<code>Ubuntu+Apache+PHP</code>，方便简洁:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install apache2 php5</span><br></pre></td></tr></table></figure></p>
+<p>即可。</p>
+<h3 id="网页"><a href="#网页" class="headerlink" title="网页"></a>网页</h3><p>以下为测试使用的服务器端代码，全部使用php实现。</p>
+<ul>
+<li>curldemo.php，用于输出User-Agent、Referer、Cookie信息：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_USER_AGENT'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">'HTTP_REFERER'</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;"</span>.$_SERVER[<span class="string">'HTTP_REFERER'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_COOKIE[<span class="string">'user'</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user="</span>.$_COOKIE[<span class="string">'user'</span>].<span class="string">"&lt;br&gt;\n"</span>;</span><br><span class="line">        setcookie(<span class="string">"user"</span>,<span class="string">""</span>,time()<span class="number">-1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li><p>curlfollow.php，设置cookie后跳转至curldemo.php（使用js跳转，curl不会执行js函数，因此只有在浏览器中才会自动跳转）：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    setcookie(<span class="string">"user"</span>,<span class="string">"Stackeye"</span>);</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"&lt;script&gt;window.location =\"curldemo.php\";&lt;/script&gt;"</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>curl301.php，重定向至curldemo.php（header重定向后Referer字段为空，设置的cookie也不保存）：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    Header( <span class="string">"HTTP/1.1 301 Moved Permanently"</span> ) ;</span><br><span class="line">    Header( <span class="string">"Location: curldemo.php"</span> );</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>curldeny.php，对User-Agent/Referer/cookie有严格要求，才会显示最终内容：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">CurlDeny-PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">	I<span class="string">'ll deny all http requests,&lt;br&gt;</span></span><br><span class="line"><span class="string">	except your User-agent contains "Mozilla/4.0",&lt;br&gt;</span></span><br><span class="line"><span class="string">	your referer contains "www.baidu.com",&lt;br&gt;</span></span><br><span class="line"><span class="string">	and your cookie user is "Stackeye"!&lt;br&gt;</span></span><br><span class="line"><span class="string">	If you succeed,you will see "You finally get it"!&lt;br&gt;&lt;br&gt;</span></span><br><span class="line"><span class="string">&lt;?php</span></span><br><span class="line"><span class="string">    if(strpos($_SERVER['</span>HTTP_USER_AGENT<span class="string">'],"Mozilla/4.0")!==false)</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">    	echo "&lt;strong&gt;User-Agent:&lt;/strong&gt;&lt;br&gt;".$_SERVER['</span>HTTP_USER_AGENT<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    	if(isset($_SERVER['</span>HTTP_REFERER<span class="string">'])</span></span><br><span class="line"><span class="string">         &amp;&amp;strpos($_SERVER['</span>HTTP_REFERER<span class="string">'],"www.stackeye.com")!==false)</span></span><br><span class="line"><span class="string">    	&#123;</span></span><br><span class="line"><span class="string">    		echo "&lt;strong&gt;Referer:&lt;/strong&gt;&lt;br&gt;".$_SERVER['</span>HTTP_REFERER<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    		if(isset($_COOKIE['</span>user<span class="string">'])&amp;&amp;strcmp($_COOKIE['</span>user<span class="string">'],"Stackeye")==0)</span></span><br><span class="line"><span class="string">    		&#123;</span></span><br><span class="line"><span class="string">    	      echo "&lt;strong&gt;Cookie:&lt;/strong&gt;&lt;br&gt;user=".$_COOKIE['</span>user<span class="string">']."&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">            setcookie("user","",time()-1);</span></span><br><span class="line"><span class="string">            echo "You finally get it!&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    		&#125;</span></span><br><span class="line"><span class="string">    		else</span></span><br><span class="line"><span class="string">    		    echo "\n&lt;br&gt;&lt;br&gt;I'</span>m sorry but you are so close!&lt;br&gt;\n<span class="string">";</span></span><br><span class="line"><span class="string">    	&#125;</span></span><br><span class="line"><span class="string">    	else</span></span><br><span class="line"><span class="string">    	    echo "</span>\n&lt;br&gt;&lt;br&gt;I<span class="string">'m sorry but you are so close!&lt;br&gt;\n";</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    else</span></span><br><span class="line"><span class="string">        echo "\n&lt;br&gt;&lt;br&gt;I'</span>m sorry but you are so close!&lt;br&gt;\n<span class="string">" ;</span></span><br><span class="line"><span class="string">?&gt;</span></span><br><span class="line"><span class="string">&lt;br&gt;</span></span><br><span class="line"><span class="string">&lt;a href="</span>http:<span class="comment">//www.stackeye.com" target="_blank"&gt;Stackeye's Blog&lt;/a&gt;</span></span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>setcookie.php，设置cookie的user字段，用以访问curldeny.php:</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">SetCookie-PHP Demo <span class="keyword">for</span> curl basic usage By Stackeye</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">	I just set the cookie,&lt;br&gt; </span><br><span class="line">	with which you can get the curldeny.php.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    setcookie(<span class="string">"user"</span>,<span class="string">"Stackeye"</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.stackeye.com"</span> target=<span class="string">"_blank"</span>&gt;Stackeye<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>以上PHP文件放入服务器根目录下即可（Ubuntu+Apache下默认为<code>/var/www</code>）。以下默认服务器地址为本机127.0.0.1。</p>
+<h2 id="curl访问任务"><a href="#curl访问任务" class="headerlink" title="curl访问任务"></a>curl访问任务</h2><p>使用curl命令完成如下任务。</p>
+<h3 id="1-伪装成Firefox访问curldemo-php"><a href="#1-伪装成Firefox访问curldemo-php" class="headerlink" title="1. 伪装成Firefox访问curldemo.php"></a>1. 伪装成Firefox访问curldemo.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure>
+<p>保存的html文件可以用浏览器打开查看。</p>
+<h3 id="2-伪装来源页面为www-stackeye-com访问curldemo-php"><a href="#2-伪装来源页面为www-stackeye-com访问curldemo-php" class="headerlink" title="2. 伪装来源页面为www.stackeye.com访问curldemo.php"></a>2. 伪装来源页面为<a href="http://www.stackeye.com访问curldemo.php" target="_blank" rel="noopener">www.stackeye.com访问curldemo.php</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o curlex.html -e http://www.stackeye.com http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure>
+<h3 id="3-伪装成Firefox访问curlfollow-php，并保存cookie文件"><a href="#3-伪装成Firefox访问curlfollow-php，并保存cookie文件" class="headerlink" title="3. 伪装成Firefox访问curlfollow.php，并保存cookie文件"></a>3. 伪装成Firefox访问curlfollow.php，并保存cookie文件</h3><p>然后使用保存的cookie文件，伪装成firefox，访问curldemo.php<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curlfollow.html -D cookie001.txt http://127.0.0.1/curlfollow.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html -D cookie002.txt -b cookie001.txt http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure></p>
+<p>curldemo.html将显示user的值为Stackeye。</p>
+<h3 id="4-伪装成Firefox并直接使用cookie值访问curldemo-php"><a href="#4-伪装成Firefox并直接使用cookie值访问curldemo-php" class="headerlink" title="4. 伪装成Firefox并直接使用cookie值访问curldemo.php"></a>4. 伪装成Firefox并直接使用cookie值访问curldemo.php</h3><p>cookie中user值为Stackeye，pass值为password<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldemo.html -D cookie002.txt -b “user=Stackeye;pass=password” \</span><br><span class="line">http://127.0.0.1/curldemo.php</span><br></pre></td></tr></table></figure></p>
+<p>curldemo.html将显示user的值为Stackeye，pass值为password。</p>
+<h3 id="5-不自动跟踪重定向访问curl301-php"><a href="#5-不自动跟踪重定向访问curl301-php" class="headerlink" title="5. 不自动跟踪重定向访问curl301.php"></a>5. 不自动跟踪重定向访问curl301.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -v -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curl301.html http://127.0.0.1/curl301.php</span><br></pre></td></tr></table></figure>
+<p>因为此时curl301.html文件内容为空，我们只能通过-v查看具体内容。<br>可以看到curl只访问了curl301.php</p>
+<h3 id="6-自动跟踪重定向访问curl301-php"><a href="#6-自动跟踪重定向访问curl301-php" class="headerlink" title="6. 自动跟踪重定向访问curl301.php"></a>6. 自动跟踪重定向访问curl301.php</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -L -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curl301.html http://127.0.0.1/curl301.php</span><br></pre></td></tr></table></figure>
+<p>此时打开curl301.html会看到curldemo.php的内容，说明curl自动根据重定向去访问了curldemo.php。</p>
+<h3 id="7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”"><a href="#7-访问setcookie-php和curldeny-php，使curldeny-php显示“You-finally-get-it-”" class="headerlink" title="7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”"></a>7. 访问setcookie.php和curldeny.php，使curldeny.php显示“You finally get it!”</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o setcookie.html -D cookie001.txt http://127.0.0.1/setcookie.php</span><br><span class="line">curl -s -A <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-o curldeny.html -e http://www.adeploy.com -D cookie002.txt -b cookie001.txt \</span><br><span class="line">http://127.0.0.1/curldeny.php</span><br></pre></td></tr></table></figure>
+<p>打开curldeny.html文件，可看到“You finally get it!”信息。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是针对curl基本用法的实例以加深理解和掌握。实际操作中，登陆、发帖等操作还会用到提交表单相关操作，下篇将进行讲解。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -769,66 +881,41 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之八：curl基本使用实例之115网盘自动摇一摇脚本</title>
-    <url>/2012/08/linux-curl-example-115/</url>
-    <content><![CDATA[<p>上一篇使用shell+curl的方式完成了登陆百度空间并发表文章。但是奈何shell脚本对大批量文字的处理太弱，因此脚本显得鸡肋。<br>而本篇则完成一个实际可用的脚本程序：115网盘自动摇一摇脚本。</p>
-<h2 id="115网盘简介"><a href="#115网盘简介" class="headerlink" title="115网盘简介"></a>115网盘简介</h2><p>115网盘容量和速度都算不错的。注册送15G，然后可通过每天摇一摇等方式获得容量。<br>免费会员每天可以摇一次，可以获得几十M到一百多M的空间，和几百“雨露”。雨露可用于升级，升级后增加空间，但是貌似现在没有了。<br>可以在淘宝上搜一下115账号的价格。<br>（注：当初写这个脚本的时候，还在网盘大战前后，如今的115早已不如当前，摇一摇这个功能早已消失。）</p>
-<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>登陆过程我们仍然使用Developer Tools分析。<br>简单的办法是使用谷歌官方的chrome浏览器或Firefox+Firebug。</p>
-<h2 id="登陆过程"><a href="#登陆过程" class="headerlink" title="登陆过程"></a>登陆过程</h2><p>登陆，使用Developer Tools抓包，很容易看到第一个POST包。</p>
-<h3 id="1、POST地址"><a href="#1、POST地址" class="headerlink" title="1、POST地址"></a>1、POST地址</h3><p><code>https://passport.115.com/?ac=login</code></p>
-<h3 id="2、三部分数据"><a href="#2、三部分数据" class="headerlink" title="2、三部分数据"></a>2、三部分数据</h3><ul>
-<li>Request Headers，没特殊需要注意的字段。</li>
-<li>Query String Parameters，没用。</li>
-<li>Form Data，有两个数据：用户名、密码，字段名分别为login[account]、login[passwd]，参数明文。<a id="more"></a>
-<h3 id="3、curl脚本"><a href="#3、curl脚本" class="headerlink" title="3、curl脚本"></a>3、curl脚本</h3>伪造User-Agent，伪装来源页面，登陆保存cookie：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#username/passwd are the parameters of this script</span></span><br><span class="line">username=<span class="variable">$1</span></span><br><span class="line">passwd=<span class="variable">$2</span></span><br><span class="line"><span class="comment">#save to log</span></span><br><span class="line">date&gt;&gt;yaoyao.log</span><br><span class="line"><span class="built_in">echo</span> Log <span class="variable">$1</span>&gt;&gt;yaoyao.log</span><br><span class="line"><span class="comment">#login post</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o 1151.html -D 115cookie001.txt http://www.115.com/</span><br><span class="line">curl -s -L -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line"> -e http://www.115.com/ -o 1152.html -D 115cookie002.txt -b 115cookie001.txt \</span><br><span class="line"> --data-urlencode back=http://www.115.com \</span><br><span class="line"> --data-urlencode goto=http://115.com \</span><br><span class="line"> --data-urlencode login[account]=<span class="variable">$username</span> \</span><br><span class="line"> --data-urlencode login[passwd]=<span class="variable">$passwd</span> \</span><br><span class="line"> <span class="string">'http://passport.115.com/?ac=login'</span></span><br></pre></td></tr></table></figure>
+    <title>Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</title>
+    <url>/2012/08/linux-curl-basic-usage-upload-file/</url>
+    <content><![CDATA[<p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/" target="_blank" rel="noopener">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
+<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前，所有服务端代码通过php实现。</p>
+<ul>
+<li>file.php，显示文件上传表单：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP File Upload Demo.&lt;br /&gt;</span><br><span class="line">Select a file <span class="keyword">and</span> Submit.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;form action=<span class="string">"upload_file.php"</span> method=<span class="string">"post"</span></span><br><span class="line">enctype=<span class="string">"multipart/form-data"</span>&gt;</span><br><span class="line">&lt;label <span class="keyword">for</span>=<span class="string">"file"</span>&gt;Filename:&lt;/label&gt;</span><br><span class="line">&lt;input type=<span class="string">"file"</span> name=<span class="string">"file"</span> id=<span class="string">"file"</span> /&gt; </span><br><span class="line">&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"submit"</span> value=<span class="string">"Submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
 </li>
 </ul>
-<p>为了更逼真，我们先访问了下首页，完整模仿实际用户行为。<br>登陆成功与否不在此处检测，原因见下节。</p>
-<h2 id="摇一摇过程"><a href="#摇一摇过程" class="headerlink" title="摇一摇过程"></a>摇一摇过程</h2><h3 id="1、摇一摇抓包分析"><a href="#1、摇一摇抓包分析" class="headerlink" title="1、摇一摇抓包分析"></a>1、摇一摇抓包分析</h3><p>在“网盘”页面下，点击摇一摇，摇成功后抓包分析。<br>很快发现摇一摇的GET数据包。</p>
-<h3 id="2、字段分析"><a href="#2、字段分析" class="headerlink" title="2、字段分析"></a>2、字段分析</h3><p>GET网址为：<code>http://115.com/?ct=ajax_user&amp;ac=pick_space&amp;token=dfcce64ebe71051a732d7943068ab***&amp;_=1345093324***</code><br>多次试验发现，URL中有两个变化的参数，token和<em>。没有其它特殊字段。<br>token和</em>字段，按上篇文章思路，我们先考虑这两个字段没有实际意义的情况。</p>
-<h3 id="3、curl脚本-1"><a href="#3、curl脚本-1" class="headerlink" title="3、curl脚本"></a>3、curl脚本</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -L -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-e http://www.115.com/ -o 1153.html -D 115cookie003.txt -b 115cookie002.txt \</span><br><span class="line">http://115.com/?ct=ajax_user\&amp;ac=pick_space\&amp;token=dfcce64ebe71051a756f7943068ab147\&amp;_=1331178826515</span><br></pre></td></tr></table></figure>
-<p>成功后会有跳转，所有我们使用了-L选项自动跟踪跳转。<br>token和_字段处，填入格式相同的随机值，打开1153.html发现失败。</p>
-<h3 id="4、寻找token字段"><a href="#4、寻找token字段" class="headerlink" title="4、寻找token字段"></a>4、寻找token字段</h3><p>同上篇相同思路，从后向前寻找。或者抓包，然后搜索token值。<br>1）最终发现在GET网页<code>http://115.com/?ct=file&amp;ac=userfile&amp;aid=1&amp;cid=0&amp;tpl=list_pg&amp;limit=35的Response</code>里有：<br><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span> window["INDEX_HOME_DATA"] = &#123;take_token: '164d32f6fc1e668c0769eff1235e83ff',is_take: Number('1') &#125;;</span><br></pre></td></tr></table></figure></p>
-<p>2）我们使用curl脚本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-e http://115.com/ -o 1153.html -D 115cookie003.txt -b 115cookie002.txt \</span><br><span class="line"><span class="string">'http://115.com/?ct=file&amp;ac=userfile&amp;aid=1&amp;cid=0&amp;tpl=list_pg&amp;limit=35'</span></span><br></pre></td></tr></table></figure></p>
-<p>cat 1153.html|grep token即可看到token字段。</p>
-<p>3）增加curl语句GET此页面提取token即可。<br>与上文POST摇一摇的代码合并后脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#get token</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-e http://115.com/ -o 1153.html -D 115cookie003.txt -b 115cookie002.txt \</span><br><span class="line"><span class="string">'http://115.com/?ct=file&amp;ac=userfile&amp;aid=1&amp;cid=0&amp;tpl=list_pg&amp;limit=35'</span></span><br><span class="line">token=`cat 1153.html | grep Yao|awk -F <span class="string">"'"</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"'"</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"token="</span><span class="variable">$token</span></span><br><span class="line"><span class="comment">#check before post</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$token</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>&gt;&gt;yaoyao.log;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment">#yao post</span></span><br><span class="line">curl -s -L -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-e http://www.115.com/ -o 1154.html -D 115cookie004.txt -b 115cookie002.txt \</span><br><span class="line">http://115.com/?ct=ajax_user\&amp;ac=pick_space\&amp;token=<span class="variable">$token</span>\&amp;_=1331178977515</span><br></pre></td></tr></table></figure></p>
-<p>测试成功，证明_字段没有实际作用。估计是个时间戳之类的，服务器并不对其正确唯一与否做出很严格的校验。<br>我们只需要在获得token后检验token是否为空即可，不需要在登陆后检测登陆是否成功。因为即使登陆成功后获得token识别，脚本也会终止。</p>
-<h2 id="后续处理"><a href="#后续处理" class="headerlink" title="后续处理"></a>后续处理</h2><h3 id="1、结果处理"><a href="#1、结果处理" class="headerlink" title="1、结果处理"></a>1、结果处理</h3><p>摇一摇POST页面<code>http://115.com/?ct=ajax_user&amp;ac=pick_space&amp;token=164d32f6fc1e668c0769eff1235e8***&amp;_=1345094656***</code>得到的结果中，有三个字段有意义：</p>
+<a id="more"></a>
 <ul>
-<li>picked：摇一摇获得空间数</li>
-<li>total_size：总空间数</li>
-<li>exp：获得的雨露数</li>
+<li><p>upload_file.php，处理上传的文件。<br>上传文件后，文件先缓存在临时目录中，脚本结束时临时文件被删除。upload_file.php只是简单输出上传文件的信息，而不做实际场景中将临时文件保存至永久目录等进一步处理。但此差异对我们进行curl实验没有任何影响。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a File Upload Process Demo.&lt;br /&gt;</span><br><span class="line">It only shows the information of the file you uploaded.&lt;br /&gt;</span><br><span class="line">The file you uploaded remains temporary,&lt;br /&gt;</span><br><span class="line"><span class="keyword">and</span> is deleted when this script is finished.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span> ($_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] &gt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Error: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Upload: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"name"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Type: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"type"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Size: "</span> . ($_FILES[<span class="string">"file"</span>][<span class="string">"size"</span>] / <span class="number">1024</span>) . <span class="string">" Kb&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Stored in: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"tmp_name"</span>];</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>put.php，处理通过HTTP PUT方法上传的文件。<br>同上，为了安全只输出上传文件信息，不做实际转存处理。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP PUT Demo.&lt;br&gt;</span><br><span class="line">It reads the file you upload using PUT,&lt;br&gt;</span><br><span class="line"><span class="keyword">and</span> prints the content out.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/* PUT data comes in on the stdin stream */</span></span><br><span class="line">$putdata = fopen(<span class="string">"php://input"</span>, <span class="string">"r"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Read the data 1 KB at a time</span></span><br><span class="line"><span class="comment">   and print the content out */</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"The contents of the file you upload:&lt;br&gt;&lt;br&gt;\n"</span>;</span><br><span class="line"><span class="keyword">while</span> ($data = fread($putdata, <span class="number">1024</span>))</span><br><span class="line">    <span class="keyword">echo</span> $data;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="comment">/* Close the streams */</span></span><br><span class="line">fclose($putdata);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
 </ul>
-<p>提取脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#get the result</span></span><br><span class="line">cat 1154.html |awk -F<span class="string">"picked\":\""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>&gt;&gt;yaoyao.log</span><br><span class="line">cat 1154.html |awk -F<span class="string">"total_size\":\""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>&gt;&gt;yaoyao.log</span><br><span class="line">cat 1154.html |awk -F<span class="string">"exp\":"</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"&#125;"</span> <span class="string">'&#123;print $1&#125;'</span>&gt;&gt;yaoyao.log</span><br></pre></td></tr></table></figure></p>
-<p>结果保存在日志中。我们只需要查看日志即可判断成功与否。</p>
-<h3 id="2、资源清理"><a href="#2、资源清理" class="headerlink" title="2、资源清理"></a>2、资源清理</h3><p>脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rm -f 1151.html 1152.html 1153.html 1154.html</span><br><span class="line">rm -f 115cookie001.txt 115cookie002.txt 115cookie003.txt 115cookie004.txt</span><br></pre></td></tr></table></figure></p>
-<p>除115cookie002.txt之外，其余的cookie其实不用保存。<br>稳妥的办法是在开头结尾都添加资源清理语句。</p>
-<h3 id="3、容错处理"><a href="#3、容错处理" class="headerlink" title="3、容错处理"></a>3、容错处理</h3><p>脚本中没有做太完备的容错处理。<br>因为在网络好的情况下，一般只会一次成功，失败的概率很小。没必要添加逻辑复杂的容错处理。</p>
-<h2 id="Linux设置自动执行"><a href="#Linux设置自动执行" class="headerlink" title="Linux设置自动执行"></a>Linux设置自动执行</h2><p>可设置crotab自动执行。<br>如<code>vim /etc/crontab</code>添加如下字段：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">30 5    * * *   root   bash yaoyao.sh username password</span><br></pre></td></tr></table></figure></p>
-<p>表示每天5:30以root用户自动执行”bash yaoyao.sh username password“。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>完整的脚本请下载yaoyao.sh<br>使用方法：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">bash yaoyao.sh username password</span><br></pre></td></tr></table></figure></p>
-<p>使用bash执行的原因是，其他shell可能有不支持的shell语法。<br>日志保存在yaoyao.log中。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之一：cURL简介</title>
-    <url>/2012/07/linux-curl-description/</url>
-    <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
-<p>而cURL就是HTTP脚本编程的利器。</p>
-<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
-<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
-<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
-<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
-<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
+<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><h3 id="F-–form"><a href="#F-–form" class="headerlink" title="-F/–form"></a>-F/–form</h3><p><code>-F/--form &lt;name=content&gt;</code><br>使用<code>Content-Type  multi‐part/form-data</code>的方式提交数据，可用于上传二进制文件。</p>
+<ol>
+<li><p>@的使用<br>一般使用<code>-F file=@filename</code>的形式，其中file为文件表单的name，filename为文件名。@后面的文件作为文件上传处理。</p>
+</li>
+<li><p>&lt;的使用<br>对于&lt;后的文件，curl会读取其内容，而不会作为文件上传。类似-d选项中@的作用。<br>如<br><code>curl -F name=&lt;foobar.txt -Fage=100 http://127.0.0.1/welcome.php</code><br>foobar.txt内容为Adeploy，则此命令与以下命令等价：<br><code>curl -F name=Adeploy -Fage=100 http://127.0.0.1/welcome.php</code><br>而-F @foobar.txt表示将foobar.txt作为文件上传。</p>
+</li>
+<li><p>-F不进行url编码<br>-F与-d类似，都是不对数据进行urlencode编码，而且-F不能与-d或–data-urlencode共用。<br>因此如果上传文件的同时还需要提交其他需要urlencode编码的字段（如中文用户名），就会出现问题。<br>除手动编码外，实用的解决办法是自己编写urlencode函数（网上可以找到Linux脚本实现的urlencode函数或C语言版本、Perl版本、Python），调用即可。</p>
+</li>
+<li><p>使用”type=”指定Content-Type<br>如<code>curl -F &quot;web=@index.html;type=text/html&quot; url.com</code><br>将index.html以text/html的Content-Type上传。</p>
+</li>
+<li><p>使用”filename=”修改上传文件的名字<br>如<code>curl -F &quot;file=@localfile;filename=nameinpost&quot; url.com</code><br>上传localfile并修改文件名字为nameinpost。</p>
+</li>
 </ol>
+<h3 id="–form-string"><a href="#–form-string" class="headerlink" title="–form-string"></a>–form-string</h3><p><code>--form-string &lt;name=string&gt;</code><br>基本同-F，但是此参数后面跟”@”、”&lt;”、”;type=”时，不做特殊含义解析。</p>
+<h3 id="T-–upload-file"><a href="#T-–upload-file" class="headerlink" title="-T/–upload-file"></a>-T/–upload-file</h3><p><code>-T/--upload-file &lt;file&gt;</code><br>使用HTTP的PUT方法上传文件，需要目标URL支持HTTP的PUT方法。<br>可以与-d、–data-urlencode、-F同时使用。</p>
+<h2 id="参数使用实例"><a href="#参数使用实例" class="headerlink" title="参数使用实例"></a>参数使用实例</h2><h3 id="F文件上传"><a href="#F文件上传" class="headerlink" title="-F文件上传"></a>-F文件上传</h3><p>打开file.php选择文件后submit，Developer Tools抓包截图如下：<br><img src="/img/developertools_file.jpg" alt="Developer Tools file上传"><br>注意此时的Content-Type字段是<code>multipart/form-data</code>，主要用于上传文件，具体可参考<a href="http://www.ietf.org/rfc/rfc1867.txt" target="_blank" rel="noopener">RFC1867</a>。<br>分析file.php的源代码可知，表单中file类型的input元素name=file，所以命令如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o file.html -F file=@a.txt http://127.0.0.1/upload_file.php</span><br></pre></td></tr></table></figure></p>
+<h3 id="T文件上传"><a href="#T文件上传" class="headerlink" title="-T文件上传"></a>-T文件上传</h3><p>没有找到正确的PUT表单，因此无法使用Developer Tools跟踪实际提交过程。<br>命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o put.html -T a.txt http://127.0.0.1/put.php</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要为使用curl上传文件的操作方法。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -906,6 +993,147 @@
       </tags>
   </entry>
   <entry>
+    <title>Linux下cURL使用教程之一：cURL简介</title>
+    <url>/2012/07/linux-curl-description/</url>
+    <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
+<p>而cURL就是HTTP脚本编程的利器。</p>
+<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
+<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
+<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
+<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
+<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之八：curl基本使用实例之115网盘自动摇一摇脚本</title>
+    <url>/2012/08/linux-curl-example-115/</url>
+    <content><![CDATA[<p>上一篇使用shell+curl的方式完成了登陆百度空间并发表文章。但是奈何shell脚本对大批量文字的处理太弱，因此脚本显得鸡肋。<br>而本篇则完成一个实际可用的脚本程序：115网盘自动摇一摇脚本。</p>
+<h2 id="115网盘简介"><a href="#115网盘简介" class="headerlink" title="115网盘简介"></a>115网盘简介</h2><p>115网盘容量和速度都算不错的。注册送15G，然后可通过每天摇一摇等方式获得容量。<br>免费会员每天可以摇一次，可以获得几十M到一百多M的空间，和几百“雨露”。雨露可用于升级，升级后增加空间，但是貌似现在没有了。<br>可以在淘宝上搜一下115账号的价格。<br>（注：当初写这个脚本的时候，还在网盘大战前后，如今的115早已不如当前，摇一摇这个功能早已消失。）</p>
+<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>登陆过程我们仍然使用Developer Tools分析。<br>简单的办法是使用谷歌官方的chrome浏览器或Firefox+Firebug。</p>
+<h2 id="登陆过程"><a href="#登陆过程" class="headerlink" title="登陆过程"></a>登陆过程</h2><p>登陆，使用Developer Tools抓包，很容易看到第一个POST包。</p>
+<h3 id="1、POST地址"><a href="#1、POST地址" class="headerlink" title="1、POST地址"></a>1、POST地址</h3><p><code>https://passport.115.com/?ac=login</code></p>
+<h3 id="2、三部分数据"><a href="#2、三部分数据" class="headerlink" title="2、三部分数据"></a>2、三部分数据</h3><ul>
+<li>Request Headers，没特殊需要注意的字段。</li>
+<li>Query String Parameters，没用。</li>
+<li>Form Data，有两个数据：用户名、密码，字段名分别为login[account]、login[passwd]，参数明文。<a id="more"></a>
+<h3 id="3、curl脚本"><a href="#3、curl脚本" class="headerlink" title="3、curl脚本"></a>3、curl脚本</h3>伪造User-Agent，伪装来源页面，登陆保存cookie：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#username/passwd are the parameters of this script</span></span><br><span class="line">username=<span class="variable">$1</span></span><br><span class="line">passwd=<span class="variable">$2</span></span><br><span class="line"><span class="comment">#save to log</span></span><br><span class="line">date&gt;&gt;yaoyao.log</span><br><span class="line"><span class="built_in">echo</span> Log <span class="variable">$1</span>&gt;&gt;yaoyao.log</span><br><span class="line"><span class="comment">#login post</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o 1151.html -D 115cookie001.txt http://www.115.com/</span><br><span class="line">curl -s -L -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line"> -e http://www.115.com/ -o 1152.html -D 115cookie002.txt -b 115cookie001.txt \</span><br><span class="line"> --data-urlencode back=http://www.115.com \</span><br><span class="line"> --data-urlencode goto=http://115.com \</span><br><span class="line"> --data-urlencode login[account]=<span class="variable">$username</span> \</span><br><span class="line"> --data-urlencode login[passwd]=<span class="variable">$passwd</span> \</span><br><span class="line"> <span class="string">'http://passport.115.com/?ac=login'</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>为了更逼真，我们先访问了下首页，完整模仿实际用户行为。<br>登陆成功与否不在此处检测，原因见下节。</p>
+<h2 id="摇一摇过程"><a href="#摇一摇过程" class="headerlink" title="摇一摇过程"></a>摇一摇过程</h2><h3 id="1、摇一摇抓包分析"><a href="#1、摇一摇抓包分析" class="headerlink" title="1、摇一摇抓包分析"></a>1、摇一摇抓包分析</h3><p>在“网盘”页面下，点击摇一摇，摇成功后抓包分析。<br>很快发现摇一摇的GET数据包。</p>
+<h3 id="2、字段分析"><a href="#2、字段分析" class="headerlink" title="2、字段分析"></a>2、字段分析</h3><p>GET网址为：<code>http://115.com/?ct=ajax_user&amp;ac=pick_space&amp;token=dfcce64ebe71051a732d7943068ab***&amp;_=1345093324***</code><br>多次试验发现，URL中有两个变化的参数，token和<em>。没有其它特殊字段。<br>token和</em>字段，按上篇文章思路，我们先考虑这两个字段没有实际意义的情况。</p>
+<h3 id="3、curl脚本-1"><a href="#3、curl脚本-1" class="headerlink" title="3、curl脚本"></a>3、curl脚本</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -L -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-e http://www.115.com/ -o 1153.html -D 115cookie003.txt -b 115cookie002.txt \</span><br><span class="line">http://115.com/?ct=ajax_user\&amp;ac=pick_space\&amp;token=dfcce64ebe71051a756f7943068ab147\&amp;_=1331178826515</span><br></pre></td></tr></table></figure>
+<p>成功后会有跳转，所有我们使用了-L选项自动跟踪跳转。<br>token和_字段处，填入格式相同的随机值，打开1153.html发现失败。</p>
+<h3 id="4、寻找token字段"><a href="#4、寻找token字段" class="headerlink" title="4、寻找token字段"></a>4、寻找token字段</h3><p>同上篇相同思路，从后向前寻找。或者抓包，然后搜索token值。<br>1）最终发现在GET网页<code>http://115.com/?ct=file&amp;ac=userfile&amp;aid=1&amp;cid=0&amp;tpl=list_pg&amp;limit=35的Response</code>里有：<br><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span> window["INDEX_HOME_DATA"] = &#123;take_token: '164d32f6fc1e668c0769eff1235e83ff',is_take: Number('1') &#125;;</span><br></pre></td></tr></table></figure></p>
+<p>2）我们使用curl脚本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-e http://115.com/ -o 1153.html -D 115cookie003.txt -b 115cookie002.txt \</span><br><span class="line"><span class="string">'http://115.com/?ct=file&amp;ac=userfile&amp;aid=1&amp;cid=0&amp;tpl=list_pg&amp;limit=35'</span></span><br></pre></td></tr></table></figure></p>
+<p>cat 1153.html|grep token即可看到token字段。</p>
+<p>3）增加curl语句GET此页面提取token即可。<br>与上文POST摇一摇的代码合并后脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#get token</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-e http://115.com/ -o 1153.html -D 115cookie003.txt -b 115cookie002.txt \</span><br><span class="line"><span class="string">'http://115.com/?ct=file&amp;ac=userfile&amp;aid=1&amp;cid=0&amp;tpl=list_pg&amp;limit=35'</span></span><br><span class="line">token=`cat 1153.html | grep Yao|awk -F <span class="string">"'"</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"'"</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"token="</span><span class="variable">$token</span></span><br><span class="line"><span class="comment">#check before post</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$token</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>&gt;&gt;yaoyao.log;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment">#yao post</span></span><br><span class="line">curl -s -L -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> \</span><br><span class="line">-e http://www.115.com/ -o 1154.html -D 115cookie004.txt -b 115cookie002.txt \</span><br><span class="line">http://115.com/?ct=ajax_user\&amp;ac=pick_space\&amp;token=<span class="variable">$token</span>\&amp;_=1331178977515</span><br></pre></td></tr></table></figure></p>
+<p>测试成功，证明_字段没有实际作用。估计是个时间戳之类的，服务器并不对其正确唯一与否做出很严格的校验。<br>我们只需要在获得token后检验token是否为空即可，不需要在登陆后检测登陆是否成功。因为即使登陆成功后获得token识别，脚本也会终止。</p>
+<h2 id="后续处理"><a href="#后续处理" class="headerlink" title="后续处理"></a>后续处理</h2><h3 id="1、结果处理"><a href="#1、结果处理" class="headerlink" title="1、结果处理"></a>1、结果处理</h3><p>摇一摇POST页面<code>http://115.com/?ct=ajax_user&amp;ac=pick_space&amp;token=164d32f6fc1e668c0769eff1235e8***&amp;_=1345094656***</code>得到的结果中，有三个字段有意义：</p>
+<ul>
+<li>picked：摇一摇获得空间数</li>
+<li>total_size：总空间数</li>
+<li>exp：获得的雨露数</li>
+</ul>
+<p>提取脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#get the result</span></span><br><span class="line">cat 1154.html |awk -F<span class="string">"picked\":\""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>&gt;&gt;yaoyao.log</span><br><span class="line">cat 1154.html |awk -F<span class="string">"total_size\":\""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>&gt;&gt;yaoyao.log</span><br><span class="line">cat 1154.html |awk -F<span class="string">"exp\":"</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"&#125;"</span> <span class="string">'&#123;print $1&#125;'</span>&gt;&gt;yaoyao.log</span><br></pre></td></tr></table></figure></p>
+<p>结果保存在日志中。我们只需要查看日志即可判断成功与否。</p>
+<h3 id="2、资源清理"><a href="#2、资源清理" class="headerlink" title="2、资源清理"></a>2、资源清理</h3><p>脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rm -f 1151.html 1152.html 1153.html 1154.html</span><br><span class="line">rm -f 115cookie001.txt 115cookie002.txt 115cookie003.txt 115cookie004.txt</span><br></pre></td></tr></table></figure></p>
+<p>除115cookie002.txt之外，其余的cookie其实不用保存。<br>稳妥的办法是在开头结尾都添加资源清理语句。</p>
+<h3 id="3、容错处理"><a href="#3、容错处理" class="headerlink" title="3、容错处理"></a>3、容错处理</h3><p>脚本中没有做太完备的容错处理。<br>因为在网络好的情况下，一般只会一次成功，失败的概率很小。没必要添加逻辑复杂的容错处理。</p>
+<h2 id="Linux设置自动执行"><a href="#Linux设置自动执行" class="headerlink" title="Linux设置自动执行"></a>Linux设置自动执行</h2><p>可设置crotab自动执行。<br>如<code>vim /etc/crontab</code>添加如下字段：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">30 5    * * *   root   bash yaoyao.sh username password</span><br></pre></td></tr></table></figure></p>
+<p>表示每天5:30以root用户自动执行”bash yaoyao.sh username password“。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>完整的脚本请下载yaoyao.sh<br>使用方法：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">bash yaoyao.sh username password</span><br></pre></td></tr></table></figure></p>
+<p>使用bash执行的原因是，其他shell可能有不支持的shell语法。<br>日志保存在yaoyao.log中。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十一：HTTPS及证书使用简介</title>
+    <url>/2012/08/linux-curl-usage-https-cert/</url>
+    <content><![CDATA[<p>某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:</span><br><span class="line">error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed</span><br><span class="line">More details here: http://curl.haxx.se/docs/sslcerts.html</span><br></pre></td></tr></table></figure></p>
+<p>此时就需要使用证书。<br>因此本篇只对curl相关选项做出介绍，详细原理请参考HTTPS协议。</p>
+<h2 id="使用到的选项"><a href="#使用到的选项" class="headerlink" title="使用到的选项"></a>使用到的选项</h2><h3 id="E-–cert-导入证书"><a href="#E-–cert-导入证书" class="headerlink" title="-E/–cert 导入证书"></a>-E/–cert 导入证书</h3><p><code>-E/--cert &lt;certificate[:password]&gt;</code>导入证书。curl默认使用PEM格式的证书。<br>一般我们从浏览器导出的cert都是X.509格式。可以使用openssl转化为PEM格式。<br><a id="more"></a></p>
+<h3 id="–cert-type-指定证书类型"><a href="#–cert-type-指定证书类型" class="headerlink" title="–cert-type 指定证书类型"></a>–cert-type 指定证书类型</h3><p><code>--cert-type &lt;type&gt;</code>指定证书类型，可以为PEM、 DER 或 ENG类型。</p>
+<h3 id="–cacert-指定CA证书"><a href="#–cacert-指定CA证书" class="headerlink" title="–cacert 指定CA证书"></a>–cacert 指定CA证书</h3><p><code>--cacert &lt;CA certificate&gt;</code><br>指定使用的CA证书。CA证书必须是PEM格式。<br>默认情况下，curl使用一个自带的CA文件。可以在<a href="http://curl.haxx.se/docs/caextract.html" target="_blank" rel="noopener">这里</a>下载curl提供的最新的CA证书。<br>curl通过读取环境变量CURL_CA_BUNDLE的值作为CA证书库（CA cert bundle）的路径。此选项优先级高于此环境变量被使用。</p>
+<h3 id="–capath-指定CA路径"><a href="#–capath-指定CA路径" class="headerlink" title="–capath 指定CA路径"></a>–capath 指定CA路径</h3><p><code>--capath &lt;CA certificate directory&gt;</code><br>指定使用的CA证书路径目录。证书必须为PEM格式，且此目录已被curl自带的c_rehash工具处理过。<br>在需要指定多个CA证书的时候，使用–capath指定CA目录更高效。</p>
+<h3 id="k-–insecure-跳过验证"><a href="#k-–insecure-跳过验证" class="headerlink" title="-k/–insecure 跳过验证"></a>-k/–insecure 跳过验证</h3><p><code>-k/--insecure</code><br>指定允许使用不安全的ssl连接传输。<br>所有的连接都是试图通过使用默认安装的CA证书库（CA certificate bundle）来验证是安全的。非安全的连接默认是不允许的。</p>
+<h3 id="指定私钥"><a href="#指定私钥" class="headerlink" title="指定私钥"></a>指定私钥</h3><p><code>--key &lt;key&gt;</code><br>指定私钥文件名。</p>
+<p><code>--key-type &lt;type&gt;</code><br>指定私钥文件类型，可以为DER、PEM 或 ENG。默认使用PEM。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://curl.haxx.se/docs/sslcerts.html" target="_blank" rel="noopener">Details on Server SSL Certificates</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，curl脚本HTTP相关部分告一段落。<br>后续会介绍些curl使用其他协议的例子，及在编程中使用libcurl库。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十：HTTP文件下载</title>
+    <url>/2012/08/linux-curl-usage-download-file/</url>
+    <content><![CDATA[<p>其实每次我们使用curl去打开一个url都是执行一次下载操作，因此我们甚至可以认为curl是一个下载工具。<br>而且curl的某些选项及特性，使得curl能完成非常强大的下载功能。<br>基本命令及一些有用的参数如下。</p>
+<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><p>使用<code>curl [URL...]</code>下载URL，并输出在终端。<br>可指定多个URL。多个URL时，下载内容同时在终端显示。</p>
+<h2 id="–progress-bar-进度条"><a href="#–progress-bar-进度条" class="headerlink" title="-#/–progress-bar 进度条"></a>-#/–progress-bar 进度条</h2><p>添加参数<code>-#/--progress-bar</code>查看下载进度条。</p>
+<h2 id="o-–output-输出文件"><a href="#o-–output-输出文件" class="headerlink" title="-o/–output 输出文件"></a>-o/–output 输出文件</h2><p>使用参数<code>-o/--output &lt;file&gt;</code>下载并保存至文件file。<br>可同时下载多个URL，每个-o对应一个URL。<br>如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>会下载<a href="http://www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而" target="_blank" rel="noopener">www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而</a><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com -o b.html http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html -o b.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>会分别下载两个URL至两个文件中。<br><a id="more"></a></p>
+<h2 id="O-–remote-name"><a href="#O-–remote-name" class="headerlink" title="-O/–remote-name"></a>-O/–remote-name</h2><p>下载并从url中提取文件名。<br>多个URL的情况同-o选项相同：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O -O http://www.xxx.com/a.html http://www.xxx.com/b.html</span><br><span class="line">curl -O http://www.xxx.com/a.html -O http://www.xxx.com/b.html</span><br></pre></td></tr></table></figure></p>
+<p>都会将两个URL分别保存在a.html和b.html中。</p>
+<h2 id="C-–continue-at-断点续传"><a href="#C-–continue-at-断点续传" class="headerlink" title="-C/–continue-at 断点续传"></a>-C/–continue-at 断点续传</h2><p>使用参数<code>-C/--continue-at &lt;offset&gt;</code>进行断点续传。offset参数指定跳过多少bytes。<br>“-C -”指定自动检测断点续传开始位置。<br>使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>下载QQ安装程序，在下载未完成时Ctrl+C结束下载，然后使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -C - -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>进行断点续传。可看到第二次下载时并不是重新下载，而是从上次结束的地方下载。</p>
+<h2 id="r-–range-分块下载"><a href="#r-–range-分块下载" class="headerlink" title="-r/–range 分块下载"></a>-r/–range 分块下载</h2><p>使用<code>-r/--range &lt;range&gt;</code>分块下载，指定每块下载的字节范围。如上例中下载qq，分块下载如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 0-10240 -o qq.exe.part1 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载前10240bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 10241-20480 -o qq.exe.part2 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载10241-20480bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 20481- -o qq.exe.part3 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载20481bytes及之后的字节。<br>下载完后可使用<code>cat qq.exe.part&gt;qq.exe</code>的形式得到完整文件（win下需要使用copy /b）。<br>此选项适用于HTTP/FTP/SFTP及本地文件。</p>
+<h2 id="–limit-rate-限速下载"><a href="#–limit-rate-限速下载" class="headerlink" title="–limit-rate 限速下载"></a>–limit-rate 限速下载</h2><p>使用参数<code>--limit-rate &lt;speed&gt;</code>限速下载。默认单位为bytes/s，’k’或’K’指定使用单位KB/s，可以使用’m’或’M’指定使用单位MB/s，’g’或’G’指定使用单位GB/s。如<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O --limit-rate 100K http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>指定限速为100KB/s。<br>限速是限制平均速度，某时刻的突发速度可能超过限制速度，但平均速度会低于限制速度。<br>如果同时使用了-Y/–speed-limit限制了最低下载速度，-Y/–speed-limit选择优先级更高。因此如果-Y/–speed-limit指定的值高于限制的速度，那么限制的速度回被突破，以保证最低下载速度有效（因为如果低于-Y/–speed-limit指定的最低下载速度，下载会被取消）。</p>
+<h2 id="y-Y-限制速度"><a href="#y-Y-限制速度" class="headerlink" title="-y/-Y 限制速度"></a>-y/-Y 限制速度</h2><p>使用参数<code>-y/--speed-time &lt;time&gt;</code>或<code>-Y/--speed-limit &lt;speed&gt;</code>限制速度。<br>网速太慢时取消下载。</p>
+<ul>
+<li>-Y指定最低速度。使用-y指定超时时间而未指定最低速度时，最低速度默认为1.</li>
+<li>-y指定超时时间，即低于最低速度多次时间时取消下载。使用-Y指定最低速度而未指定超时时间时，超时时间默认为30。</li>
+</ul>
+<h2 id="z-–time-cond-更新下载"><a href="#z-–time-cond-更新下载" class="headerlink" title="-z/–time-cond 更新下载"></a>-z/–time-cond 更新下载</h2><p>使用参数<code>-z/--time-cond &lt;date expression&gt;</code>设置只在更新时下载。具体的时间格式请参考<code>man 3 curl_getdate</code>（这个只有在安装了libcurl开发库之后才有），或者<a href="http://curl.haxx.se/libcurl/c/curl_getdate.html" target="_blank" rel="noopener">curl_getdate在线文档</a>。<br>如果时间格式解析失败，curl将会把此字段理解为文件名，从文件中读取时间。<br>需要网页中有相关字段表明最后更新日期。<br>如curl_getdate在线文档网页内有字段:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Page updated June 20, 2012.</span><br></pre></td></tr></table></figure></p>
+<p>表明网页最后更新日期是2012-06-20，因此执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z 20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
+<p>curl_getdate.html在2012-06-20以后被更新，会被下载。而在日期前加上”-“，则表示相反意思，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z -20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
+<p>只有 curl_getdate.html 在2012-06-20之前被更新才会下载。因此此命令不会下载curl_getdate.html。</p>
+<h2 id="文件批量下载"><a href="#文件批量下载" class="headerlink" title="文件批量下载"></a>文件批量下载</h2><p>通过使用正则表达式，可以对有一定规律的文件批量下载。如我们在PHP服务器的/var/www下新建a、b两个目录，新建如下文件：<br><code>a/1.php a/2.php...a/7.php,b/1.php b/2.php...b/5.php</code><br>PHP文件内容相同，都为输出绝对路径，用以标志文件的不同：<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="keyword">__FILE__</span> ;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>可以使用命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O http://127.0.0.1/&#123;a,b&#125;/[1-7].php</span><br></pre></td></tr></table></figure></p>
+<p>批量下载文件。<br>a/1.php-a/7.php会保存在当前目录下的1.php-7.php中。b/1.php-b/5.php如果也保存在当前目录下的1.php-5.php的话，会覆盖以前的文件。因此curl会把b/1.php-b/5.php的内容在终端输出而不会保存文件。而执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl <span class="string">"http://10.1.1.103/&#123;a,b&#125;/[1-7].php"</span> -o <span class="string">"#1_#2.php"</span></span><br></pre></td></tr></table></figure></p>
+<p>则会使用“目录<em>文件”的形式命名文件，避免文件名冲突。<br>{}、[]类似于正则表达式中的语法，用以取得多个文件。#加数字的形式用以取得正则表达式的当前值。<br>如#1表示第一个正则表达式的当前值，上例中即为{a,b}的值。<br>当下载<code>http://10.1.1.103/a/1.php</code>时，#1为“a”，#2为“1”，#1</em>#2.php即为“a_1.php”。从而完成批量文件的自动命名。</p>
+<p>注：注意此时网址包含在双引号中，这是因为如果不被包含在引号中，{}中的内容无法使用#1的形式引用，会出现如下错误<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">internal error: invalid pattern type (0)</span><br><span class="line">Warning: bad output glob!</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实日常使用，我们更多使用wget下载文件。相比wget，curl功能更具体一些。<br>关于二者的区别，请参考后续文章。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>解密Redis持久化</title>
     <url>/2017/04/redis-persistence-demystified/</url>
     <content><![CDATA[<p>本文主要是对<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">antirez博客</a>的翻译。其实<a href="http://blog.nosqlfan.com/html/3813.html" target="_blank" rel="noopener"></a>nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。</p>
@@ -936,30 +1164,6 @@
         <tag>nosql</tag>
         <tag>aof</tag>
         <tag>rdb</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之十一：HTTPS及证书使用简介</title>
-    <url>/2012/08/linux-curl-usage-https-cert/</url>
-    <content><![CDATA[<p>某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:</span><br><span class="line">error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed</span><br><span class="line">More details here: http://curl.haxx.se/docs/sslcerts.html</span><br></pre></td></tr></table></figure></p>
-<p>此时就需要使用证书。<br>因此本篇只对curl相关选项做出介绍，详细原理请参考HTTPS协议。</p>
-<h2 id="使用到的选项"><a href="#使用到的选项" class="headerlink" title="使用到的选项"></a>使用到的选项</h2><h3 id="E-–cert-导入证书"><a href="#E-–cert-导入证书" class="headerlink" title="-E/–cert 导入证书"></a>-E/–cert 导入证书</h3><p><code>-E/--cert &lt;certificate[:password]&gt;</code>导入证书。curl默认使用PEM格式的证书。<br>一般我们从浏览器导出的cert都是X.509格式。可以使用openssl转化为PEM格式。<br><a id="more"></a></p>
-<h3 id="–cert-type-指定证书类型"><a href="#–cert-type-指定证书类型" class="headerlink" title="–cert-type 指定证书类型"></a>–cert-type 指定证书类型</h3><p><code>--cert-type &lt;type&gt;</code>指定证书类型，可以为PEM、 DER 或 ENG类型。</p>
-<h3 id="–cacert-指定CA证书"><a href="#–cacert-指定CA证书" class="headerlink" title="–cacert 指定CA证书"></a>–cacert 指定CA证书</h3><p><code>--cacert &lt;CA certificate&gt;</code><br>指定使用的CA证书。CA证书必须是PEM格式。<br>默认情况下，curl使用一个自带的CA文件。可以在<a href="http://curl.haxx.se/docs/caextract.html" target="_blank" rel="noopener">这里</a>下载curl提供的最新的CA证书。<br>curl通过读取环境变量CURL_CA_BUNDLE的值作为CA证书库（CA cert bundle）的路径。此选项优先级高于此环境变量被使用。</p>
-<h3 id="–capath-指定CA路径"><a href="#–capath-指定CA路径" class="headerlink" title="–capath 指定CA路径"></a>–capath 指定CA路径</h3><p><code>--capath &lt;CA certificate directory&gt;</code><br>指定使用的CA证书路径目录。证书必须为PEM格式，且此目录已被curl自带的c_rehash工具处理过。<br>在需要指定多个CA证书的时候，使用–capath指定CA目录更高效。</p>
-<h3 id="k-–insecure-跳过验证"><a href="#k-–insecure-跳过验证" class="headerlink" title="-k/–insecure 跳过验证"></a>-k/–insecure 跳过验证</h3><p><code>-k/--insecure</code><br>指定允许使用不安全的ssl连接传输。<br>所有的连接都是试图通过使用默认安装的CA证书库（CA certificate bundle）来验证是安全的。非安全的连接默认是不允许的。</p>
-<h3 id="指定私钥"><a href="#指定私钥" class="headerlink" title="指定私钥"></a>指定私钥</h3><p><code>--key &lt;key&gt;</code><br>指定私钥文件名。</p>
-<p><code>--key-type &lt;type&gt;</code><br>指定私钥文件类型，可以为DER、PEM 或 ENG。默认使用PEM。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://curl.haxx.se/docs/sslcerts.html" target="_blank" rel="noopener">Details on Server SSL Certificates</a></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，curl脚本HTTP相关部分告一段落。<br>后续会介绍些curl使用其他协议的例子，及在编程中使用libcurl库。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -1139,49 +1343,80 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之十：HTTP文件下载</title>
-    <url>/2012/08/linux-curl-usage-download-file/</url>
-    <content><![CDATA[<p>其实每次我们使用curl去打开一个url都是执行一次下载操作，因此我们甚至可以认为curl是一个下载工具。<br>而且curl的某些选项及特性，使得curl能完成非常强大的下载功能。<br>基本命令及一些有用的参数如下。</p>
-<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><p>使用<code>curl [URL...]</code>下载URL，并输出在终端。<br>可指定多个URL。多个URL时，下载内容同时在终端显示。</p>
-<h2 id="–progress-bar-进度条"><a href="#–progress-bar-进度条" class="headerlink" title="-#/–progress-bar 进度条"></a>-#/–progress-bar 进度条</h2><p>添加参数<code>-#/--progress-bar</code>查看下载进度条。</p>
-<h2 id="o-–output-输出文件"><a href="#o-–output-输出文件" class="headerlink" title="-o/–output 输出文件"></a>-o/–output 输出文件</h2><p>使用参数<code>-o/--output &lt;file&gt;</code>下载并保存至文件file。<br>可同时下载多个URL，每个-o对应一个URL。<br>如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
-<p>会下载<a href="http://www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而" target="_blank" rel="noopener">www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而</a><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com -o b.html http://www.b.com</span><br></pre></td></tr></table></figure></p>
-<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html -o b.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
-<p>会分别下载两个URL至两个文件中。<br><a id="more"></a></p>
-<h2 id="O-–remote-name"><a href="#O-–remote-name" class="headerlink" title="-O/–remote-name"></a>-O/–remote-name</h2><p>下载并从url中提取文件名。<br>多个URL的情况同-o选项相同：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O -O http://www.xxx.com/a.html http://www.xxx.com/b.html</span><br><span class="line">curl -O http://www.xxx.com/a.html -O http://www.xxx.com/b.html</span><br></pre></td></tr></table></figure></p>
-<p>都会将两个URL分别保存在a.html和b.html中。</p>
-<h2 id="C-–continue-at-断点续传"><a href="#C-–continue-at-断点续传" class="headerlink" title="-C/–continue-at 断点续传"></a>-C/–continue-at 断点续传</h2><p>使用参数<code>-C/--continue-at &lt;offset&gt;</code>进行断点续传。offset参数指定跳过多少bytes。<br>“-C -”指定自动检测断点续传开始位置。<br>使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
-<p>下载QQ安装程序，在下载未完成时Ctrl+C结束下载，然后使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -C - -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
-<p>进行断点续传。可看到第二次下载时并不是重新下载，而是从上次结束的地方下载。</p>
-<h2 id="r-–range-分块下载"><a href="#r-–range-分块下载" class="headerlink" title="-r/–range 分块下载"></a>-r/–range 分块下载</h2><p>使用<code>-r/--range &lt;range&gt;</code>分块下载，指定每块下载的字节范围。如上例中下载qq，分块下载如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 0-10240 -o qq.exe.part1 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
-<p>下载前10240bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 10241-20480 -o qq.exe.part2 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
-<p>下载10241-20480bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 20481- -o qq.exe.part3 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
-<p>下载20481bytes及之后的字节。<br>下载完后可使用<code>cat qq.exe.part&gt;qq.exe</code>的形式得到完整文件（win下需要使用copy /b）。<br>此选项适用于HTTP/FTP/SFTP及本地文件。</p>
-<h2 id="–limit-rate-限速下载"><a href="#–limit-rate-限速下载" class="headerlink" title="–limit-rate 限速下载"></a>–limit-rate 限速下载</h2><p>使用参数<code>--limit-rate &lt;speed&gt;</code>限速下载。默认单位为bytes/s，’k’或’K’指定使用单位KB/s，可以使用’m’或’M’指定使用单位MB/s，’g’或’G’指定使用单位GB/s。如<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O --limit-rate 100K http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
-<p>指定限速为100KB/s。<br>限速是限制平均速度，某时刻的突发速度可能超过限制速度，但平均速度会低于限制速度。<br>如果同时使用了-Y/–speed-limit限制了最低下载速度，-Y/–speed-limit选择优先级更高。因此如果-Y/–speed-limit指定的值高于限制的速度，那么限制的速度回被突破，以保证最低下载速度有效（因为如果低于-Y/–speed-limit指定的最低下载速度，下载会被取消）。</p>
-<h2 id="y-Y-限制速度"><a href="#y-Y-限制速度" class="headerlink" title="-y/-Y 限制速度"></a>-y/-Y 限制速度</h2><p>使用参数<code>-y/--speed-time &lt;time&gt;</code>或<code>-Y/--speed-limit &lt;speed&gt;</code>限制速度。<br>网速太慢时取消下载。</p>
+    <title>SQLAlchemy简介及在OpenStack中的使用</title>
+    <url>/2015/07/sqlalchemy-intro/</url>
+    <content><![CDATA[<p>SQLAlchemy是Python编程语言下的一款开源软件，提供了SQL工具包及对象关系映射(ORM)工具。</p>
+<h2 id="web编程之orm"><a href="#web编程之orm" class="headerlink" title="web编程之orm"></a>web编程之orm</h2><p>在编写web服务时，我们通常使用orm，而不是直接使用SQL与数据库进行交互。<br>如果使用Django等比较全面的框架，可以选择默认的ORM。但如果选择flask等轻量级框架，则需要自己选择ORM。同时，自己选择使用ORM也带来了更大的灵活性。<br><a id="more"></a></p>
+<h3 id="orm是什么"><a href="#orm是什么" class="headerlink" title="orm是什么"></a>orm是什么</h3><p>以下节选自wikipeida：</p>
+<blockquote>
+<p>Object-relational mapping (ORM, O/RM, and O/R mapping tool) in computer science is a programming technique for converting data between incompatible type systems in object-oriented programming languages.</p>
+</blockquote>
+<p>以下节选自百度百科：</p>
+<blockquote>
+<p>对象关系映射（英语：Object Relation Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。</p>
+</blockquote>
+<p>实际项目中，我们主要使用orm作为与数据库等进行实际交互的工具。</p>
+<h3 id="为什么使用orm"><a href="#为什么使用orm" class="headerlink" title="为什么使用orm"></a>为什么使用orm</h3><p>与直接使用sql访问数据库相比，其有以下好处：</p>
 <ul>
-<li>-Y指定最低速度。使用-y指定超时时间而未指定最低速度时，最低速度默认为1.</li>
-<li>-y指定超时时间，即低于最低速度多次时间时取消下载。使用-Y指定最低速度而未指定超时时间时，超时时间默认为30。</li>
+<li>代码的简洁性，对存储层的通用封装<br>使用orm，操作数据库往往仅需要简单的几条语句，使代码变得简洁。</li>
+<li>数据源的兼容性<br>orm往往对多种数据库、数据源进行通用的封装，从而使得编写一套代码，适用于不同的数据源变得可能。</li>
+<li>操作的安全性<br>直接使用sql操作数据库，往往会因为开发人员疏忽引入sql注入等安全问题。而使用orm，能避免此问题。</li>
+<li>操作语句的高效性<br>orm的封装是众多开发人员智慧的结晶，其中往往已经对生成的sql语句进行了优化，使得一般语句的性能比较高效，而开发人员不需要再去考虑性能问题。但orm一般是通用的解决方案，无法针对所有场景进行优化，特殊场景下其生成的sql语句可能会非常低效，因此需要在实际使用时进行监控并酌情优化。</li>
 </ul>
-<h2 id="z-–time-cond-更新下载"><a href="#z-–time-cond-更新下载" class="headerlink" title="-z/–time-cond 更新下载"></a>-z/–time-cond 更新下载</h2><p>使用参数<code>-z/--time-cond &lt;date expression&gt;</code>设置只在更新时下载。具体的时间格式请参考<code>man 3 curl_getdate</code>（这个只有在安装了libcurl开发库之后才有），或者<a href="http://curl.haxx.se/libcurl/c/curl_getdate.html" target="_blank" rel="noopener">curl_getdate在线文档</a>。<br>如果时间格式解析失败，curl将会把此字段理解为文件名，从文件中读取时间。<br>需要网页中有相关字段表明最后更新日期。<br>如curl_getdate在线文档网页内有字段:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Page updated June 20, 2012.</span><br></pre></td></tr></table></figure></p>
-<p>表明网页最后更新日期是2012-06-20，因此执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z 20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
-<p>curl_getdate.html在2012-06-20以后被更新，会被下载。而在日期前加上”-“，则表示相反意思，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z -20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
-<p>只有 curl_getdate.html 在2012-06-20之前被更新才会下载。因此此命令不会下载curl_getdate.html。</p>
-<h2 id="文件批量下载"><a href="#文件批量下载" class="headerlink" title="文件批量下载"></a>文件批量下载</h2><p>通过使用正则表达式，可以对有一定规律的文件批量下载。如我们在PHP服务器的/var/www下新建a、b两个目录，新建如下文件：<br><code>a/1.php a/2.php...a/7.php,b/1.php b/2.php...b/5.php</code><br>PHP文件内容相同，都为输出绝对路径，用以标志文件的不同：<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="keyword">__FILE__</span> ;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>可以使用命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O http://127.0.0.1/&#123;a,b&#125;/[1-7].php</span><br></pre></td></tr></table></figure></p>
-<p>批量下载文件。<br>a/1.php-a/7.php会保存在当前目录下的1.php-7.php中。b/1.php-b/5.php如果也保存在当前目录下的1.php-5.php的话，会覆盖以前的文件。因此curl会把b/1.php-b/5.php的内容在终端输出而不会保存文件。而执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl <span class="string">"http://10.1.1.103/&#123;a,b&#125;/[1-7].php"</span> -o <span class="string">"#1_#2.php"</span></span><br></pre></td></tr></table></figure></p>
-<p>则会使用“目录<em>文件”的形式命名文件，避免文件名冲突。<br>{}、[]类似于正则表达式中的语法，用以取得多个文件。#加数字的形式用以取得正则表达式的当前值。<br>如#1表示第一个正则表达式的当前值，上例中即为{a,b}的值。<br>当下载<code>http://10.1.1.103/a/1.php</code>时，#1为“a”，#2为“1”，#1</em>#2.php即为“a_1.php”。从而完成批量文件的自动命名。</p>
-<p>注：注意此时网址包含在双引号中，这是因为如果不被包含在引号中，{}中的内容无法使用#1的形式引用，会出现如下错误<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">internal error: invalid pattern type (0)</span><br><span class="line">Warning: bad output glob!</span><br></pre></td></tr></table></figure></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实日常使用，我们更多使用wget下载文件。相比wget，curl功能更具体一些。<br>关于二者的区别，请参考后续文章。</p>
+<h2 id="简介及特性"><a href="#简介及特性" class="headerlink" title="简介及特性"></a>简介及特性</h2><p>SQLAlchemy的特性主要如下：</p>
+<ul>
+<li>Mature, High Performing Architecture DBA Approved</li>
+<li>Non-Opinionated</li>
+<li>Unit Of Work</li>
+<li>Function-based query construction Modular and Extensible</li>
+<li>Separate mapping and class design …</li>
+</ul>
+<p>See: <a href="http://www.sqlalchemy.org/features.html" target="_blank" rel="noopener">http://www.sqlalchemy.org/features.html</a></p>
+<h2 id="安装及使用"><a href="#安装及使用" class="headerlink" title="安装及使用"></a>安装及使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>开发环境推荐使用pip安装，同时注意版本问题。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install sqlalchemy</span><br></pre></td></tr></table></figure></p>
+<p>生产环境推荐使用rpm/deb安装，同时注意版本问题。<br>rpm - 版本兼容问题<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum install SQLAlchemy</span><br><span class="line">apt-get install SQLAlchemy</span><br></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>支持的2种方式:</p>
+<ul>
+<li>SQL Expression Language (core)</li>
+<li>Object Relational Mapper (orm)</li>
+</ul>
+<h2 id="Core方式"><a href="#Core方式" class="headerlink" title="Core方式"></a>Core方式</h2><p>(raw sql、sql expression)<br>对于绝大多数应用, 推荐使用SqlAlchemy. 即使是使用raw sql,<br>SqlAlchemy 也可以带来如下好处:</p>
+<ul>
+<li>内建数据库连接池</li>
+<li>强大的log功能</li>
+</ul>
+<p>SqlAlchemy的sql expression和raw sql的比较:</p>
+<ul>
+<li>sql expression 写法是纯python代码, 阅读性更好</li>
+<li>raw sql 比 sql expression 更灵活, 如果SQL很复杂, 更有优势了</li>
+</ul>
+<h3 id="Connect"><a href="#Connect" class="headerlink" title="Connect"></a>Connect</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">engine_str = <span class="string">"mysql:mysql://root:root@localhost/django_sqla"</span></span><br><span class="line">engine = create_engine(engine_str, echo=<span class="literal">True</span>)</span><br><span class="line">conn = engine.connect()</span><br></pre></td></tr></table></figure>
+<h3 id="Metadata"><a href="#Metadata" class="headerlink" title="Metadata"></a>Metadata</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Table objects <span class="keyword">and</span> its children <span class="keyword">as</span> metadata Table Column(String, Integer…)</span><br><span class="line">Create tables within the engine</span><br></pre></td></tr></table></figure>
+<h3 id="Insert-expression"><a href="#Insert-expression" class="headerlink" title="Insert expression"></a>Insert expression</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ins2=users.insert() <span class="comment">#anexpression</span></span><br><span class="line">result2 = conn.execute(ins2, id=<span class="number">2</span>, name=’wendy’, fullname=’Wendy Williams’) <span class="comment"># execute</span></span><br><span class="line">Multiple inserts: conn.execute(ins2, a_list)</span><br></pre></td></tr></table></figure>
+<h3 id="Update"><a href="#Update" class="headerlink" title="Update"></a>Update</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">users.update().values(&#123;…&#125;).where(…)</span><br></pre></td></tr></table></figure>
+<h3 id="Delete"><a href="#Delete" class="headerlink" title="Delete"></a>Delete</h3><p>同上</p>
+<h3 id="Select"><a href="#Select" class="headerlink" title="Select"></a>Select</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s = select([users]) <span class="keyword">or</span> s = users.select()</span><br><span class="line">result = conn.execute(s)</span><br><span class="line">result.fetchone()</span><br><span class="line">result.close()</span><br></pre></td></tr></table></figure>
+<h3 id="text"><a href="#text" class="headerlink" title="text"></a>text</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">sqlalchemy allows using string</span><br><span class="line">s = text(“””Hello”””)</span><br></pre></td></tr></table></figure>
+<h2 id="orm方式"><a href="#orm方式" class="headerlink" title="orm方式"></a>orm方式</h2><h3 id="Declare-a-Mapping"><a href="#Declare-a-Mapping" class="headerlink" title="Declare a Mapping"></a>Declare a Mapping</h3><p>declarative_base: define classes and mapping to tables<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base = declarative_base()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = ‘users’</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure></p>
+<h3 id="MetaData"><a href="#MetaData" class="headerlink" title="MetaData"></a>MetaData</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base.metadata.create_all(engine)</span><br></pre></td></tr></table></figure>
+<h3 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h3><p>事务<br>using session to handle orm’s action<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=engine)</span><br><span class="line">session = Session()</span><br></pre></td></tr></table></figure></p>
+<h3 id="Connection-pool"><a href="#Connection-pool" class="headerlink" title="Connection pool"></a>Connection pool</h3><h3 id="Add-insert"><a href="#Add-insert" class="headerlink" title="Add(insert)"></a>Add(insert)</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ed_user = User(<span class="string">'ed'</span>, <span class="string">'Ed Jones'</span>, <span class="string">'edspassword'</span>)</span><br><span class="line">session.add(ed_user)</span><br><span class="line">session.add_all([...])</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+<h3 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result = session.query(User).filter(User.name==‘ed<span class="string">')</span></span><br><span class="line"><span class="string">result[0].name, result[0][0]</span></span><br></pre></td></tr></table></figure>
+<h3 id="Relationship"><a href="#Relationship" class="headerlink" title="Relationship"></a>Relationship</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span><span class="params">(Base)</span></span></span><br><span class="line">__tablename__ = ‘addresses’</span><br><span class="line">...</span><br><span class="line">user_id = Column(Integer, ForeignKey(<span class="string">'users.id'</span>)) user = relationship(<span class="string">"User"</span>,</span><br><span class="line">backref=backref(<span class="string">'addresses'</span>, order_by=id))</span><br></pre></td></tr></table></figure>
+<h2 id="迁移"><a href="#迁移" class="headerlink" title="迁移"></a>迁移</h2><p>Alembic<br><a href="http://blog.csdn.net/ying_593254979/article/details/10189799" target="_blank" rel="noopener">参考</a></p>
+<h2 id="OpenStack中的使用"><a href="#OpenStack中的使用" class="headerlink" title="OpenStack中的使用"></a>OpenStack中的使用</h2><p>wsgi框架+SQLAlchemy</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>版本兼容问题<br>rpmbuild</p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://en.wikipedia.org/wiki/Object-relational_mapping" target="_blank" rel="noopener">orm in wiki</a></li>
+</ul>
 ]]></content>
       <categories>
-        <category>curl</category>
+        <category>Python</category>
       </categories>
       <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
+        <tag>python</tag>
+        <tag>web</tag>
+        <tag>orm</tag>
+        <tag>sqlalchemy</tag>
       </tags>
   </entry>
   <entry>
@@ -1261,131 +1496,6 @@
         <tag>keepalive</tag>
         <tag>vip</tag>
         <tag>LVS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SQLAlchemy简介及在OpenStack中的使用</title>
-    <url>/2015/07/sqlalchemy-intro/</url>
-    <content><![CDATA[<p>SQLAlchemy是Python编程语言下的一款开源软件，提供了SQL工具包及对象关系映射(ORM)工具。</p>
-<h2 id="web编程之orm"><a href="#web编程之orm" class="headerlink" title="web编程之orm"></a>web编程之orm</h2><p>在编写web服务时，我们通常使用orm，而不是直接使用SQL与数据库进行交互。<br>如果使用Django等比较全面的框架，可以选择默认的ORM。但如果选择flask等轻量级框架，则需要自己选择ORM。同时，自己选择使用ORM也带来了更大的灵活性。<br><a id="more"></a></p>
-<h3 id="orm是什么"><a href="#orm是什么" class="headerlink" title="orm是什么"></a>orm是什么</h3><p>以下节选自wikipeida：</p>
-<blockquote>
-<p>Object-relational mapping (ORM, O/RM, and O/R mapping tool) in computer science is a programming technique for converting data between incompatible type systems in object-oriented programming languages.</p>
-</blockquote>
-<p>以下节选自百度百科：</p>
-<blockquote>
-<p>对象关系映射（英语：Object Relation Mapping，简称ORM，或O/RM，或O/R mapping），是一种程序技术，用于实现面向对象编程语言里不同类型系统的数据之间的转换。</p>
-</blockquote>
-<p>实际项目中，我们主要使用orm作为与数据库等进行实际交互的工具。</p>
-<h3 id="为什么使用orm"><a href="#为什么使用orm" class="headerlink" title="为什么使用orm"></a>为什么使用orm</h3><p>与直接使用sql访问数据库相比，其有以下好处：</p>
-<ul>
-<li>代码的简洁性，对存储层的通用封装<br>使用orm，操作数据库往往仅需要简单的几条语句，使代码变得简洁。</li>
-<li>数据源的兼容性<br>orm往往对多种数据库、数据源进行通用的封装，从而使得编写一套代码，适用于不同的数据源变得可能。</li>
-<li>操作的安全性<br>直接使用sql操作数据库，往往会因为开发人员疏忽引入sql注入等安全问题。而使用orm，能避免此问题。</li>
-<li>操作语句的高效性<br>orm的封装是众多开发人员智慧的结晶，其中往往已经对生成的sql语句进行了优化，使得一般语句的性能比较高效，而开发人员不需要再去考虑性能问题。但orm一般是通用的解决方案，无法针对所有场景进行优化，特殊场景下其生成的sql语句可能会非常低效，因此需要在实际使用时进行监控并酌情优化。</li>
-</ul>
-<h2 id="简介及特性"><a href="#简介及特性" class="headerlink" title="简介及特性"></a>简介及特性</h2><p>SQLAlchemy的特性主要如下：</p>
-<ul>
-<li>Mature, High Performing Architecture DBA Approved</li>
-<li>Non-Opinionated</li>
-<li>Unit Of Work</li>
-<li>Function-based query construction Modular and Extensible</li>
-<li>Separate mapping and class design …</li>
-</ul>
-<p>See: <a href="http://www.sqlalchemy.org/features.html" target="_blank" rel="noopener">http://www.sqlalchemy.org/features.html</a></p>
-<h2 id="安装及使用"><a href="#安装及使用" class="headerlink" title="安装及使用"></a>安装及使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>开发环境推荐使用pip安装，同时注意版本问题。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pip install sqlalchemy</span><br></pre></td></tr></table></figure></p>
-<p>生产环境推荐使用rpm/deb安装，同时注意版本问题。<br>rpm - 版本兼容问题<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">yum install SQLAlchemy</span><br><span class="line">apt-get install SQLAlchemy</span><br></pre></td></tr></table></figure></p>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>支持的2种方式:</p>
-<ul>
-<li>SQL Expression Language (core)</li>
-<li>Object Relational Mapper (orm)</li>
-</ul>
-<h2 id="Core方式"><a href="#Core方式" class="headerlink" title="Core方式"></a>Core方式</h2><p>(raw sql、sql expression)<br>对于绝大多数应用, 推荐使用SqlAlchemy. 即使是使用raw sql,<br>SqlAlchemy 也可以带来如下好处:</p>
-<ul>
-<li>内建数据库连接池</li>
-<li>强大的log功能</li>
-</ul>
-<p>SqlAlchemy的sql expression和raw sql的比较:</p>
-<ul>
-<li>sql expression 写法是纯python代码, 阅读性更好</li>
-<li>raw sql 比 sql expression 更灵活, 如果SQL很复杂, 更有优势了</li>
-</ul>
-<h3 id="Connect"><a href="#Connect" class="headerlink" title="Connect"></a>Connect</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">engine_str = <span class="string">"mysql:mysql://root:root@localhost/django_sqla"</span></span><br><span class="line">engine = create_engine(engine_str, echo=<span class="literal">True</span>)</span><br><span class="line">conn = engine.connect()</span><br></pre></td></tr></table></figure>
-<h3 id="Metadata"><a href="#Metadata" class="headerlink" title="Metadata"></a>Metadata</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Table objects <span class="keyword">and</span> its children <span class="keyword">as</span> metadata Table Column(String, Integer…)</span><br><span class="line">Create tables within the engine</span><br></pre></td></tr></table></figure>
-<h3 id="Insert-expression"><a href="#Insert-expression" class="headerlink" title="Insert expression"></a>Insert expression</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ins2=users.insert() <span class="comment">#anexpression</span></span><br><span class="line">result2 = conn.execute(ins2, id=<span class="number">2</span>, name=’wendy’, fullname=’Wendy Williams’) <span class="comment"># execute</span></span><br><span class="line">Multiple inserts: conn.execute(ins2, a_list)</span><br></pre></td></tr></table></figure>
-<h3 id="Update"><a href="#Update" class="headerlink" title="Update"></a>Update</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">users.update().values(&#123;…&#125;).where(…)</span><br></pre></td></tr></table></figure>
-<h3 id="Delete"><a href="#Delete" class="headerlink" title="Delete"></a>Delete</h3><p>同上</p>
-<h3 id="Select"><a href="#Select" class="headerlink" title="Select"></a>Select</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">s = select([users]) <span class="keyword">or</span> s = users.select()</span><br><span class="line">result = conn.execute(s)</span><br><span class="line">result.fetchone()</span><br><span class="line">result.close()</span><br></pre></td></tr></table></figure>
-<h3 id="text"><a href="#text" class="headerlink" title="text"></a>text</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">sqlalchemy allows using string</span><br><span class="line">s = text(“””Hello”””)</span><br></pre></td></tr></table></figure>
-<h2 id="orm方式"><a href="#orm方式" class="headerlink" title="orm方式"></a>orm方式</h2><h3 id="Declare-a-Mapping"><a href="#Declare-a-Mapping" class="headerlink" title="Declare a Mapping"></a>Declare a Mapping</h3><p>declarative_base: define classes and mapping to tables<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base = declarative_base()</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(Base)</span>:</span></span><br><span class="line">    __tablename__ = ‘users’</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure></p>
-<h3 id="MetaData"><a href="#MetaData" class="headerlink" title="MetaData"></a>MetaData</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Base.metadata.create_all(engine)</span><br></pre></td></tr></table></figure>
-<h3 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h3><p>事务<br>using session to handle orm’s action<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Session = sessionmaker(bind=engine)</span><br><span class="line">session = Session()</span><br></pre></td></tr></table></figure></p>
-<h3 id="Connection-pool"><a href="#Connection-pool" class="headerlink" title="Connection pool"></a>Connection pool</h3><h3 id="Add-insert"><a href="#Add-insert" class="headerlink" title="Add(insert)"></a>Add(insert)</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ed_user = User(<span class="string">'ed'</span>, <span class="string">'Ed Jones'</span>, <span class="string">'edspassword'</span>)</span><br><span class="line">session.add(ed_user)</span><br><span class="line">session.add_all([...])</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-<h3 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result = session.query(User).filter(User.name==‘ed<span class="string">')</span></span><br><span class="line"><span class="string">result[0].name, result[0][0]</span></span><br></pre></td></tr></table></figure>
-<h3 id="Relationship"><a href="#Relationship" class="headerlink" title="Relationship"></a>Relationship</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span><span class="params">(Base)</span></span></span><br><span class="line">__tablename__ = ‘addresses’</span><br><span class="line">...</span><br><span class="line">user_id = Column(Integer, ForeignKey(<span class="string">'users.id'</span>)) user = relationship(<span class="string">"User"</span>,</span><br><span class="line">backref=backref(<span class="string">'addresses'</span>, order_by=id))</span><br></pre></td></tr></table></figure>
-<h2 id="迁移"><a href="#迁移" class="headerlink" title="迁移"></a>迁移</h2><p>Alembic<br><a href="http://blog.csdn.net/ying_593254979/article/details/10189799" target="_blank" rel="noopener">参考</a></p>
-<h2 id="OpenStack中的使用"><a href="#OpenStack中的使用" class="headerlink" title="OpenStack中的使用"></a>OpenStack中的使用</h2><p>wsgi框架+SQLAlchemy</p>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>版本兼容问题<br>rpmbuild</p>
-<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
-<li><a href="https://en.wikipedia.org/wiki/Object-relational_mapping" target="_blank" rel="noopener">orm in wiki</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>Python</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>web</tag>
-        <tag>orm</tag>
-        <tag>sqlalchemy</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之十三：curl vs wget</title>
-    <url>/2012/09/curl-vs-wget/</url>
-    <content><![CDATA[<p>curl和wget有很多地方是相同的，很多场景下二者都可以使用。那面对一个复杂问题的时候，我们怎么决定使用哪个工具呢？本篇通过对二者进行比较，从而对此提供思路。<br>本篇主要参考<a href="http://daniel.haxx.se/docs/curl-vs-wget.html" target="_blank" rel="noopener">curl官方的文档</a>，翻译加整理。</p>
-<h2 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h2><ul>
-<li>都是可通过FTP/HTTP/HTTPS协议下载文件的命令行工具；</li>
-<li>都可以发送HTTP POST请求；</li>
-<li>都支持cookie的使用；</li>
-<li>都被设计为无界面（UI），可在如脚本中使用；</li>
-<li>都是开源且免费的软件。</li>
-</ul>
-<a id="more"></a>
-<h2 id="不同点"><a href="#不同点" class="headerlink" title="不同点"></a>不同点</h2><h3 id="curl"><a href="#curl" class="headerlink" title="curl"></a>curl</h3><ul>
-<li>curl是基于libcurl库实现，因此特性来源于libcurl库。libcurl库跨平台、开源且免费，因此curl不只是一个命令行工具</li>
-<li>管道。curl在传统的UNIX风格的基础上加以扩展，对输入输出做出更多的处理，从而贯彻了”everything is a pipe” 的设计思想。</li>
-<li>单点传送（Single shot）。curl被设计为用于数据的单点传送。它只会传送用户指定的URLS，并不包含任何递归下载的逻辑，也不对html进行任何解析。</li>
-<li>更多协议支持。目前curl 支持的协议有： FTP, FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, LDAP, LDAPS, FILE, POP3, IMAP, SMTP 和 RTSP 。Wget仅仅支持 HTTP, HTTPS 和 FTP。（协议的支持情况可能会随着时间发展而变化。）</li>
-<li>更多平台支持，便于移植。与wget相比，curl可在更多平台上编译和运行。比如OS/400, TPF 和其他很多非UNIX的平台。</li>
-<li>更强大的SSL库和SSL支持。curl能应用于多个不同的 SSL/TLS 库, 并提供了更多的可控性和对协议细节更广泛的支持。</li>
-<li>curl支持更多的HTTP认证方式。尤其是当你使用HTTP代理的时候，curl支持Basic, Digest, NTLM and Negotiate认证方式（参见<a href="https://adeployblog.appspot.com/2012/08/17/http-auth-schemes.html" target="_blank" rel="noopener">HTTP认证模式</a>）。</li>
-<li>libcurl库支持多种不同的SOCKS代理，基于libcurl实现的curl工具也支持。而wget不支持。</li>
-<li>双向通信。 curl 提供了上传能力，Wget仅仅支持HTTP POST方式。</li>
-<li>HTTP multipart/form-data 的发送能力。 这使得用户可以进行HTTP上传，更好的模拟浏览器的行为从而更大程度的实现HTTP操作的自动化，提供了更多操作的可能。</li>
-<li>压缩。 curl 支持GZIP和 inflate Content-Encoding 并且自动进行解压缩操作。</li>
-<li>curl提供并执行Transfer-Encoded HTTP的解压缩，而wget不会</li>
-<li>curl在7.27.0之后，提供对<a href="http://en.wikipedia.org/wiki/Metalink" target="_blank" rel="noopener">metalink</a>的支持（好吧，百度百科对metalink的解释是不对的， 百度百科说的是oracle公司的一个服务）。而wget需要依靠一个Google Summer开源项目才能支持metalink。</li>
-</ul>
-<h3 id="wget"><a href="#wget" class="headerlink" title="wget"></a>wget</h3><ul>
-<li>wget仅仅是一个命令行工具。没有库提供使用。</li>
-<li>递归下载支持。wget相比curl最大的优点在于对递归下载的支持，甚至下载一个资源如网页或FTP目录指向的所有资源。</li>
-<li>wget下载时无需指定保存文件名。而curl需要使用-o或-O指定。</li>
-<li>wget仅支持GnuTLS 和 OpenSSL两种SSL库。</li>
-<li>wget仅支持HTTP代理的基本认证（Basic auth）。</li>
-<li>wget不支持SOCKS代理。</li>
-<li>wget项目更老，基于GPL开源协议，隶属GNU项目。curl基于MIT开源协议，不隶属于任何组织，版权由作者一人所有。</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>wput仅是一个单独的工具，不进行讨论。<br>参考：<a href="http://daniel.haxx.se/docs/curl-vs-wget.html" target="_blank" rel="noopener">curl vs Wget</a></p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-        <tag>wget</tag>
       </tags>
   </entry>
 </search>
