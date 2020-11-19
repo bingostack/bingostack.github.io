@@ -1,6 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Linux下cURL使用教程之十二：ftp及其他协议</title>
+    <url>/2012/08/curl-ftp-usage/</url>
+    <content><![CDATA[<p>在<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">Linux下cURL使用教程之一：cURL简介</a>里，提到curl支持多种协议。本篇就以ftp协议为主，对curl对其他协议的操作进行简介。</p>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>基本使用方法同HTTP没有区别：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl ftp://ftp.cisco.com/pub/mibs/</span><br></pre></td></tr></table></figure></p>
+<p>只不过ftp一般会有用户名密码，所有在命令中要加上用户名密码：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -O ftp://ftp_server/index.php</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl ftp:// ftpuser:ftppass ftp://ftp_server/index.php</span><br></pre></td></tr></table></figure></p>
+<h2 id="上传文件"><a href="#上传文件" class="headerlink" title="上传文件"></a>上传文件</h2><p>使用-T选项。具体请参考<a href="https://adeployblog.appspot.com/2012/08/11/linux-curl-basic-usage-upload-file.html" target="_blank" rel="noopener">Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</a>。<a id="more"></a><br>上传一个文件：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T myfile.txt ftp://ftp.testserver.com</span><br></pre></td></tr></table></figure></p>
+<p>上传多个文件：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T <span class="string">"&#123;file1,file2&#125;"</span> ftp://ftp.testserver.com</span><br></pre></td></tr></table></figure></p>
+<p>从标准输入获得文件内容：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T - ftp://ftp.testserver.com/myfile_1.txt</span><br></pre></td></tr></table></figure></p>
+<p>这个命令会将标准输入的内容保存在<a href="ftp://ftp.testserver.com/myfile_1.txt中。" target="_blank" rel="noopener">ftp://ftp.testserver.com/myfile_1.txt中。</a></p>
+<h2 id="FTP四种模式"><a href="#FTP四种模式" class="headerlink" title="FTP四种模式"></a>FTP四种模式</h2><p>FTP有两种基本模式：PASV和PORT，也即主动模式和被动模式。在二者基础上分别有两种扩展：ERSV和EPRT。具体请参考相关RFC文档。<br>curl默认使用EPSV模式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
+<p>会看到curl执行了EPSV命令。–eprt参数显式指定使用EPRT模式。<br>使用<code>--disable-epsv</code>选项禁用EPSV而使用PASV：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --<span class="built_in">disable</span>-epsv ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
+<p>使用<code>-P/--ftp-port &lt;address&gt;</code>选项指定使用EPRT，其中address参数可以指定为“-”，指定使用FTP控制连接相同的地址：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ftp-port - ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
+<p>会看到使用了EPRT命令。<br>而使用<code>--disable-epsv</code>选项，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ftp-port - --<span class="built_in">disable</span>-epsv ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
+<p>及指定了使用PORT模式。</p>
+<h2 id="其他协议"><a href="#其他协议" class="headerlink" title="其他协议"></a>其他协议</h2><p>以SMTP协议发邮件为例，执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ssl --mail-rcpt <span class="built_in">test</span>@163.com --mail-from <span class="built_in">test</span>@163.com smtp://smtp.163.com -u <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
+<p>–ssl指定使用SSL， smtp://一定要加在url上，否则curl会使用默认的HTTP协议。</p>
+<p>之后，按提示输入如下内容：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Subject: Testing</span><br><span class="line">This is a test mail</span><br><span class="line">.</span><br></pre></td></tr></table></figure></p>
+<p>即可发送邮件。<br>但是估计是有防作弊机制，测试发现163、GMAIL的SMTP发信都失败，提示“curl: (67) Access denied: 500”，追踪详细过程，发现是“MAIL FROM: <a href="mailto:test@163.com" target="_blank" rel="noopener">test@163.com</a>”这句提示语法错误。不知道是什么原因。<br>但是使用自己搭建的邮件服务器测试成功。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+        <tag>ftp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>buildbot实战</title>
+    <url>/2014/11/buildbot-in-action/</url>
+    <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
+<ul>
+<li>监控代码仓库</li>
+<li>代码仓库有变化后，立即拉取代码</li>
+<li>执行build、部署、测试及发布工作</li>
+<li>反馈结果</li>
+</ul>
+<p>我们对这样一个工具的一般要求为：</p>
+<ul>
+<li>轻量级，安装、配置简单，本身耗费资源较少</li>
+<li>高效率，较快的完成自动化任务</li>
+<li>通用性强，在不同的操作系统，甚至与不同的代码系统兼容</li>
+<li>易扩展、配置及管理，能较简单的配置自动化任务</li>
+</ul>
+<p>Buildbot和Jenkins都能很好的满足我们这些要求。但相比Jenkins，buildbot更轻量级，部署配置更为简单。<br>Web界面也更简单美观一些。</p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>buildbot架构比较简单，主要分为三部分：</p>
+<ul>
+<li>版本控制层<br>外部版本控制，通过插件或主动触发的方式触发buildbot执行任务。</li>
+<li>任务执行层<br>master接收任务后，调度其slave执行任务，并获取到返回的结果</li>
+<li>通知层<br>master获取结果后，可通过邮件、IRC等方式进行通知。</li>
+</ul>
+<p>其中重要的主体是master和slave，其主要采用星形拓扑结构，一个集群中可以多个master、多个slave。master主要负责任务接收、调度并通知任务，slave负责具体的任务执行。各节点本身无状态，横向扩展性很好。<br><a id="more"></a><br><img src="/img/buildbot-overview.png" alt="buildbot架构"></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="pip安装"><a href="#pip安装" class="headerlink" title="pip安装"></a>pip安装</h3><p>建议使用pip安装，避免麻烦的依赖问题。<br>同时当前对python3版本支持不太好，建议使用python2.7版本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install gcc python-devel </span><br><span class="line">yum install python-dateutil15 git expect</span><br><span class="line"><span class="comment"># master安装</span></span><br><span class="line">pip install buildbot</span><br><span class="line"><span class="comment"># salve安装</span></span><br><span class="line">pip install buildbot-slave</span><br></pre></td></tr></table></figure></p>
+<p>如果是python2.6的话，因为最新版本的Twisted需要python2.7，所以需要提前指定版本安装：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install Twisted==15.1.0</span><br></pre></td></tr></table></figure></p>
+<p>为充分利用资源，同一台机器可配置为多个master、slave：可使用不同用户或virtualenv，每个用户或virtualenv环境部署为一个节点。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install virtualenv</span><br></pre></td></tr></table></figure></p>
+<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>最近看到<a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">buildbot官方</a>给出了Dockerfile(但Dockerfile地址是错的，可以自行在github代码中查找)，可下载后自行构建镜像使用，运行后即可使用：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Download Buildbot Dockerfile.</span></span><br><span class="line">wget https://raw.githubusercontent.com/buildbot/buildbot/master/master/Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the Buildbot container (it will take a few minutes to download packages)</span></span><br><span class="line">docker build -t buildbot - &lt; Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Run buildbot</span></span><br><span class="line">CONTAINER_ID=$(docker run -d -p 8010:8010 -p 22 buildbot)</span><br></pre></td></tr></table></figure></p>
+<p>然后打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可。</p>
+<h2 id="创建及运行"><a href="#创建及运行" class="headerlink" title="创建及运行"></a>创建及运行</h2><h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildbot create-master master</span><br><span class="line"><span class="comment"># 配置文件</span></span><br><span class="line">mv master/master.cfg.sample master/master.cfg</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildbot start master</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f master/twistd.log</span><br></pre></td></tr></table></figure>
+<p>buildbot会在当前目录下创建master名称的目录，以上为<code>master</code>。<br>看到最后显示<code>BuildMaster is running</code>即为启动成功，此时可通过<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>访问，默认用户名密码都是<code>pyflakes</code>。</p>
+<h3 id="slave"><a href="#slave" class="headerlink" title="slave"></a>slave</h3><p>创建slave时需要指定mater的地址，或者修改配置文件指定。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildslave create-slave slave1 localhost:9989 slave1 pass</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildslave start slave</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f slave/twistd.log</span><br></pre></td></tr></table></figure></p>
+<p>create-slave的参数分布是：slave目录、master、名字、密码。其中master默认都采用9989与slave通信。名字、密码必须与master的master.cfg中配置的一致：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'slaves'</span>] = [buildslave.BuildSlave(<span class="string">"example-slave"</span>, <span class="string">"pass"</span>)]</span><br></pre></td></tr></table></figure></p>
+<h3 id="预览"><a href="#预览" class="headerlink" title="预览"></a>预览</h3><p>此时打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可看到如下页面：<br><img src="/img/buildbot-index.png" alt="buildbot预览"><br>其中Buildslaves页面可查看到我们新添加的example-slave，且状态为<code>Idle</code>。<br>而Waterfall页面可查看到当前的builder，目前只有runtest，点进去点击forcebuild即可进行测试build。成功后记录显示为绿色。</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>Buildbot的配置文件为<code>.cfg</code>后缀的python脚本，使用python语法。如上文slave的定义就是一个python list的定义。</p>
+<h3 id="master配置"><a href="#master配置" class="headerlink" title="master配置"></a>master配置</h3><p>主要配置如下。</p>
+<ul>
+<li>BUILDSLAVES<br>slave的定义，以list的形式呈现。需要主要名字和密码与slave一致。<br>其中protocols可定义与slave的通信方式，包括端口等。</li>
+<li><p>CHANGESOURCES<br>指定需要监控的源代码地址。格式如下，其中可指定git地址、工作目录、分支、监控周期等。可定义多个，每个append进list即可。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c[&apos;change_source&apos;] = []</span><br><span class="line">c[&apos;change_source&apos;].append(changes.GitPoller(</span><br><span class="line">        &apos;git://github.com/buildbot/pyflakes.git&apos;,</span><br><span class="line">        workdir=&apos;gitpoller-workdir&apos;, branch=&apos;master&apos;,</span><br><span class="line">        pollinterval=300))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>SCHEDULERS<br>scheduler指定何时、如何触发执行builder，其中builder在BUILDERS中定义。下文定义了两个scheduler：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'schedulers'</span>] = []</span><br><span class="line"><span class="comment"># 定义每小时运行的scheduler</span></span><br><span class="line">hourlyscheduler = Periodic(name = <span class="string">"hourly"</span>,</span><br><span class="line">                           builderNames = [<span class="string">"simplebuild"</span>],</span><br><span class="line">                           periodicBuildTimer = <span class="number">3600</span>)</span><br><span class="line"><span class="comment"># 定义手动触发的scheduler</span></span><br><span class="line">c[<span class="string">'schedulers'</span>].append(schedulers.ForceScheduler(</span><br><span class="line">                            name=<span class="string">"force"</span>,</span><br><span class="line">                            builderNames=[<span class="string">"master"</span>]))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>BUILDERS<br>builder定义具体执行的任务内容，由一系列的步骤组成。每个步骤定义在step中，factory包含一系列的step，builder通过指定factory等参数创建。可定义多个builder。<br>代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义factory</span></span><br><span class="line">factory = util.BuildFactory()</span><br><span class="line"><span class="comment"># 定义具体step</span></span><br><span class="line">factory.addStep(steps.Git(repourl=<span class="string">'git://github.com/buildbot/pyflakes.git'</span>, mode=<span class="string">'incremental'</span>))</span><br><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"trial"</span>, <span class="string">"pyflakes"</span>]))</span><br><span class="line"><span class="comment"># 创建builder</span></span><br><span class="line">c[<span class="string">'builders'</span>] = []</span><br><span class="line"><span class="comment"># 指定名称、使用的slave、factory</span></span><br><span class="line">c[<span class="string">'builders'</span>].append(</span><br><span class="line">    util.BuilderConfig(name=<span class="string">"master"</span>,</span><br><span class="line">      slavenames=[<span class="string">"master"</span>],</span><br><span class="line">      factory=factory))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>STATUS TARGETS<br>此处定义buildbot对外通知build信息的方式。最基本的方式就是显示在页面中，因此此处同时定义了页面的认证方式，即登录使用的用户名、密码在此处修改。同时可定义IRC、邮件等通知方式。</p>
+</li>
+<li>PROJECT IDENTITY<br>此处主要为buildbot的基本信息，如title、超链接、url等。</li>
+<li>DB URL<br>此处定义使用的数据库，默认使用sqlite，地址为本地文件路径。</li>
+</ul>
+<h3 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h3><p>slave的定义主要在<code>buildbot.tac</code>文件中，可用于定义使用的master及slave基本信息。</p>
+<h2 id="启动及使用"><a href="#启动及使用" class="headerlink" title="启动及使用"></a>启动及使用</h2><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><ul>
+<li>启动<br>master、slave的启动上文已提及，子命令为start，参数为路径。</li>
+<li>停止、重启<br>stop和restart，其余同start</li>
+<li>master重新加载配置<br><code>buildbot reconfig master</code>即可重新加载配置。</li>
+</ul>
+<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>平时比较常用手动触发build，即forcebuild：web页面登录-&gt;Builders-&gt;选择builder-&gt;Force Build-&gt;在Waterfall查看打包结果及详细日志。<br><img src="/img/buildbot-waterfall.png" alt="buildbot waterfall"><br>注意：只有登录后才有build权限。</p>
+<h3 id="各页面介绍"><a href="#各页面介绍" class="headerlink" title="各页面介绍"></a>各页面介绍</h3><p>Buildbot比较方便的一点是全部通过页面来进行操作。主要页面介绍如下：</p>
+<ul>
+<li>Waterfall，以瀑布流的方式显示build任务，可点击任务查看详情、执行操作等</li>
+<li>Grid/T-Grid，以对应的方式显示build任务</li>
+<li>Console，还在开发中，当前主要显示revision信息</li>
+<li>Builders，定义的所有builder</li>
+<li>Recent Builds，最近的build</li>
+<li>Buildslaves，定义的所有slave</li>
+<li>Changesources，定义的所有代码仓库</li>
+<li>JSON API，对外提供的JSON API文档</li>
+</ul>
+<h2 id="高级使用"><a href="#高级使用" class="headerlink" title="高级使用"></a>高级使用</h2><h3 id="多分支build"><a href="#多分支build" class="headerlink" title="多分支build"></a>多分支build</h3><p>定义一个Changesource。<br>定义多个schedulers，分别对应不同分支。<br>定义多个factory，其中的step除branch不同外，其余step通用。通用的step可一次定义，多次使用。<br>builder分别指定分支和factory。</p>
+<h3 id="多项目build"><a href="#多项目build" class="headerlink" title="多项目build"></a>多项目build</h3><p>新版本可使用此功能，但不太推荐。buildbot的一个master还是更多的擅长对一个项目的管理。<br>需要定义多个Changesource，然后在其它定义时通过<code>project</code>和<code>repository</code>参数指定项目。</p>
+<h3 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h3><p>通过检查step的返回结果判断是否执行成功，规则同shell：0为成功，其它失败。<br>因此如果step中调用了自己的脚本，需要保证按上述规则返回结果。</p>
+<h3 id="添加参数"><a href="#添加参数" class="headerlink" title="添加参数"></a>添加参数</h3><p>使用<code>util.Property</code>获得网页上指定的参数，可设置默认值：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"bash"</span>, <span class="string">"autorpm.sh"</span>, util.Property(<span class="string">'project'</span>, default=<span class="string">''</span>)]))</span><br></pre></td></tr></table></figure></p>
+<p>在build页面通过name/value指定，如：<br><img src="/img/buildbot-param.png" alt="buildbot指定参数"></p>
+<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><p>实际使用中发现，buildslave所创建的文件，权限都为600或700。<br>这样会造成如cp到apache目录时，apache无法读取文件。<br>通过官方文档查看到slave启动时有umask选项：</p>
+<blockquote>
+<p>–umask<br>This is a string (generally an octal representation of an integer) which will cause the buildslave process’ umask value to be set shortly after initialization.<br>The twistddaemonization utility forces the umask to 077 at startup (which means that all files created by the buildslave or its child processes will be unreadable by any user other than the buildslave account).<br>If you want build products to be readable by other accounts, you can add –umask=022 to tell the buildslave to fix the umask after twistd clobbers it.<br>If you want build products to be writable by other accounts too, use –umask=000, but this is likely to be a security problem.</p>
+</blockquote>
+<p>通过修改slave目录下的buildbot.tac，修改：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">umask = 022</span><br></pre></td></tr></table></figure></p>
+<p>然后重启slave解决此问题:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">buildbot stop slave1</span><br><span class="line">buildbot stop slave2</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://build.chromium.org/p/chromium/console" target="_blank" rel="noopener">chromium buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">docker安装buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/tour.html" target="_blank" rel="noopener">quick tour of buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/fiveminutes.html" target="_blank" rel="noopener">Buildbot in 5 minutes</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>openstack</category>
+      </categories>
+      <tags>
+        <tag>openstack</tag>
+        <tag>ci</tag>
+        <tag>持续集成</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十三：curl vs wget</title>
+    <url>/2012/09/curl-vs-wget/</url>
+    <content><![CDATA[<p>curl和wget有很多地方是相同的，很多场景下二者都可以使用。那面对一个复杂问题的时候，我们怎么决定使用哪个工具呢？本篇通过对二者进行比较，从而对此提供思路。<br>本篇主要参考<a href="http://daniel.haxx.se/docs/curl-vs-wget.html" target="_blank" rel="noopener">curl官方的文档</a>，翻译加整理。</p>
+<h2 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h2><ul>
+<li>都是可通过FTP/HTTP/HTTPS协议下载文件的命令行工具；</li>
+<li>都可以发送HTTP POST请求；</li>
+<li>都支持cookie的使用；</li>
+<li>都被设计为无界面（UI），可在如脚本中使用；</li>
+<li>都是开源且免费的软件。</li>
+</ul>
+<a id="more"></a>
+<h2 id="不同点"><a href="#不同点" class="headerlink" title="不同点"></a>不同点</h2><h3 id="curl"><a href="#curl" class="headerlink" title="curl"></a>curl</h3><ul>
+<li>curl是基于libcurl库实现，因此特性来源于libcurl库。libcurl库跨平台、开源且免费，因此curl不只是一个命令行工具</li>
+<li>管道。curl在传统的UNIX风格的基础上加以扩展，对输入输出做出更多的处理，从而贯彻了”everything is a pipe” 的设计思想。</li>
+<li>单点传送（Single shot）。curl被设计为用于数据的单点传送。它只会传送用户指定的URLS，并不包含任何递归下载的逻辑，也不对html进行任何解析。</li>
+<li>更多协议支持。目前curl 支持的协议有： FTP, FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, LDAP, LDAPS, FILE, POP3, IMAP, SMTP 和 RTSP 。Wget仅仅支持 HTTP, HTTPS 和 FTP。（协议的支持情况可能会随着时间发展而变化。）</li>
+<li>更多平台支持，便于移植。与wget相比，curl可在更多平台上编译和运行。比如OS/400, TPF 和其他很多非UNIX的平台。</li>
+<li>更强大的SSL库和SSL支持。curl能应用于多个不同的 SSL/TLS 库, 并提供了更多的可控性和对协议细节更广泛的支持。</li>
+<li>curl支持更多的HTTP认证方式。尤其是当你使用HTTP代理的时候，curl支持Basic, Digest, NTLM and Negotiate认证方式（参见<a href="https://adeployblog.appspot.com/2012/08/17/http-auth-schemes.html" target="_blank" rel="noopener">HTTP认证模式</a>）。</li>
+<li>libcurl库支持多种不同的SOCKS代理，基于libcurl实现的curl工具也支持。而wget不支持。</li>
+<li>双向通信。 curl 提供了上传能力，Wget仅仅支持HTTP POST方式。</li>
+<li>HTTP multipart/form-data 的发送能力。 这使得用户可以进行HTTP上传，更好的模拟浏览器的行为从而更大程度的实现HTTP操作的自动化，提供了更多操作的可能。</li>
+<li>压缩。 curl 支持GZIP和 inflate Content-Encoding 并且自动进行解压缩操作。</li>
+<li>curl提供并执行Transfer-Encoded HTTP的解压缩，而wget不会</li>
+<li>curl在7.27.0之后，提供对<a href="http://en.wikipedia.org/wiki/Metalink" target="_blank" rel="noopener">metalink</a>的支持（好吧，百度百科对metalink的解释是不对的， 百度百科说的是oracle公司的一个服务）。而wget需要依靠一个Google Summer开源项目才能支持metalink。</li>
+</ul>
+<h3 id="wget"><a href="#wget" class="headerlink" title="wget"></a>wget</h3><ul>
+<li>wget仅仅是一个命令行工具。没有库提供使用。</li>
+<li>递归下载支持。wget相比curl最大的优点在于对递归下载的支持，甚至下载一个资源如网页或FTP目录指向的所有资源。</li>
+<li>wget下载时无需指定保存文件名。而curl需要使用-o或-O指定。</li>
+<li>wget仅支持GnuTLS 和 OpenSSL两种SSL库。</li>
+<li>wget仅支持HTTP代理的基本认证（Basic auth）。</li>
+<li>wget不支持SOCKS代理。</li>
+<li>wget项目更老，基于GPL开源协议，隶属GNU项目。curl基于MIT开源协议，不隶属于任何组织，版权由作者一人所有。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>wput仅是一个单独的工具，不进行讨论。<br>参考：<a href="http://daniel.haxx.se/docs/curl-vs-wget.html" target="_blank" rel="noopener">curl vs Wget</a></p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+        <tag>wget</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>自动化测试实践：自动化测试的思考总结</title>
     <url>/2013/09/auto-testing-summary/</url>
     <content><![CDATA[<p>目前所在的团队一直主要负责部门产品的自动化测试方案。团队在自动化测试方面已经有了几年的探索，但直到最近才真正发挥作用大大提升了产品的测试效率，在这个过程中走了很多的弯路。<br>以下是我这一个阶段以来做自动化测试的思考及总结，有一些大的方向上的讨论，也有一些细节的探讨，希望给大家参考。</p>
@@ -111,101 +288,71 @@
       </tags>
   </entry>
   <entry>
-    <title>buildbot实战</title>
-    <url>/2014/11/buildbot-in-action/</url>
-    <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
-<ul>
-<li>监控代码仓库</li>
-<li>代码仓库有变化后，立即拉取代码</li>
-<li>执行build、部署、测试及发布工作</li>
-<li>反馈结果</li>
-</ul>
-<p>我们对这样一个工具的一般要求为：</p>
-<ul>
-<li>轻量级，安装、配置简单，本身耗费资源较少</li>
-<li>高效率，较快的完成自动化任务</li>
-<li>通用性强，在不同的操作系统，甚至与不同的代码系统兼容</li>
-<li>易扩展、配置及管理，能较简单的配置自动化任务</li>
-</ul>
-<p>Buildbot和Jenkins都能很好的满足我们这些要求。但相比Jenkins，buildbot更轻量级，部署配置更为简单。<br>Web界面也更简单美观一些。</p>
-<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>buildbot架构比较简单，主要分为三部分：</p>
-<ul>
-<li>版本控制层<br>外部版本控制，通过插件或主动触发的方式触发buildbot执行任务。</li>
-<li>任务执行层<br>master接收任务后，调度其slave执行任务，并获取到返回的结果</li>
-<li>通知层<br>master获取结果后，可通过邮件、IRC等方式进行通知。</li>
-</ul>
-<p>其中重要的主体是master和slave，其主要采用星形拓扑结构，一个集群中可以多个master、多个slave。master主要负责任务接收、调度并通知任务，slave负责具体的任务执行。各节点本身无状态，横向扩展性很好。<br><a id="more"></a><br><img src="/img/buildbot-overview.png" alt="buildbot架构"></p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="pip安装"><a href="#pip安装" class="headerlink" title="pip安装"></a>pip安装</h3><p>建议使用pip安装，避免麻烦的依赖问题。<br>同时当前对python3版本支持不太好，建议使用python2.7版本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install gcc python-devel </span><br><span class="line">yum install python-dateutil15 git expect</span><br><span class="line"><span class="comment"># master安装</span></span><br><span class="line">pip install buildbot</span><br><span class="line"><span class="comment"># salve安装</span></span><br><span class="line">pip install buildbot-slave</span><br></pre></td></tr></table></figure></p>
-<p>如果是python2.6的话，因为最新版本的Twisted需要python2.7，所以需要提前指定版本安装：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install Twisted==15.1.0</span><br></pre></td></tr></table></figure></p>
-<p>为充分利用资源，同一台机器可配置为多个master、slave：可使用不同用户或virtualenv，每个用户或virtualenv环境部署为一个节点。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install virtualenv</span><br></pre></td></tr></table></figure></p>
-<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>最近看到<a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">buildbot官方</a>给出了Dockerfile(但Dockerfile地址是错的，可以自行在github代码中查找)，可下载后自行构建镜像使用，运行后即可使用：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Download Buildbot Dockerfile.</span></span><br><span class="line">wget https://raw.githubusercontent.com/buildbot/buildbot/master/master/Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the Buildbot container (it will take a few minutes to download packages)</span></span><br><span class="line">docker build -t buildbot - &lt; Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Run buildbot</span></span><br><span class="line">CONTAINER_ID=$(docker run -d -p 8010:8010 -p 22 buildbot)</span><br></pre></td></tr></table></figure></p>
-<p>然后打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可。</p>
-<h2 id="创建及运行"><a href="#创建及运行" class="headerlink" title="创建及运行"></a>创建及运行</h2><h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildbot create-master master</span><br><span class="line"><span class="comment"># 配置文件</span></span><br><span class="line">mv master/master.cfg.sample master/master.cfg</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildbot start master</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f master/twistd.log</span><br></pre></td></tr></table></figure>
-<p>buildbot会在当前目录下创建master名称的目录，以上为<code>master</code>。<br>看到最后显示<code>BuildMaster is running</code>即为启动成功，此时可通过<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>访问，默认用户名密码都是<code>pyflakes</code>。</p>
-<h3 id="slave"><a href="#slave" class="headerlink" title="slave"></a>slave</h3><p>创建slave时需要指定mater的地址，或者修改配置文件指定。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildslave create-slave slave1 localhost:9989 slave1 pass</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildslave start slave</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f slave/twistd.log</span><br></pre></td></tr></table></figure></p>
-<p>create-slave的参数分布是：slave目录、master、名字、密码。其中master默认都采用9989与slave通信。名字、密码必须与master的master.cfg中配置的一致：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'slaves'</span>] = [buildslave.BuildSlave(<span class="string">"example-slave"</span>, <span class="string">"pass"</span>)]</span><br></pre></td></tr></table></figure></p>
-<h3 id="预览"><a href="#预览" class="headerlink" title="预览"></a>预览</h3><p>此时打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可看到如下页面：<br><img src="/img/buildbot-index.png" alt="buildbot预览"><br>其中Buildslaves页面可查看到我们新添加的example-slave，且状态为<code>Idle</code>。<br>而Waterfall页面可查看到当前的builder，目前只有runtest，点进去点击forcebuild即可进行测试build。成功后记录显示为绿色。</p>
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>Buildbot的配置文件为<code>.cfg</code>后缀的python脚本，使用python语法。如上文slave的定义就是一个python list的定义。</p>
-<h3 id="master配置"><a href="#master配置" class="headerlink" title="master配置"></a>master配置</h3><p>主要配置如下。</p>
-<ul>
-<li>BUILDSLAVES<br>slave的定义，以list的形式呈现。需要主要名字和密码与slave一致。<br>其中protocols可定义与slave的通信方式，包括端口等。</li>
-<li><p>CHANGESOURCES<br>指定需要监控的源代码地址。格式如下，其中可指定git地址、工作目录、分支、监控周期等。可定义多个，每个append进list即可。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c[&apos;change_source&apos;] = []</span><br><span class="line">c[&apos;change_source&apos;].append(changes.GitPoller(</span><br><span class="line">        &apos;git://github.com/buildbot/pyflakes.git&apos;,</span><br><span class="line">        workdir=&apos;gitpoller-workdir&apos;, branch=&apos;master&apos;,</span><br><span class="line">        pollinterval=300))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>SCHEDULERS<br>scheduler指定何时、如何触发执行builder，其中builder在BUILDERS中定义。下文定义了两个scheduler：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'schedulers'</span>] = []</span><br><span class="line"><span class="comment"># 定义每小时运行的scheduler</span></span><br><span class="line">hourlyscheduler = Periodic(name = <span class="string">"hourly"</span>,</span><br><span class="line">                           builderNames = [<span class="string">"simplebuild"</span>],</span><br><span class="line">                           periodicBuildTimer = <span class="number">3600</span>)</span><br><span class="line"><span class="comment"># 定义手动触发的scheduler</span></span><br><span class="line">c[<span class="string">'schedulers'</span>].append(schedulers.ForceScheduler(</span><br><span class="line">                            name=<span class="string">"force"</span>,</span><br><span class="line">                            builderNames=[<span class="string">"master"</span>]))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>BUILDERS<br>builder定义具体执行的任务内容，由一系列的步骤组成。每个步骤定义在step中，factory包含一系列的step，builder通过指定factory等参数创建。可定义多个builder。<br>代码如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义factory</span></span><br><span class="line">factory = util.BuildFactory()</span><br><span class="line"><span class="comment"># 定义具体step</span></span><br><span class="line">factory.addStep(steps.Git(repourl=<span class="string">'git://github.com/buildbot/pyflakes.git'</span>, mode=<span class="string">'incremental'</span>))</span><br><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"trial"</span>, <span class="string">"pyflakes"</span>]))</span><br><span class="line"><span class="comment"># 创建builder</span></span><br><span class="line">c[<span class="string">'builders'</span>] = []</span><br><span class="line"><span class="comment"># 指定名称、使用的slave、factory</span></span><br><span class="line">c[<span class="string">'builders'</span>].append(</span><br><span class="line">    util.BuilderConfig(name=<span class="string">"master"</span>,</span><br><span class="line">      slavenames=[<span class="string">"master"</span>],</span><br><span class="line">      factory=factory))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>STATUS TARGETS<br>此处定义buildbot对外通知build信息的方式。最基本的方式就是显示在页面中，因此此处同时定义了页面的认证方式，即登录使用的用户名、密码在此处修改。同时可定义IRC、邮件等通知方式。</p>
-</li>
-<li>PROJECT IDENTITY<br>此处主要为buildbot的基本信息，如title、超链接、url等。</li>
-<li>DB URL<br>此处定义使用的数据库，默认使用sqlite，地址为本地文件路径。</li>
-</ul>
-<h3 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h3><p>slave的定义主要在<code>buildbot.tac</code>文件中，可用于定义使用的master及slave基本信息。</p>
-<h2 id="启动及使用"><a href="#启动及使用" class="headerlink" title="启动及使用"></a>启动及使用</h2><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><ul>
-<li>启动<br>master、slave的启动上文已提及，子命令为start，参数为路径。</li>
-<li>停止、重启<br>stop和restart，其余同start</li>
-<li>master重新加载配置<br><code>buildbot reconfig master</code>即可重新加载配置。</li>
-</ul>
-<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>平时比较常用手动触发build，即forcebuild：web页面登录-&gt;Builders-&gt;选择builder-&gt;Force Build-&gt;在Waterfall查看打包结果及详细日志。<br><img src="/img/buildbot-waterfall.png" alt="buildbot waterfall"><br>注意：只有登录后才有build权限。</p>
-<h3 id="各页面介绍"><a href="#各页面介绍" class="headerlink" title="各页面介绍"></a>各页面介绍</h3><p>Buildbot比较方便的一点是全部通过页面来进行操作。主要页面介绍如下：</p>
-<ul>
-<li>Waterfall，以瀑布流的方式显示build任务，可点击任务查看详情、执行操作等</li>
-<li>Grid/T-Grid，以对应的方式显示build任务</li>
-<li>Console，还在开发中，当前主要显示revision信息</li>
-<li>Builders，定义的所有builder</li>
-<li>Recent Builds，最近的build</li>
-<li>Buildslaves，定义的所有slave</li>
-<li>Changesources，定义的所有代码仓库</li>
-<li>JSON API，对外提供的JSON API文档</li>
-</ul>
-<h2 id="高级使用"><a href="#高级使用" class="headerlink" title="高级使用"></a>高级使用</h2><h3 id="多分支build"><a href="#多分支build" class="headerlink" title="多分支build"></a>多分支build</h3><p>定义一个Changesource。<br>定义多个schedulers，分别对应不同分支。<br>定义多个factory，其中的step除branch不同外，其余step通用。通用的step可一次定义，多次使用。<br>builder分别指定分支和factory。</p>
-<h3 id="多项目build"><a href="#多项目build" class="headerlink" title="多项目build"></a>多项目build</h3><p>新版本可使用此功能，但不太推荐。buildbot的一个master还是更多的擅长对一个项目的管理。<br>需要定义多个Changesource，然后在其它定义时通过<code>project</code>和<code>repository</code>参数指定项目。</p>
-<h3 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h3><p>通过检查step的返回结果判断是否执行成功，规则同shell：0为成功，其它失败。<br>因此如果step中调用了自己的脚本，需要保证按上述规则返回结果。</p>
-<h3 id="添加参数"><a href="#添加参数" class="headerlink" title="添加参数"></a>添加参数</h3><p>使用<code>util.Property</code>获得网页上指定的参数，可设置默认值：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"bash"</span>, <span class="string">"autorpm.sh"</span>, util.Property(<span class="string">'project'</span>, default=<span class="string">''</span>)]))</span><br></pre></td></tr></table></figure></p>
-<p>在build页面通过name/value指定，如：<br><img src="/img/buildbot-param.png" alt="buildbot指定参数"></p>
-<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><p>实际使用中发现，buildslave所创建的文件，权限都为600或700。<br>这样会造成如cp到apache目录时，apache无法读取文件。<br>通过官方文档查看到slave启动时有umask选项：</p>
+    <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
+    <url>/2013/03/gateway-performance-test-desc/</url>
+    <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
+<ol>
+<li>简介及性能指标介绍 - 本篇</li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
+</ol>
+<a id="more"></a>
+<h2 id="性能测试简介"><a href="#性能测试简介" class="headerlink" title="性能测试简介"></a>性能测试简介</h2><p>以下解释来自百度百科：</p>
 <blockquote>
-<p>–umask<br>This is a string (generally an octal representation of an integer) which will cause the buildslave process’ umask value to be set shortly after initialization.<br>The twistddaemonization utility forces the umask to 077 at startup (which means that all files created by the buildslave or its child processes will be unreadable by any user other than the buildslave account).<br>If you want build products to be readable by other accounts, you can add –umask=022 to tell the buildslave to fix the umask after twistd clobbers it.<br>If you want build products to be writable by other accounts too, use –umask=000, but this is likely to be a security problem.</p>
+<p>性能测试是通过自动化的测试<strong>工具</strong>模拟多种正常、峰值以及异常<strong>负载</strong>条件来对系统的各项性能指标进行测试。负载测试和压力测试都属于性能测试，两者可以结合进行。通过负载测试，确定在各种工作负载下系统的性能，目标是测试当负载逐渐增加时，系统各项性能指标的变化情况。压力测试是通过确定一个系统的<strong>瓶颈</strong>或者不能接受的性能点，来获得系统能提供的最大服务级别的测试。</p>
 </blockquote>
-<p>通过修改slave目录下的buildbot.tac，修改：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">umask = 022</span><br></pre></td></tr></table></figure></p>
-<p>然后重启slave解决此问题:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">buildbot stop slave1</span><br><span class="line">buildbot stop slave2</span><br></pre></td></tr></table></figure></p>
-<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
-<li><a href="https://build.chromium.org/p/chromium/console" target="_blank" rel="noopener">chromium buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">docker安装buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/tour.html" target="_blank" rel="noopener">quick tour of buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/fiveminutes.html" target="_blank" rel="noopener">Buildbot in 5 minutes</a></li>
+<p>其中有三个关键词需要关注：</p>
+<ul>
+<li>工具：性能测试一般需要的压力较大较复杂，单纯依靠手工很难做到，因此一般需要专业化的设备、工具，或编写自动化测试脚本完成。网关类产品一般要求的负载较高，在千兆、万兆设置更高级别，一般需要专业配置千兆万兆网卡的硬件设备，如IAXA等，价格较昂贵。而其它产品一般也需要如Loadruner、Jmeter等专业化的性能测试软件并根据场景编写脚本完成。</li>
+<li>负载：性能测试有别于功能测试的点就在于使用的负载较高。而且负载的构造需要根据实际的场景才有价值，并需要使用特定的工具或自行研发软件实现。</li>
+<li>瓶颈：逐渐加大负载到达瓶颈。测试中比较重要的就是各个性能拐点，因为各个拐点往往都有重要的意义。如保持最优响应的拐点、延迟急剧增加的拐点、系统彻底瘫痪的拐点。持续测试找到各个拐点，对于产品的调优、部署及运维都有很大的价值。<br><img src="/img/jmeter-result.png" alt="性能测试结果"></li>
 </ul>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS\、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>DUT，devices under test，测试设备。</li>
+</ul>
+<h2 id="性能指标名词解释"><a href="#性能指标名词解释" class="headerlink" title="性能指标名词解释"></a>性能指标名词解释</h2><p>网络安全类产品或网关类产品常见的性能指标有：</p>
+<ul>
+<li>RFC2544 四项值（吞吐量、延迟、丢包率、背靠背）</li>
+<li>TCP 的每秒新建连接数（CPS）</li>
+<li>HTTP 的每秒处理事务数（TPS）、HTTP 有效吞吐量（HTTP Throughput）</li>
+<li>最大并发连接数等</li>
+</ul>
+<p>除此之外，部分评测机构或客户也会根据自己的实际情况增加性能指标，如：IPS/UTM下的HTTP有效吞吐量和每秒新建，Mail协议（SMTP/POP3/IMAP）的有效吞吐量和新建，特殊场景的混合流量（如加入恶意流量）的吞吐量等。<br>可参考业界标杆Fortinet的<a href="https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/Fortinet_Product_Matrix.pdf" target="_blank" rel="noopener">性能测试报告</a>。<br><img src="/img/fortinet-product-matrix-sample.png" alt="Fortinet product matrix"></p>
+<p>下面我们先认识一下各性能指标名词的含义。本篇只介绍各名词的含义，测试方法后续章节中说明。</p>
+<h3 id="RFC2544-四项值"><a href="#RFC2544-四项值" class="headerlink" title="RFC2544 四项值"></a>RFC2544 四项值</h3><p><a href="https://tools.ietf.org/html/rfc1242" target="_blank" rel="noopener">RFC1242</a>文档中定义了吞吐量（Throughput）、延迟（Latency）、丢包率（Frame Loss）、背靠背（Back-to-Back）四个标准术语。<br><a href="https://www.ietf.org/rfc/rfc2544.txt" target="_blank" rel="noopener">RFC2544</a>是RFC组织提出的用于评测网络互联设备（防火墙、IDS、交换机路由器等）的国际标准，其中主要对RFC1242 中定义的性能评测参数的具体测试方法、结果的提交形式作了较详细的规定。</p>
+<p>下面将对这四项值是做为重点进行介绍。</p>
+<h4 id="吞吐量（Throughput）"><a href="#吞吐量（Throughput）" class="headerlink" title="吞吐量（Throughput）"></a>吞吐量（Throughput）</h4><p>吞吐量是指被测设备在不丢包的情况下，所能转发的最大速率或最大流量。通常测试结果以每秒通过的最大数据包数（PPS）或比特数（Mb/s）。<br>用于反映被测设备所能够处理的最大的数据流量，重在测试被测设备的转发能力。<br>结果值越大越好。<br>吞吐量比较通用，适用于绝大多数软件系统的性能测试。</p>
+<h4 id="延迟（Latency）"><a href="#延迟（Latency）" class="headerlink" title="延迟（Latency）"></a>延迟（Latency）</h4><p>发送一定数量的数据包，记录中间数据包发出的时间T1，以及经由被测设备转发后到达接收端口的时间T2：Latency＝T2－T1。延迟的测试结果以毫秒（ms）或微秒（μs）表示。<br>测试延迟是在测试过程中不存在丢包的条件下进行的，也就是说在测试延迟时，先要知道被测设备的吞吐量，从而定义发包的速率。<br>延迟用于反映被测设备处理数据包的速度。<br>延迟越小，表明设备处理速度越快。<br>延迟比较通用，是大多数软件系统性能测试的重要指标。</p>
+<h4 id="丢包率（Frame-Loss）"><a href="#丢包率（Frame-Loss）" class="headerlink" title="丢包率（Frame Loss）"></a>丢包率（Frame Loss）</h4><p>丢包率是指在一定的负载下，由于缺乏资源而未能被转发的包占应该转发的包数的百分比。<br>用于反映被测设备承受特定负载能力。<br>结果值越小越好。</p>
+<h4 id="背靠背（Back-to-Back）"><a href="#背靠背（Back-to-Back）" class="headerlink" title="背靠背（Back-to-Back）"></a>背靠背（Back-to-Back）</h4><p>以能够产生的最大的速率，发送一定长度的数据包，并不断改变单次发送的数据包数目，直到被测设备能够完全转发所有发送的数据包而不丢包，这个包数就是该设备的背对背值。<br>用于反映被测设备处理突发数据的缓存能力。背对背的值越大，路由器的缓存能力就越强，处理突发数据包的能力越强。</p>
+<h3 id="TCP每秒新建连接数（CPS）"><a href="#TCP每秒新建连接数（CPS）" class="headerlink" title="TCP每秒新建连接数（CPS）"></a>TCP每秒新建连接数（CPS）</h3><p>TCP每秒新建是在业界提到最多的一个。这个性能指标出自<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档。全称是 Maximum TCP Connection Establishment Rate（最大TCP 建立速率），大家习惯将这个指标称为CPS（TCPConnection Per Second）。<br>TCP每秒新建速率是指在被测设备能够成功建立所有请求连接的条件下，所能承受的最大TCP 连接建立速度。其测试采用迭代搜索算法，每次迭代过程中，以低于被测设备所能承受的最大并发连接数发起速率不同的TCP 连接请求，直到得到所有连接成功建立的最大速率。<br>TCP每秒新建速率以连接数/秒表示结果，其值越大越好。<br>注：TCP Connection Establishment已在<a href="https://tools.ietf.org/html/rfc2647" target="_blank" rel="noopener">RFC2647</a>文档中进行定义。</p>
+<h3 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h3><p>TPS性能指标是反映被测设备应用层的新建速率，这个性能指标也出自RFC3511文档。全称是Maximum HTTP Transaction Rate（最大HTTP传输事务速率），大家习惯将这个指标称为TPS（HTTPTransaction Per Second）。<br>HTTP的每秒事务数是指在被测设备能够成功建立连接的条件下，所能承受的最大的HTTP 协议的请求/回应操作的速度。其测试采用反复搜索过程，每次反复过程中，以低于被测设备所能承受的最大处理速率，直到所有连接被成功建立并且有对相应的请求。<br>结果以连接数/秒表示结果。其值越大越好。</p>
+<h3 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h3><p>HTTP有效吞吐量是反映被测设备在应用层的最大传输速率，这个性能指标在RFC3511文档中没有明确描述，但可以通过将HTTP Transaction Rate调整转化为HTTP有效吞吐量的测试方法。HTTP有效吞吐量是指在被测设备能够成功建立连接的条件下，在同一时间内所能承受的最大的有效数据量。<br>测试结果值越大越好。</p>
+<h3 id="最大并发连接数"><a href="#最大并发连接数" class="headerlink" title="最大并发连接数"></a>最大并发连接数</h3><p>最大并发连接数性能指标是反映被测设备最大的会话条目数，这个性能指标也出自RFC3511文档。全称是 Concurrent TCP Connection Capacity。最大并发连接数是指在被测设备能够成功建立连接的条件下，所能同时承受的最大的链接条目数，也反映了被测设备维持多个会话的能力。<br>测试结果值越大越好。</p>
+<h3 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h3><p>在<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档中主要描述了HTTP协议的性能测试，但随着产品及技术的大幅度更新，这往往已经不能满足客户或厂商的需求。我们还需要测试其它协议的性能，通常以应用层为主：包括FTP协议、Mail协议等。但测试的内容基本都是一样的，以每秒新建（每秒会话）和吞吐量为主。只需将HTTP协议变为其它应用层协议即可。</p>
+<p>随着网关产品尤其是网络安全类产品的发展，性能测试的范围不再局限于防火墙功能上的性能测试，还新增加了对其它功能如IPS、AV（防病毒）和UTM（集成安全网关）等的性能测试。但可以看到，这些功能的增加对于测试过程或者测试方法而言其实没有直接的影响，仍然要使用原来的测试过程或测试方法。下篇我们将介绍具体的测试方法。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是简介及测试方法的概念介绍。所有的性能指标中，RFC2544的四项指标是其中比较重要的部分且目前基本以形成标准，下篇文章将对其进行介绍。</p>
 ]]></content>
       <categories>
-        <category>openstack</category>
+        <category>Testing</category>
       </categories>
       <tags>
-        <tag>openstack</tag>
-        <tag>ci</tag>
-        <tag>持续集成</tag>
+        <tag>性能测试</tag>
+        <tag>ips</tag>
+        <tag>NGFW</tag>
+        <tag>防火墙</tag>
+        <tag>spi firewall</tag>
       </tags>
   </entry>
   <entry>
@@ -273,83 +420,6 @@
         <tag>spi firewall</tag>
         <tag>CPS</tag>
         <tag>TPS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之十三：curl vs wget</title>
-    <url>/2012/09/curl-vs-wget/</url>
-    <content><![CDATA[<p>curl和wget有很多地方是相同的，很多场景下二者都可以使用。那面对一个复杂问题的时候，我们怎么决定使用哪个工具呢？本篇通过对二者进行比较，从而对此提供思路。<br>本篇主要参考<a href="http://daniel.haxx.se/docs/curl-vs-wget.html" target="_blank" rel="noopener">curl官方的文档</a>，翻译加整理。</p>
-<h2 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h2><ul>
-<li>都是可通过FTP/HTTP/HTTPS协议下载文件的命令行工具；</li>
-<li>都可以发送HTTP POST请求；</li>
-<li>都支持cookie的使用；</li>
-<li>都被设计为无界面（UI），可在如脚本中使用；</li>
-<li>都是开源且免费的软件。</li>
-</ul>
-<a id="more"></a>
-<h2 id="不同点"><a href="#不同点" class="headerlink" title="不同点"></a>不同点</h2><h3 id="curl"><a href="#curl" class="headerlink" title="curl"></a>curl</h3><ul>
-<li>curl是基于libcurl库实现，因此特性来源于libcurl库。libcurl库跨平台、开源且免费，因此curl不只是一个命令行工具</li>
-<li>管道。curl在传统的UNIX风格的基础上加以扩展，对输入输出做出更多的处理，从而贯彻了”everything is a pipe” 的设计思想。</li>
-<li>单点传送（Single shot）。curl被设计为用于数据的单点传送。它只会传送用户指定的URLS，并不包含任何递归下载的逻辑，也不对html进行任何解析。</li>
-<li>更多协议支持。目前curl 支持的协议有： FTP, FTPS, HTTP, HTTPS, SCP, SFTP, TFTP, TELNET, DICT, LDAP, LDAPS, FILE, POP3, IMAP, SMTP 和 RTSP 。Wget仅仅支持 HTTP, HTTPS 和 FTP。（协议的支持情况可能会随着时间发展而变化。）</li>
-<li>更多平台支持，便于移植。与wget相比，curl可在更多平台上编译和运行。比如OS/400, TPF 和其他很多非UNIX的平台。</li>
-<li>更强大的SSL库和SSL支持。curl能应用于多个不同的 SSL/TLS 库, 并提供了更多的可控性和对协议细节更广泛的支持。</li>
-<li>curl支持更多的HTTP认证方式。尤其是当你使用HTTP代理的时候，curl支持Basic, Digest, NTLM and Negotiate认证方式（参见<a href="https://adeployblog.appspot.com/2012/08/17/http-auth-schemes.html" target="_blank" rel="noopener">HTTP认证模式</a>）。</li>
-<li>libcurl库支持多种不同的SOCKS代理，基于libcurl实现的curl工具也支持。而wget不支持。</li>
-<li>双向通信。 curl 提供了上传能力，Wget仅仅支持HTTP POST方式。</li>
-<li>HTTP multipart/form-data 的发送能力。 这使得用户可以进行HTTP上传，更好的模拟浏览器的行为从而更大程度的实现HTTP操作的自动化，提供了更多操作的可能。</li>
-<li>压缩。 curl 支持GZIP和 inflate Content-Encoding 并且自动进行解压缩操作。</li>
-<li>curl提供并执行Transfer-Encoded HTTP的解压缩，而wget不会</li>
-<li>curl在7.27.0之后，提供对<a href="http://en.wikipedia.org/wiki/Metalink" target="_blank" rel="noopener">metalink</a>的支持（好吧，百度百科对metalink的解释是不对的， 百度百科说的是oracle公司的一个服务）。而wget需要依靠一个Google Summer开源项目才能支持metalink。</li>
-</ul>
-<h3 id="wget"><a href="#wget" class="headerlink" title="wget"></a>wget</h3><ul>
-<li>wget仅仅是一个命令行工具。没有库提供使用。</li>
-<li>递归下载支持。wget相比curl最大的优点在于对递归下载的支持，甚至下载一个资源如网页或FTP目录指向的所有资源。</li>
-<li>wget下载时无需指定保存文件名。而curl需要使用-o或-O指定。</li>
-<li>wget仅支持GnuTLS 和 OpenSSL两种SSL库。</li>
-<li>wget仅支持HTTP代理的基本认证（Basic auth）。</li>
-<li>wget不支持SOCKS代理。</li>
-<li>wget项目更老，基于GPL开源协议，隶属GNU项目。curl基于MIT开源协议，不隶属于任何组织，版权由作者一人所有。</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>wput仅是一个单独的工具，不进行讨论。<br>参考：<a href="http://daniel.haxx.se/docs/curl-vs-wget.html" target="_blank" rel="noopener">curl vs Wget</a></p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-        <tag>wget</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>HTTP认证模式</title>
-    <url>/2012/08/http-auth-schemes/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在研究curl和httpclient，用到了HTTP认证相关的知识。<br>但是搜索之后发现，网上居然没有很全面的HTTP认证模式的介绍，尤其是中文的文章。<br>因此结合MS的<a href="http://msdn.microsoft.com/en-us/library/ms789031.aspx" target="_blank" rel="noopener">Understanding HTTP Authentication</a>和<a href="http://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html" target="_blank" rel="noopener">HttpClient Tutorial</a>翻译加个人理解写了一篇。</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本篇博文简介了几种HTTP认证模式。文章内容要求读者对HTTP请求、响应的基本结构，HTTP状态码和HTTP协议头有一定的了解。<br>请参考<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">Linux下cURL使用教程之二：HTTP协议概述</a>。</p>
-<h2 id="HTTP访问认证框架"><a href="#HTTP访问认证框架" class="headerlink" title="HTTP访问认证框架"></a>HTTP访问认证框架</h2><p>HTTP协议（RFC2616）定义了一个简单的访问认证模式框架。此框架假设有若干页面（被保护资源，也称作realm，区域），只能被特定的人访问，这些人可以在服务器要求时提供凭证。<br>当客户端如浏览器访问一个位于保护区域（protected realm）中的页面时，服务器返回包含401未认证状态码和www认证头（WWW-Authenticate header field）的响应。返回的认证头中必须含有至少一个适用于请求页面的认证要求（challenge）。<br>然后客户端发起第二次请求，此次请求在请求头中包含了试用于服务器认证要求的认证头域。<br>如果服务器接受了客户端提供的凭证，它将返回客户端请求的页面。否则，服务端会返回另一个401未认证响应以提示客户端认证失败。<br>具体认证响应头和请求头的内容取决于认证的方式。RFC2616中定义了两种广泛使用的认证模式：<br>HTTP基本认证（HTTP  Basic authentication）和HTTP摘要认证（HTTP Digest authentication）。<br>此外常用的还有NTLM、SPNEGO（HTTP协商认证，HTTP Negotiate authentication，是其一种）和Kerberos认证方式。<br><a id="more"></a></p>
-<h2 id="认证模式"><a href="#认证模式" class="headerlink" title="认证模式"></a>认证模式</h2><h3 id="1-基本认证Basic-Access-Authentication"><a href="#1-基本认证Basic-Access-Authentication" class="headerlink" title="1. 基本认证Basic Access Authentication"></a>1. 基本认证Basic Access Authentication</h3><p>基本认证是基于用户名密码的。<br>服务端的401响应中包含一个认证要求（authentication challenge），此认证要求中含有“Basic”关键字和一个用以表明访问的被保护资源名称的“名称=值”对，如下：<br><code>WWW-Authenticate: Basic realm=&quot;Protected page&quot;</code><br>如果你使用的浏览器，浏览器在接收到401响应时，将会弹出窗口让你输入用户名密码，然后发送认证请求。认证请求中同样包含”Basic”关键字，此外还有Base64编码后的用户名密码，如下：<br><code>Authorization: Basic QWRlcGxveSdzIGJsb2c=</code><br>服务器将用户名密码解码后比对，成功匹配后即认证成功。<br>因为Base64不算是一种加密方法：无密钥的可逆加密，任何人都可解密（百度搜索一下”在线解码“一大堆）。因此基本认证被认为是明文传输，安全性不好。极易出现密码被窃听和重放攻击等安全性问题。<br>如果资源需要更高强度的保护，请使用其他认证方法。</p>
-<h3 id="2-摘要认证HTTP-Digest-authentication"><a href="#2-摘要认证HTTP-Digest-authentication" class="headerlink" title="2. 摘要认证HTTP Digest authentication"></a>2. 摘要认证HTTP Digest authentication</h3><p>摘要认证被设计用来弥补基本认证的缺点。摘要认证基于请求-响应（challenge-response）模式，而且使用了哈希加密算法（常用为MD5），从而某些程度上解决了基本认证安全性的问题。<br>服务器返回的初始401响应的www认证头（WWW-Authenticate header）中多出了一个称为nonce的随机数的字段。服务端保证每个401响应中的nonce值唯一。如：<br><code>Authorization: Digest username=&quot;admin&quot;, realm=&quot;HiPER&quot;</code><br>接下来的客户端响应中将包含由用户名、密码、nonce和其他信息组成的数据的哈希值（如使用MD5加密）。所有被加密的数据服务端也具有，因此服务端执行同样加密过程。如果二者一直则认证成功。<br>因为如MD5等哈希加密算法是不可逆的，因此用户名密码明文无法被窃听破解。因为服务器对同一个nonce的请求只接受一次客户端请求，从而能避免重放攻击。<br>但是，digest的安全性也有缺点：</p>
-<ul>
-<li>只有密码密码被加密，而客户端最终请求的被保护资源是明文传送的，可被窃听</li>
-<li>客户端无法确认服务端的正确身份，缺少对服务端的认证方式</li>
-<li>近年来，随着计算机性能的提高等因素，传统高强度加密算法的破解已成可能。而MD5更是已有破解方法。</li>
-</ul>
-<p>更多安全性问题请参考RFC2617。</p>
-<h3 id="3-NTML"><a href="#3-NTML" class="headerlink" title="3. NTML"></a>3. NTML</h3><p>NTML由微软开发，使用于Windows平台。被认为是比摘要认证更安全的认证方式。<br>它使用Windows凭证（Windows credentials）来传递认证数据，而不是使用未编码的用户名密码。<br>NTML要求服务器与客户端做出多次数据交换，服务器和所有其中的代理都必须支持永久连接（persistent connections）才能完成认证。</p>
-<h3 id="4-Kerberos"><a href="#4-Kerberos" class="headerlink" title="4. Kerberos"></a>4. Kerberos</h3><p>服务器与客户端通过第三方的Kerberos服务器完成认证。具体请参见<a href="http://baike.baidu.com/view/306687.htm" target="_blank" rel="noopener">百度百科条目</a>和<a href="http://zh.wikipedia.org/wiki/Kerberos" target="_blank" rel="noopener">维基百科条目</a>。<br>Kerberose相比NTML有很大改善：速度快，而且允许相互认证、认证代理和简单的信任关系。参考<a href="http://msdn.microsoft.com/en-us/library/aa480475.aspx" target="_blank" rel="noopener">KERBEROS vs NTLM</a>。</p>
-<h3 id="5-SPNEGO"><a href="#5-SPNEGO" class="headerlink" title="5. SPNEGO"></a>5. SPNEGO</h3><p>全称是Simple and Protected GSS-API Negotiation，是微软提供的一种使用<a href="http://baike.baidu.com/view/1551940.htm" target="_blank" rel="noopener">GSS-API</a>认证机制的安全协议，用于使Webserver共享Windows Credentials，它扩展了Kerberos(一种网络认证协议)。<br>SPNEGO适用于客户端需要认证，但是客户端服务端都不清楚对方支持什么认证协议的场合。<br>SPENGO其实是一种”伪认证机制“（pseudo-mechanism），用以协商出真正的认证机制。<br>最常见的是微软的HTTP协商认证扩展（HTTP Negotiate authentication extension），协商的最终机制在NTML和Kerberos中选择。Kerberos因其优点优先使用。<br>百度词条对此认证的解释是不够准确的，准确的解释可以参考<a href="http://en.wikipedia.org/wiki/SPNEGO" target="_blank" rel="noopener">维基百科条目</a>。</p>
-<h2 id="认证方式选择"><a href="#认证方式选择" class="headerlink" title="认证方式选择"></a>认证方式选择</h2><p>选择何种认证方式取决于资源要被保护的程度。不需要保护的资源使用基本认证方式。因为认证会导致更多的数据传输，可能影响用户体验。<br>认证方式最弱的是基本认证，最强的是协商认证。服务端在WWW-Authentication提供自己支持的认证方式，供客户端任意选择。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>RFC2616-HTTP协议<br>RFC2617-HTTP认证：基本认证和摘要认证<br>RFC1321-MD5摘要加密逻辑<br><a href="http://frontier.userland.com/stories/storyReader$2159" target="_blank" rel="noopener">HTTP Authentication Schemes</a></p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -466,6 +536,212 @@
       </tags>
   </entry>
   <entry>
+    <title>网关类产品的性能测试之四：测试工具、注意事项及经验总结</title>
+    <url>/2013/04/gateway-performance-test-summary/</url>
+    <content><![CDATA[<p>前面我们介绍了各性能指标项的测试方法。本篇主要概述测试工具、测试拓扑及经验总结。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p>
+<ol>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/" target="_blank" rel="noopener">简介及性能指标介绍</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
+<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
+</ol>
+<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
+<ul>
+<li>性能测试，对产品负载压力承受能力的测试。</li>
+<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
+<li>网关类产品，部署作为网关的设备及软件。</li>
+<li>IDS，入侵检测系统</li>
+<li>IPS，入侵防御系统</li>
+<li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
+<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
+<li>被测设备，devices under test，测试设备。</li>
+</ul>
+<h2 id="性能测试工具"><a href="#性能测试工具" class="headerlink" title="性能测试工具"></a>性能测试工具</h2><p>对于网关类产品，一般要求的性能值比较高，因此测试一般使用专用的硬件设备。<br>常用硬件设备有IAXA等。<br>常用的测试软件有：</p>
+<ul>
+<li><a href="https://iperf.fr/" target="_blank" rel="noopener">iperf</a></li>
+<li><a href="http://jmeter.apache.org/" target="_blank" rel="noopener">Jmeter</a>使用Java编写，主要用于软件的性能测试，但也可扩展用于网络性能测试。机器配置足够的情况下，流量可打到上百M。</li>
+<li><a href="http://tomahawk.sourceforge.net/" target="_blank" rel="noopener">tomahawk</a>是一个回放数据包的工具，也可完成部分性能测试。</li>
+<li>而软件的性能测试常用的LoadRunner，一般难以用于网络的性能测试。</li>
+</ul>
+<a id="more"></a>
+<h2 id="测试拓扑"><a href="#测试拓扑" class="headerlink" title="测试拓扑"></a>测试拓扑</h2><p>前文主要介绍了2－7层的性能测试方法，除此之外我们还需要注意测试拓扑结构。<br>从物理环境上看，性能测试拓扑是比较单一的，没有多少复杂度：测试仪表连接被测设备，就可开始测试。需要注意的是测试仪中的制定的测试拓扑，在每次性能测试开始前，我们都需要明确客户端数目、服务器数目、源IP、目的IP和NAT等。以下为根据实际的测试经验简单总结一下性能测试在拓扑制定上需要注意的事项。</p>
+<ol>
+<li>在测试2－7层的性能时，测试仪和被测设备的转发模式我们一般会选择透明模式或者路由模式。<br>透明模式相当于二层，被测设备的配置相对简单，配置相应的转发规则即可。测试仪表的配置中源IP地址和目的IP地址要在相同的地址网段中，客户端和服务器的数目不应大于IP地址数，客户端的数目建议大于服务器端数目。<br>路由模式相当于三层，被测设备的配置相对复杂一些，需要配置接口的IP地址、路由表及相应的转发规则等。测试仪表的配置中源IP地址和目的IP地址要与被测设备的接口IP地址相对应，并且需要配置ARP响应机制或IPv6地址的学习机制，其它与配置透明模式的一致。</li>
+<li>在测试2－3层的性能，特别是RFC2544四项值时，建议测试仪采用UDP协议做为测试的承载协议。<br>当然，也有一些客户会选择IP层或者TCP层做为承载协议。这里没有硬性的规定，但大部分评测机构或者客户都会选择UDP协议进行测试。<br>当选择UDP协议进行测试时，UDP协议的端口号应避免已知的常用协议，如DNS的53端口，TFTP的69端口等，当然也没有硬性的规定。建议使用UDP端口7或0做为源和目的端口，或者直接使用测试仪的默认端口即可。</li>
+<li>在测试4－7层的性能时，需要注意客户端与服务器之间的对应关系。TODO<br>在测试需求或测试要求中，我们可能会遇到多个客户端对应一台服务器或者多个客户端对应多台服务器的情况。<br>在多对一的环境中，控制客户端数目不要过多，应根据被测设备应用的实际场景确定数目，源IP地址和目的IP地址建议使用一个C类网段。<br>在多对多的环境中，会出现两种测试拓扑结构。其中一种是多对一的单一叠加方式，另一种是全部混搭方式。这两者的客户端请求方式存在很大的差异。全部混搭方式要比单一叠加的方式更接近实际的应用场景，而这正是我们搭建测试拓扑的关键。如果被测设备足够好，无论采用哪种方式，性能结果都不应该有变化。因此，建议在测试4－7层的性能时，应采用全部混搭的方式搭建拓扑结构。</li>
+<li>在测试4－7层的性能时，还应注意源IP地址与目的IP地址的数目。<br>前面我们提到在多对一的测试拓扑中，建议使用一个C类地址段。在多对多的测试拓扑中，可以使用一个C类地址段，也可以使用多个C类地址段或一个B类地址段。<br>这里建议在多对多的测试拓扑结构中，决定使用几个地址段时，应参考被测设备在实际应用场景所能承受的最大负载。比如，将一个百兆的网关类设备放在一个数据中心的出口处显然不太适合，所以在测试时给它分配一个B类地址段或多个C类地址段，也显然不适合。<br>在设计和搭建测试拓扑时，应充分考虑被测设备所应用的场景，从而给它量身定做源IP地址和目的IP地址、甚至是客户端与服务器的数量等。</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过本篇相信大家对性能测试有了一更深入的理解，以下是一些经验总结及注意事项。</p>
+<ol>
+<li>对于网络安全类产品或网关类产品，RFC2544四项值一直作为性能测试的首要测试指标，从1999年发布一直使用至今。<br>业界有人认为RFC2544四项值已经不太适用于现代的产品，特别是对于IPS、AV和UTM的产品。但无可否认的是，RFC2544四项值是最能反映产品在底层转发的性能，而且从侧面反映了产品在低层转发过程中的稳定性。所以，RFC2544四项值将会被一直延用，并且作为一个重要测试指标一直延用下去。</li>
+<li>在网络安全类产品或网关类产品中，RFC3511对于4－7层的性能测试方法的定义过于模糊。<br>这使得4－7层的性能测试存在很大的争议，比如请求文件的大小、每条连接中请求的次数、协议版本、客户端与服务器数目等，都是争义的内容。特别是当产品集成了IPS、AV 和UTM功能后，在测试的细节上争义更为严重。比如URL地址是否相同、文件类型的变化、文件内容是否相同、IP地址端口的遍历、客户端与服务器所使用的软件及软件版本等。一个细微的不同，可能就会导致测试结果不同。所以，在对4－7层进行性能测试时，一定要与客户或评测机构沟通，指定相关的细节，从而验证产品的真实性能。同时，做为性能测试人员，在制定测试方法和测试拓扑时，应充分考虑被测设备所能应用的场景。这样的测试结果才是真实、可信并且有意义的。</li>
+<li>在此系列文章中没有介绍混合流量的性能测试，特别是应用层协议的混合流量性能测试。<br>首先无论是单一协议还是混合协议，主要关注新建速率和吞吐量值。而且混合流量中吞吐量的结果，可能是大家最为关注的。但混合流量中各协议的分配比例，没有一个权威的机构支撑，也难有哪个机构能够支撑。因为网络环境中的应用千变万化，网络实际应用场景也大不相同，比如教育网、中小企业、政府机构、金隔业场景等。混合流量没有一个统一的模板，所以在指定协议分配比例时，多数是参考评测机构发布的数据或者凭借自身经验指定的模板。因此，混合流量的性能测试没有在本篇中涉及。</li>
+<li>对于性能测试人员，不仅要了解产品特性，还要对协议有一定的了解。<br>特别是应用层的协议，了解各协议的数据处理流程，从而指定客户端请求与服务器的应答等过程。</li>
+<li>性能测试也要有需求意识。<br>性能测试人员要懂得倾听，明白哪些是客户最想了解的，哪些是评测机构最想知道的。只有了解到需求，才能制定一份符合产品的测试方法，才能得出产品的真实性能结果。</li>
+</ol>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a></li>
+<li><a href="http://wenku.baidu.com/link?url=Ih8o0RQ8OcRMoiJHO4yaJTDqPKz5NYt--mc63aeUQCQlrruS_KXQsnWf_AG7U73vo5ciytSLZNyGQTB5kPY9-xn7E4rScqtQGAy8U8ucD_O###" target="_blank" rel="noopener">网络安全产品的性能测试研究</a> - 阐述较为全面的硕士论文</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Testing</category>
+      </categories>
+      <tags>
+        <tag>性能测试</tag>
+        <tag>ips</tag>
+        <tag>NGFW</tag>
+        <tag>防火墙</tag>
+        <tag>spi firewall</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>HTTP认证模式</title>
+    <url>/2012/08/http-auth-schemes/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在研究curl和httpclient，用到了HTTP认证相关的知识。<br>但是搜索之后发现，网上居然没有很全面的HTTP认证模式的介绍，尤其是中文的文章。<br>因此结合MS的<a href="http://msdn.microsoft.com/en-us/library/ms789031.aspx" target="_blank" rel="noopener">Understanding HTTP Authentication</a>和<a href="http://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html" target="_blank" rel="noopener">HttpClient Tutorial</a>翻译加个人理解写了一篇。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本篇博文简介了几种HTTP认证模式。文章内容要求读者对HTTP请求、响应的基本结构，HTTP状态码和HTTP协议头有一定的了解。<br>请参考<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">Linux下cURL使用教程之二：HTTP协议概述</a>。</p>
+<h2 id="HTTP访问认证框架"><a href="#HTTP访问认证框架" class="headerlink" title="HTTP访问认证框架"></a>HTTP访问认证框架</h2><p>HTTP协议（RFC2616）定义了一个简单的访问认证模式框架。此框架假设有若干页面（被保护资源，也称作realm，区域），只能被特定的人访问，这些人可以在服务器要求时提供凭证。<br>当客户端如浏览器访问一个位于保护区域（protected realm）中的页面时，服务器返回包含401未认证状态码和www认证头（WWW-Authenticate header field）的响应。返回的认证头中必须含有至少一个适用于请求页面的认证要求（challenge）。<br>然后客户端发起第二次请求，此次请求在请求头中包含了试用于服务器认证要求的认证头域。<br>如果服务器接受了客户端提供的凭证，它将返回客户端请求的页面。否则，服务端会返回另一个401未认证响应以提示客户端认证失败。<br>具体认证响应头和请求头的内容取决于认证的方式。RFC2616中定义了两种广泛使用的认证模式：<br>HTTP基本认证（HTTP  Basic authentication）和HTTP摘要认证（HTTP Digest authentication）。<br>此外常用的还有NTLM、SPNEGO（HTTP协商认证，HTTP Negotiate authentication，是其一种）和Kerberos认证方式。<br><a id="more"></a></p>
+<h2 id="认证模式"><a href="#认证模式" class="headerlink" title="认证模式"></a>认证模式</h2><h3 id="1-基本认证Basic-Access-Authentication"><a href="#1-基本认证Basic-Access-Authentication" class="headerlink" title="1. 基本认证Basic Access Authentication"></a>1. 基本认证Basic Access Authentication</h3><p>基本认证是基于用户名密码的。<br>服务端的401响应中包含一个认证要求（authentication challenge），此认证要求中含有“Basic”关键字和一个用以表明访问的被保护资源名称的“名称=值”对，如下：<br><code>WWW-Authenticate: Basic realm=&quot;Protected page&quot;</code><br>如果你使用的浏览器，浏览器在接收到401响应时，将会弹出窗口让你输入用户名密码，然后发送认证请求。认证请求中同样包含”Basic”关键字，此外还有Base64编码后的用户名密码，如下：<br><code>Authorization: Basic QWRlcGxveSdzIGJsb2c=</code><br>服务器将用户名密码解码后比对，成功匹配后即认证成功。<br>因为Base64不算是一种加密方法：无密钥的可逆加密，任何人都可解密（百度搜索一下”在线解码“一大堆）。因此基本认证被认为是明文传输，安全性不好。极易出现密码被窃听和重放攻击等安全性问题。<br>如果资源需要更高强度的保护，请使用其他认证方法。</p>
+<h3 id="2-摘要认证HTTP-Digest-authentication"><a href="#2-摘要认证HTTP-Digest-authentication" class="headerlink" title="2. 摘要认证HTTP Digest authentication"></a>2. 摘要认证HTTP Digest authentication</h3><p>摘要认证被设计用来弥补基本认证的缺点。摘要认证基于请求-响应（challenge-response）模式，而且使用了哈希加密算法（常用为MD5），从而某些程度上解决了基本认证安全性的问题。<br>服务器返回的初始401响应的www认证头（WWW-Authenticate header）中多出了一个称为nonce的随机数的字段。服务端保证每个401响应中的nonce值唯一。如：<br><code>Authorization: Digest username=&quot;admin&quot;, realm=&quot;HiPER&quot;</code><br>接下来的客户端响应中将包含由用户名、密码、nonce和其他信息组成的数据的哈希值（如使用MD5加密）。所有被加密的数据服务端也具有，因此服务端执行同样加密过程。如果二者一直则认证成功。<br>因为如MD5等哈希加密算法是不可逆的，因此用户名密码明文无法被窃听破解。因为服务器对同一个nonce的请求只接受一次客户端请求，从而能避免重放攻击。<br>但是，digest的安全性也有缺点：</p>
+<ul>
+<li>只有密码密码被加密，而客户端最终请求的被保护资源是明文传送的，可被窃听</li>
+<li>客户端无法确认服务端的正确身份，缺少对服务端的认证方式</li>
+<li>近年来，随着计算机性能的提高等因素，传统高强度加密算法的破解已成可能。而MD5更是已有破解方法。</li>
+</ul>
+<p>更多安全性问题请参考RFC2617。</p>
+<h3 id="3-NTML"><a href="#3-NTML" class="headerlink" title="3. NTML"></a>3. NTML</h3><p>NTML由微软开发，使用于Windows平台。被认为是比摘要认证更安全的认证方式。<br>它使用Windows凭证（Windows credentials）来传递认证数据，而不是使用未编码的用户名密码。<br>NTML要求服务器与客户端做出多次数据交换，服务器和所有其中的代理都必须支持永久连接（persistent connections）才能完成认证。</p>
+<h3 id="4-Kerberos"><a href="#4-Kerberos" class="headerlink" title="4. Kerberos"></a>4. Kerberos</h3><p>服务器与客户端通过第三方的Kerberos服务器完成认证。具体请参见<a href="http://baike.baidu.com/view/306687.htm" target="_blank" rel="noopener">百度百科条目</a>和<a href="http://zh.wikipedia.org/wiki/Kerberos" target="_blank" rel="noopener">维基百科条目</a>。<br>Kerberose相比NTML有很大改善：速度快，而且允许相互认证、认证代理和简单的信任关系。参考<a href="http://msdn.microsoft.com/en-us/library/aa480475.aspx" target="_blank" rel="noopener">KERBEROS vs NTLM</a>。</p>
+<h3 id="5-SPNEGO"><a href="#5-SPNEGO" class="headerlink" title="5. SPNEGO"></a>5. SPNEGO</h3><p>全称是Simple and Protected GSS-API Negotiation，是微软提供的一种使用<a href="http://baike.baidu.com/view/1551940.htm" target="_blank" rel="noopener">GSS-API</a>认证机制的安全协议，用于使Webserver共享Windows Credentials，它扩展了Kerberos(一种网络认证协议)。<br>SPNEGO适用于客户端需要认证，但是客户端服务端都不清楚对方支持什么认证协议的场合。<br>SPENGO其实是一种”伪认证机制“（pseudo-mechanism），用以协商出真正的认证机制。<br>最常见的是微软的HTTP协商认证扩展（HTTP Negotiate authentication extension），协商的最终机制在NTML和Kerberos中选择。Kerberos因其优点优先使用。<br>百度词条对此认证的解释是不够准确的，准确的解释可以参考<a href="http://en.wikipedia.org/wiki/SPNEGO" target="_blank" rel="noopener">维基百科条目</a>。</p>
+<h2 id="认证方式选择"><a href="#认证方式选择" class="headerlink" title="认证方式选择"></a>认证方式选择</h2><p>选择何种认证方式取决于资源要被保护的程度。不需要保护的资源使用基本认证方式。因为认证会导致更多的数据传输，可能影响用户体验。<br>认证方式最弱的是基本认证，最强的是协商认证。服务端在WWW-Authentication提供自己支持的认证方式，供客户端任意选择。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>RFC2616-HTTP协议<br>RFC2617-HTTP认证：基本认证和摘要认证<br>RFC1321-MD5摘要加密逻辑<br><a href="http://frontier.userland.com/stories/storyReader$2159" target="_blank" rel="noopener">HTTP Authentication Schemes</a></p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之九：代理的使用</title>
+    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
+    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
+<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
+<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
+<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
+<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
+<p>5、如果有多个-x使用，只有最后一个有效。</p>
+<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
+<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>注：</p>
+<ul>
+<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
+<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
+<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
+<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
+<ol>
+<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
+</li>
+<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
+</li>
+<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
+</li>
+<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
+</li>
+<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
+</li>
+</ol>
+<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
+<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
+<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
+<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到代理IP为10.1.1.2。</p>
+<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
+<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
+<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
+<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
+<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
+<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
+<p>其它常用相关环境变量如下：</p>
+<ul>
+<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
+<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
+</ul>
+<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</title>
+    <url>/2012/08/linux-curl-basic-usage-upload-file/</url>
+    <content><![CDATA[<p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/" target="_blank" rel="noopener">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
+<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前，所有服务端代码通过php实现。</p>
+<ul>
+<li>file.php，显示文件上传表单：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP File Upload Demo.&lt;br /&gt;</span><br><span class="line">Select a file <span class="keyword">and</span> Submit.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;form action=<span class="string">"upload_file.php"</span> method=<span class="string">"post"</span></span><br><span class="line">enctype=<span class="string">"multipart/form-data"</span>&gt;</span><br><span class="line">&lt;label <span class="keyword">for</span>=<span class="string">"file"</span>&gt;Filename:&lt;/label&gt;</span><br><span class="line">&lt;input type=<span class="string">"file"</span> name=<span class="string">"file"</span> id=<span class="string">"file"</span> /&gt; </span><br><span class="line">&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"submit"</span> value=<span class="string">"Submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li><p>upload_file.php，处理上传的文件。<br>上传文件后，文件先缓存在临时目录中，脚本结束时临时文件被删除。upload_file.php只是简单输出上传文件的信息，而不做实际场景中将临时文件保存至永久目录等进一步处理。但此差异对我们进行curl实验没有任何影响。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a File Upload Process Demo.&lt;br /&gt;</span><br><span class="line">It only shows the information of the file you uploaded.&lt;br /&gt;</span><br><span class="line">The file you uploaded remains temporary,&lt;br /&gt;</span><br><span class="line"><span class="keyword">and</span> is deleted when this script is finished.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span> ($_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] &gt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Error: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Upload: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"name"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Type: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"type"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Size: "</span> . ($_FILES[<span class="string">"file"</span>][<span class="string">"size"</span>] / <span class="number">1024</span>) . <span class="string">" Kb&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Stored in: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"tmp_name"</span>];</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>put.php，处理通过HTTP PUT方法上传的文件。<br>同上，为了安全只输出上传文件信息，不做实际转存处理。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP PUT Demo.&lt;br&gt;</span><br><span class="line">It reads the file you upload using PUT,&lt;br&gt;</span><br><span class="line"><span class="keyword">and</span> prints the content out.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/* PUT data comes in on the stdin stream */</span></span><br><span class="line">$putdata = fopen(<span class="string">"php://input"</span>, <span class="string">"r"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Read the data 1 KB at a time</span></span><br><span class="line"><span class="comment">   and print the content out */</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"The contents of the file you upload:&lt;br&gt;&lt;br&gt;\n"</span>;</span><br><span class="line"><span class="keyword">while</span> ($data = fread($putdata, <span class="number">1024</span>))</span><br><span class="line">    <span class="keyword">echo</span> $data;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="comment">/* Close the streams */</span></span><br><span class="line">fclose($putdata);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><h3 id="F-–form"><a href="#F-–form" class="headerlink" title="-F/–form"></a>-F/–form</h3><p><code>-F/--form &lt;name=content&gt;</code><br>使用<code>Content-Type  multi‐part/form-data</code>的方式提交数据，可用于上传二进制文件。</p>
+<ol>
+<li><p>@的使用<br>一般使用<code>-F file=@filename</code>的形式，其中file为文件表单的name，filename为文件名。@后面的文件作为文件上传处理。</p>
+</li>
+<li><p>&lt;的使用<br>对于&lt;后的文件，curl会读取其内容，而不会作为文件上传。类似-d选项中@的作用。<br>如<br><code>curl -F name=&lt;foobar.txt -Fage=100 http://127.0.0.1/welcome.php</code><br>foobar.txt内容为Adeploy，则此命令与以下命令等价：<br><code>curl -F name=Adeploy -Fage=100 http://127.0.0.1/welcome.php</code><br>而-F @foobar.txt表示将foobar.txt作为文件上传。</p>
+</li>
+<li><p>-F不进行url编码<br>-F与-d类似，都是不对数据进行urlencode编码，而且-F不能与-d或–data-urlencode共用。<br>因此如果上传文件的同时还需要提交其他需要urlencode编码的字段（如中文用户名），就会出现问题。<br>除手动编码外，实用的解决办法是自己编写urlencode函数（网上可以找到Linux脚本实现的urlencode函数或C语言版本、Perl版本、Python），调用即可。</p>
+</li>
+<li><p>使用”type=”指定Content-Type<br>如<code>curl -F &quot;web=@index.html;type=text/html&quot; url.com</code><br>将index.html以text/html的Content-Type上传。</p>
+</li>
+<li><p>使用”filename=”修改上传文件的名字<br>如<code>curl -F &quot;file=@localfile;filename=nameinpost&quot; url.com</code><br>上传localfile并修改文件名字为nameinpost。</p>
+</li>
+</ol>
+<h3 id="–form-string"><a href="#–form-string" class="headerlink" title="–form-string"></a>–form-string</h3><p><code>--form-string &lt;name=string&gt;</code><br>基本同-F，但是此参数后面跟”@”、”&lt;”、”;type=”时，不做特殊含义解析。</p>
+<h3 id="T-–upload-file"><a href="#T-–upload-file" class="headerlink" title="-T/–upload-file"></a>-T/–upload-file</h3><p><code>-T/--upload-file &lt;file&gt;</code><br>使用HTTP的PUT方法上传文件，需要目标URL支持HTTP的PUT方法。<br>可以与-d、–data-urlencode、-F同时使用。</p>
+<h2 id="参数使用实例"><a href="#参数使用实例" class="headerlink" title="参数使用实例"></a>参数使用实例</h2><h3 id="F文件上传"><a href="#F文件上传" class="headerlink" title="-F文件上传"></a>-F文件上传</h3><p>打开file.php选择文件后submit，Developer Tools抓包截图如下：<br><img src="/img/developertools_file.jpg" alt="Developer Tools file上传"><br>注意此时的Content-Type字段是<code>multipart/form-data</code>，主要用于上传文件，具体可参考<a href="http://www.ietf.org/rfc/rfc1867.txt" target="_blank" rel="noopener">RFC1867</a>。<br>分析file.php的源代码可知，表单中file类型的input元素name=file，所以命令如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o file.html -F file=@a.txt http://127.0.0.1/upload_file.php</span><br></pre></td></tr></table></figure></p>
+<h3 id="T文件上传"><a href="#T文件上传" class="headerlink" title="-T文件上传"></a>-T文件上传</h3><p>没有找到正确的PUT表单，因此无法使用Developer Tools跟踪实际提交过程。<br>命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o put.html -T a.txt http://127.0.0.1/put.php</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要为使用curl上传文件的操作方法。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Linux下cURL使用教程之四：curl基本使用实例</title>
     <url>/2012/08/linux-curl-basic-usage-example/</url>
     <content><![CDATA[<p>本篇主要结合编写的PHP程序实例对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage/" target="_blank" rel="noopener">curl基本使用</a>进行具体说明。</p>
@@ -569,183 +845,6 @@
       </tags>
   </entry>
   <entry>
-    <title>网关类产品的性能测试之四：测试工具、注意事项及经验总结</title>
-    <url>/2013/04/gateway-performance-test-summary/</url>
-    <content><![CDATA[<p>前面我们介绍了各性能指标项的测试方法。本篇主要概述测试工具、测试拓扑及经验总结。</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>本系列分为以下四部分：</p>
-<ol>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-desc/" target="_blank" rel="noopener">简介及性能指标介绍</a></li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
-</ol>
-<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
-<ul>
-<li>性能测试，对产品负载压力承受能力的测试。</li>
-<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
-<li>网关类产品，部署作为网关的设备及软件。</li>
-<li>IDS，入侵检测系统</li>
-<li>IPS，入侵防御系统</li>
-<li>UTM，对防火墙、IDS、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
-<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
-<li>被测设备，devices under test，测试设备。</li>
-</ul>
-<h2 id="性能测试工具"><a href="#性能测试工具" class="headerlink" title="性能测试工具"></a>性能测试工具</h2><p>对于网关类产品，一般要求的性能值比较高，因此测试一般使用专用的硬件设备。<br>常用硬件设备有IAXA等。<br>常用的测试软件有：</p>
-<ul>
-<li><a href="https://iperf.fr/" target="_blank" rel="noopener">iperf</a></li>
-<li><a href="http://jmeter.apache.org/" target="_blank" rel="noopener">Jmeter</a>使用Java编写，主要用于软件的性能测试，但也可扩展用于网络性能测试。机器配置足够的情况下，流量可打到上百M。</li>
-<li><a href="http://tomahawk.sourceforge.net/" target="_blank" rel="noopener">tomahawk</a>是一个回放数据包的工具，也可完成部分性能测试。</li>
-<li>而软件的性能测试常用的LoadRunner，一般难以用于网络的性能测试。</li>
-</ul>
-<a id="more"></a>
-<h2 id="测试拓扑"><a href="#测试拓扑" class="headerlink" title="测试拓扑"></a>测试拓扑</h2><p>前文主要介绍了2－7层的性能测试方法，除此之外我们还需要注意测试拓扑结构。<br>从物理环境上看，性能测试拓扑是比较单一的，没有多少复杂度：测试仪表连接被测设备，就可开始测试。需要注意的是测试仪中的制定的测试拓扑，在每次性能测试开始前，我们都需要明确客户端数目、服务器数目、源IP、目的IP和NAT等。以下为根据实际的测试经验简单总结一下性能测试在拓扑制定上需要注意的事项。</p>
-<ol>
-<li>在测试2－7层的性能时，测试仪和被测设备的转发模式我们一般会选择透明模式或者路由模式。<br>透明模式相当于二层，被测设备的配置相对简单，配置相应的转发规则即可。测试仪表的配置中源IP地址和目的IP地址要在相同的地址网段中，客户端和服务器的数目不应大于IP地址数，客户端的数目建议大于服务器端数目。<br>路由模式相当于三层，被测设备的配置相对复杂一些，需要配置接口的IP地址、路由表及相应的转发规则等。测试仪表的配置中源IP地址和目的IP地址要与被测设备的接口IP地址相对应，并且需要配置ARP响应机制或IPv6地址的学习机制，其它与配置透明模式的一致。</li>
-<li>在测试2－3层的性能，特别是RFC2544四项值时，建议测试仪采用UDP协议做为测试的承载协议。<br>当然，也有一些客户会选择IP层或者TCP层做为承载协议。这里没有硬性的规定，但大部分评测机构或者客户都会选择UDP协议进行测试。<br>当选择UDP协议进行测试时，UDP协议的端口号应避免已知的常用协议，如DNS的53端口，TFTP的69端口等，当然也没有硬性的规定。建议使用UDP端口7或0做为源和目的端口，或者直接使用测试仪的默认端口即可。</li>
-<li>在测试4－7层的性能时，需要注意客户端与服务器之间的对应关系。TODO<br>在测试需求或测试要求中，我们可能会遇到多个客户端对应一台服务器或者多个客户端对应多台服务器的情况。<br>在多对一的环境中，控制客户端数目不要过多，应根据被测设备应用的实际场景确定数目，源IP地址和目的IP地址建议使用一个C类网段。<br>在多对多的环境中，会出现两种测试拓扑结构。其中一种是多对一的单一叠加方式，另一种是全部混搭方式。这两者的客户端请求方式存在很大的差异。全部混搭方式要比单一叠加的方式更接近实际的应用场景，而这正是我们搭建测试拓扑的关键。如果被测设备足够好，无论采用哪种方式，性能结果都不应该有变化。因此，建议在测试4－7层的性能时，应采用全部混搭的方式搭建拓扑结构。</li>
-<li>在测试4－7层的性能时，还应注意源IP地址与目的IP地址的数目。<br>前面我们提到在多对一的测试拓扑中，建议使用一个C类地址段。在多对多的测试拓扑中，可以使用一个C类地址段，也可以使用多个C类地址段或一个B类地址段。<br>这里建议在多对多的测试拓扑结构中，决定使用几个地址段时，应参考被测设备在实际应用场景所能承受的最大负载。比如，将一个百兆的网关类设备放在一个数据中心的出口处显然不太适合，所以在测试时给它分配一个B类地址段或多个C类地址段，也显然不适合。<br>在设计和搭建测试拓扑时，应充分考虑被测设备所应用的场景，从而给它量身定做源IP地址和目的IP地址、甚至是客户端与服务器的数量等。</li>
-</ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过本篇相信大家对性能测试有了一更深入的理解，以下是一些经验总结及注意事项。</p>
-<ol>
-<li>对于网络安全类产品或网关类产品，RFC2544四项值一直作为性能测试的首要测试指标，从1999年发布一直使用至今。<br>业界有人认为RFC2544四项值已经不太适用于现代的产品，特别是对于IPS、AV和UTM的产品。但无可否认的是，RFC2544四项值是最能反映产品在底层转发的性能，而且从侧面反映了产品在低层转发过程中的稳定性。所以，RFC2544四项值将会被一直延用，并且作为一个重要测试指标一直延用下去。</li>
-<li>在网络安全类产品或网关类产品中，RFC3511对于4－7层的性能测试方法的定义过于模糊。<br>这使得4－7层的性能测试存在很大的争议，比如请求文件的大小、每条连接中请求的次数、协议版本、客户端与服务器数目等，都是争义的内容。特别是当产品集成了IPS、AV 和UTM功能后，在测试的细节上争义更为严重。比如URL地址是否相同、文件类型的变化、文件内容是否相同、IP地址端口的遍历、客户端与服务器所使用的软件及软件版本等。一个细微的不同，可能就会导致测试结果不同。所以，在对4－7层进行性能测试时，一定要与客户或评测机构沟通，指定相关的细节，从而验证产品的真实性能。同时，做为性能测试人员，在制定测试方法和测试拓扑时，应充分考虑被测设备所能应用的场景。这样的测试结果才是真实、可信并且有意义的。</li>
-<li>在此系列文章中没有介绍混合流量的性能测试，特别是应用层协议的混合流量性能测试。<br>首先无论是单一协议还是混合协议，主要关注新建速率和吞吐量值。而且混合流量中吞吐量的结果，可能是大家最为关注的。但混合流量中各协议的分配比例，没有一个权威的机构支撑，也难有哪个机构能够支撑。因为网络环境中的应用千变万化，网络实际应用场景也大不相同，比如教育网、中小企业、政府机构、金隔业场景等。混合流量没有一个统一的模板，所以在指定协议分配比例时，多数是参考评测机构发布的数据或者凭借自身经验指定的模板。因此，混合流量的性能测试没有在本篇中涉及。</li>
-<li>对于性能测试人员，不仅要了解产品特性，还要对协议有一定的了解。<br>特别是应用层的协议，了解各协议的数据处理流程，从而指定客户端请求与服务器的应答等过程。</li>
-<li>性能测试也要有需求意识。<br>性能测试人员要懂得倾听，明白哪些是客户最想了解的，哪些是评测机构最想知道的。只有了解到需求，才能制定一份符合产品的测试方法，才能得出产品的真实性能结果。</li>
-</ol>
-<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
-<li><a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a></li>
-<li><a href="http://wenku.baidu.com/link?url=Ih8o0RQ8OcRMoiJHO4yaJTDqPKz5NYt--mc63aeUQCQlrruS_KXQsnWf_AG7U73vo5ciytSLZNyGQTB5kPY9-xn7E4rScqtQGAy8U8ucD_O###" target="_blank" rel="noopener">网络安全产品的性能测试研究</a> - 阐述较为全面的硕士论文</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Testing</category>
-      </categories>
-      <tags>
-        <tag>性能测试</tag>
-        <tag>ips</tag>
-        <tag>NGFW</tag>
-        <tag>防火墙</tag>
-        <tag>spi firewall</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</title>
-    <url>/2012/08/linux-curl-basic-usage-upload-file/</url>
-    <content><![CDATA[<p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/" target="_blank" rel="noopener">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
-<h2 id="PHP程序"><a href="#PHP程序" class="headerlink" title="PHP程序"></a>PHP程序</h2><p>同前，所有服务端代码通过php实现。</p>
-<ul>
-<li>file.php，显示文件上传表单：<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP File Upload Demo.&lt;br /&gt;</span><br><span class="line">Select a file <span class="keyword">and</span> Submit.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;form action=<span class="string">"upload_file.php"</span> method=<span class="string">"post"</span></span><br><span class="line">enctype=<span class="string">"multipart/form-data"</span>&gt;</span><br><span class="line">&lt;label <span class="keyword">for</span>=<span class="string">"file"</span>&gt;Filename:&lt;/label&gt;</span><br><span class="line">&lt;input type=<span class="string">"file"</span> name=<span class="string">"file"</span> id=<span class="string">"file"</span> /&gt; </span><br><span class="line">&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"submit"</span> value=<span class="string">"Submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<a id="more"></a>
-<ul>
-<li><p>upload_file.php，处理上传的文件。<br>上传文件后，文件先缓存在临时目录中，脚本结束时临时文件被删除。upload_file.php只是简单输出上传文件的信息，而不做实际场景中将临时文件保存至永久目录等进一步处理。但此差异对我们进行curl实验没有任何影响。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP FileUpload Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a File Upload Process Demo.&lt;br /&gt;</span><br><span class="line">It only shows the information of the file you uploaded.&lt;br /&gt;</span><br><span class="line">The file you uploaded remains temporary,&lt;br /&gt;</span><br><span class="line"><span class="keyword">and</span> is deleted when this script is finished.&lt;br /&gt;&lt;br /&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span> ($_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] &gt; <span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Error: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"error"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Upload: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"name"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Type: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"type"</span>] . <span class="string">"&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Size: "</span> . ($_FILES[<span class="string">"file"</span>][<span class="string">"size"</span>] / <span class="number">1024</span>) . <span class="string">" Kb&lt;br /&gt;"</span>;</span><br><span class="line">  <span class="keyword">echo</span> <span class="string">"Stored in: "</span> . $_FILES[<span class="string">"file"</span>][<span class="string">"tmp_name"</span>];</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br&gt;&lt;br&gt;&lt;br&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>put.php，处理通过HTTP PUT方法上传的文件。<br>同上，为了安全只输出上传文件信息，不做实际转存处理。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;</span><br><span class="line">PHP Form Demo <span class="keyword">for</span> curl basic usage By Adeploy</span><br><span class="line">&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">This is a PHP PUT Demo.&lt;br&gt;</span><br><span class="line">It reads the file you upload using PUT,&lt;br&gt;</span><br><span class="line"><span class="keyword">and</span> prints the content out.&lt;br&gt;&lt;br&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/* PUT data comes in on the stdin stream */</span></span><br><span class="line">$putdata = fopen(<span class="string">"php://input"</span>, <span class="string">"r"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Read the data 1 KB at a time</span></span><br><span class="line"><span class="comment">   and print the content out */</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"The contents of the file you upload:&lt;br&gt;&lt;br&gt;\n"</span>;</span><br><span class="line"><span class="keyword">while</span> ($data = fread($putdata, <span class="number">1024</span>))</span><br><span class="line">    <span class="keyword">echo</span> $data;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="comment">/* Close the streams */</span></span><br><span class="line">fclose($putdata);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</span><br><span class="line">&lt;a href=<span class="string">"http://www.adeploy.com"</span> target=<span class="string">"_blank"</span>&gt;Adeploy<span class="string">'s Blog&lt;/a&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="主要参数"><a href="#主要参数" class="headerlink" title="主要参数"></a>主要参数</h2><h3 id="F-–form"><a href="#F-–form" class="headerlink" title="-F/–form"></a>-F/–form</h3><p><code>-F/--form &lt;name=content&gt;</code><br>使用<code>Content-Type  multi‐part/form-data</code>的方式提交数据，可用于上传二进制文件。</p>
-<ol>
-<li><p>@的使用<br>一般使用<code>-F file=@filename</code>的形式，其中file为文件表单的name，filename为文件名。@后面的文件作为文件上传处理。</p>
-</li>
-<li><p>&lt;的使用<br>对于&lt;后的文件，curl会读取其内容，而不会作为文件上传。类似-d选项中@的作用。<br>如<br><code>curl -F name=&lt;foobar.txt -Fage=100 http://127.0.0.1/welcome.php</code><br>foobar.txt内容为Adeploy，则此命令与以下命令等价：<br><code>curl -F name=Adeploy -Fage=100 http://127.0.0.1/welcome.php</code><br>而-F @foobar.txt表示将foobar.txt作为文件上传。</p>
-</li>
-<li><p>-F不进行url编码<br>-F与-d类似，都是不对数据进行urlencode编码，而且-F不能与-d或–data-urlencode共用。<br>因此如果上传文件的同时还需要提交其他需要urlencode编码的字段（如中文用户名），就会出现问题。<br>除手动编码外，实用的解决办法是自己编写urlencode函数（网上可以找到Linux脚本实现的urlencode函数或C语言版本、Perl版本、Python），调用即可。</p>
-</li>
-<li><p>使用”type=”指定Content-Type<br>如<code>curl -F &quot;web=@index.html;type=text/html&quot; url.com</code><br>将index.html以text/html的Content-Type上传。</p>
-</li>
-<li><p>使用”filename=”修改上传文件的名字<br>如<code>curl -F &quot;file=@localfile;filename=nameinpost&quot; url.com</code><br>上传localfile并修改文件名字为nameinpost。</p>
-</li>
-</ol>
-<h3 id="–form-string"><a href="#–form-string" class="headerlink" title="–form-string"></a>–form-string</h3><p><code>--form-string &lt;name=string&gt;</code><br>基本同-F，但是此参数后面跟”@”、”&lt;”、”;type=”时，不做特殊含义解析。</p>
-<h3 id="T-–upload-file"><a href="#T-–upload-file" class="headerlink" title="-T/–upload-file"></a>-T/–upload-file</h3><p><code>-T/--upload-file &lt;file&gt;</code><br>使用HTTP的PUT方法上传文件，需要目标URL支持HTTP的PUT方法。<br>可以与-d、–data-urlencode、-F同时使用。</p>
-<h2 id="参数使用实例"><a href="#参数使用实例" class="headerlink" title="参数使用实例"></a>参数使用实例</h2><h3 id="F文件上传"><a href="#F文件上传" class="headerlink" title="-F文件上传"></a>-F文件上传</h3><p>打开file.php选择文件后submit，Developer Tools抓包截图如下：<br><img src="/img/developertools_file.jpg" alt="Developer Tools file上传"><br>注意此时的Content-Type字段是<code>multipart/form-data</code>，主要用于上传文件，具体可参考<a href="http://www.ietf.org/rfc/rfc1867.txt" target="_blank" rel="noopener">RFC1867</a>。<br>分析file.php的源代码可知，表单中file类型的input元素name=file，所以命令如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o file.html -F file=@a.txt http://127.0.0.1/upload_file.php</span><br></pre></td></tr></table></figure></p>
-<h3 id="T文件上传"><a href="#T文件上传" class="headerlink" title="-T文件上传"></a>-T文件上传</h3><p>没有找到正确的PUT表单，因此无法使用Developer Tools跟踪实际提交过程。<br>命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -o put.html -T a.txt http://127.0.0.1/put.php</span><br></pre></td></tr></table></figure></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要为使用curl上传文件的操作方法。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之九：代理的使用</title>
-    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
-    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
-<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
-<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
-<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
-<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
-<p>5、如果有多个-x使用，只有最后一个有效。</p>
-<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
-<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>注：</p>
-<ul>
-<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
-<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
-<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
-<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
-<ol>
-<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
-</li>
-<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
-</li>
-<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
-</li>
-<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
-</li>
-<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
-</li>
-</ol>
-<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
-<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
-<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
-<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
-<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
-<p>可看到代理IP为10.1.1.2。</p>
-<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
-<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
-<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
-<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
-<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
-<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
-<p>其它常用相关环境变量如下：</p>
-<ul>
-<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
-<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
-<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
-<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
-</ul>
-<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
-<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Linux下cURL使用教程之一：cURL简介</title>
     <url>/2012/07/linux-curl-description/</url>
     <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
@@ -756,6 +855,39 @@
 <li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
 <li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
 </ol>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之三：curl基本使用</title>
+    <url>/2012/08/linux-curl-basic-usage/</url>
+    <content><![CDATA[<p>在介绍完<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">cURL简介</a>和需要的<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">HTTP协议概述</a>之后。终于可以回归正题，进入curl的使用方法。</p>
+<h2 id="curl命令格式"><a href="#curl命令格式" class="headerlink" title="curl命令格式"></a>curl命令格式</h2><p>基本的使用用法如下：<br><code>curl [选项] [URL...]</code></p>
+<h2 id="GET一个网页"><a href="#GET一个网页" class="headerlink" title="GET一个网页"></a>GET一个网页</h2><p><code>curl http://www.baidu.com</code><br>网页源码将被打印出来。</p>
+<h3 id="o-output-lt-file-gt-指定保存目录"><a href="#o-output-lt-file-gt-指定保存目录" class="headerlink" title="-o/--output &lt;file&gt;指定保存目录"></a><code>-o/--output &lt;file&gt;</code>指定保存目录</h3><p>为便于后续处理，我们将网页内容保存在文件中：<br><code>curl -o stackeye.html http://www.stackeye.com</code><br>此时仍会显示进度条等信息。</p>
+<h3 id="s-silent静默模式"><a href="#s-silent静默模式" class="headerlink" title="-s/--silent静默模式"></a><code>-s/--silent</code>静默模式</h3><p>通过脚本结合curl可以实现很复杂的功能，而在脚本中调用curl，我们不需要进度条等信息。如执行：<br><code>curl -s -o stackeye.html http://www.stackeye.com</code><br>将不会显示任何信息。<br><a id="more"></a></p>
+<h2 id="v-–verbose查看通信过程、调试。"><a href="#v-–verbose查看通信过程、调试。" class="headerlink" title="-v/–verbose查看通信过程、调试。"></a>-v/–verbose查看通信过程、调试。</h2><p>这个参数可以清晰的查看到curl的通信过程，以便于调试，如执行：<br><code>curl -v http://www.baidu.com</code><br>返回结果如下，可以清晰的看到curl发出的HTTP请求及服务器返回的HTTP响应：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">* About to connect() to www.baidu.com port 80 (#0)</span><br><span class="line">*   Trying 119.75.218.77... connected</span><br><span class="line">* Connected to www.baidu.com (119.75.218.77) port 80 (#0)</span><br><span class="line">&gt; GET / HTTP/1.1</span><br><span class="line">&gt; User-Agent: curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18</span><br><span class="line">&gt; Host: www.baidu.com</span><br><span class="line">&gt; Accept: */*</span><br><span class="line">&gt;</span><br><span class="line">&lt; HTTP/1.1 200 OK</span><br><span class="line">&lt; Date: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Server: BWS/1.0</span><br><span class="line">&lt; Content-Length: 8216</span><br><span class="line">&lt; Content-Type: text/html;charset=gbk</span><br><span class="line">&lt; Cache-Control: private</span><br><span class="line">&lt; Expires: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Set-Cookie: BAIDUID=AF0E3C36DBB60C0D7C29DE11705028D7:FG=1; expires=Wed, 01-Aug-42 12:39:15 GMT; path=/; domain=.baidu.com</span><br><span class="line">&lt; P3P: CP=&quot; OTI DSP COR IVA OUR IND COM &quot;</span><br><span class="line">&lt; Connection: Keep-Alive</span><br><span class="line">&lt;</span><br><span class="line">&lt;!doctype html&gt;以下为HTML内容，略</span><br></pre></td></tr></table></figure></p>
+<p>以下所有命令都可以通过加入-v选项，查看具体通信过程。<br>更详细的调试信息可以使用–trace-ascii选项，如：<br><code>curl --trace-ascii debug.txt http://www.baidu.com</code></p>
+<h2 id="A-–user-agent指定User-Agent字段"><a href="#A-–user-agent指定User-Agent字段" class="headerlink" title="-A/–user-agent指定User-Agent字段"></a>-A/–user-agent指定User-Agent字段</h2><p>此选项字段用于指定HTTP请求头的User-Agent字段，即客户端（如浏览器）类型。<br>很多网站为了防止自动化程序采集，仅允许浏览器访问，最简单的办法就是通过User-Agent字段识别客户端类型做出处理。而如下命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p><code>&quot;Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)&quot;</code>为firefox的UserAgent值。<br>通过-A指定User-Agent字段，使curl伪装成Firefox，从而绕过网站的检测。<br>User-Agent字段可以通过抓包分析得到，或者通过chrome的Developer Tools、Firefox的Firebug等工具得到。<br>而如果一个网站对浏览器的限制也很严格的话，那我们甚至可以通过修改User-Agent伪装成百度蜘蛛或者googlebot突破限制，因为基于SEO的考虑，网站对搜索引擎蜘蛛的限制很小。</p>
+<h2 id="e-–referer-设置Referer"><a href="#e-–referer-设置Referer" class="headerlink" title="-e/–referer 设置Referer"></a>-e/–referer <url>设置Referer</url></h2><p>此选项字段用于指定HTTP请求头中的Referer字段，即来源网页。<br>为了防盗链，很多网页尤其是图片等可下载资源会检测Referer字段，对于非自己站内的来源全部屏蔽掉，此时我们就需要这个参数。<br>通过执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com http://www.stackeye.com</span><br><span class="line">http://www.stackeye.com将检测到来源网站为http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
+<h2 id="cookie使用"><a href="#cookie使用" class="headerlink" title="cookie使用"></a>cookie使用</h2><p>cookie的介绍参考上一篇。<br>我们登录网站后，为保持登录状态，需要使用cookie信息。</p>
+<h3 id="D-–dump-header-保存协议头部信息"><a href="#D-–dump-header-保存协议头部信息" class="headerlink" title="-D/–dump-header 保存协议头部信息"></a>-D/–dump-header 保存协议头部信息</h3><p><code>-D/--dump-header &lt;file&gt;</code>保存协议头部信息<br>头部信息中包含最常使用的cookie信息，如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -D stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会将头部信息保存至stackeyecookie.txt中。</p>
+<h3 id="b-–cookie-指定cookie"><a href="#b-–cookie-指定cookie" class="headerlink" title="-b/–cookie 指定cookie"></a>-b/–cookie 指定cookie</h3><p><code>-b/--cookie &lt;name=data&gt;/&lt;file&gt;</code>指定cookie<br>-b后可直接加-D保存的文件，curl会自动从中读取出cookie值，而且-b选项不会修改此文件。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -b stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会自动将stackeyecookie.txt中cookie信息附加至HTTP请求头中。</p>
+<p>结合-D和-b参数，即可完成cookie的保存和后续使用。</p>
+<p>cookie的形式就是“属性:值”对形式，-b后可直接以“属性=值”的形式给出cookie，当有多个属性时以分号间隔且包含在双引号中。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -b <span class="string">"user=Adeploy;pass=password"</span> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
+<p>会将cookie信息<code>user=Adeploy;pass=password</code>附加在HTTP请求头中。</p>
+<h2 id="Redirects重定向"><a href="#Redirects重定向" class="headerlink" title="Redirects重定向"></a>Redirects重定向</h2><p>打开某些网页，网页会显示“ 3XX Moved Permanently ”，即网页被移动到其他位置，新位置一般由HTTP响应头中的Location字段给出。<br>重定向一般是因为网站结构调整后，避免用户访问原来页面出现404错误。<br>而另一类常见的用法就是在登陆成功后，网页显示成功信息，然后将用户重定向至内容页面。<br><code>-L/--location</code>选项可以自动跟踪重定向。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇只介绍简单的curl使用选项，下篇将结合实例具体说明。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -817,39 +949,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之三：curl基本使用</title>
-    <url>/2012/08/linux-curl-basic-usage/</url>
-    <content><![CDATA[<p>在介绍完<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">cURL简介</a>和需要的<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">HTTP协议概述</a>之后。终于可以回归正题，进入curl的使用方法。</p>
-<h2 id="curl命令格式"><a href="#curl命令格式" class="headerlink" title="curl命令格式"></a>curl命令格式</h2><p>基本的使用用法如下：<br><code>curl [选项] [URL...]</code></p>
-<h2 id="GET一个网页"><a href="#GET一个网页" class="headerlink" title="GET一个网页"></a>GET一个网页</h2><p><code>curl http://www.baidu.com</code><br>网页源码将被打印出来。</p>
-<h3 id="o-output-lt-file-gt-指定保存目录"><a href="#o-output-lt-file-gt-指定保存目录" class="headerlink" title="-o/--output &lt;file&gt;指定保存目录"></a><code>-o/--output &lt;file&gt;</code>指定保存目录</h3><p>为便于后续处理，我们将网页内容保存在文件中：<br><code>curl -o stackeye.html http://www.stackeye.com</code><br>此时仍会显示进度条等信息。</p>
-<h3 id="s-silent静默模式"><a href="#s-silent静默模式" class="headerlink" title="-s/--silent静默模式"></a><code>-s/--silent</code>静默模式</h3><p>通过脚本结合curl可以实现很复杂的功能，而在脚本中调用curl，我们不需要进度条等信息。如执行：<br><code>curl -s -o stackeye.html http://www.stackeye.com</code><br>将不会显示任何信息。<br><a id="more"></a></p>
-<h2 id="v-–verbose查看通信过程、调试。"><a href="#v-–verbose查看通信过程、调试。" class="headerlink" title="-v/–verbose查看通信过程、调试。"></a>-v/–verbose查看通信过程、调试。</h2><p>这个参数可以清晰的查看到curl的通信过程，以便于调试，如执行：<br><code>curl -v http://www.baidu.com</code><br>返回结果如下，可以清晰的看到curl发出的HTTP请求及服务器返回的HTTP响应：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">* About to connect() to www.baidu.com port 80 (#0)</span><br><span class="line">*   Trying 119.75.218.77... connected</span><br><span class="line">* Connected to www.baidu.com (119.75.218.77) port 80 (#0)</span><br><span class="line">&gt; GET / HTTP/1.1</span><br><span class="line">&gt; User-Agent: curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18</span><br><span class="line">&gt; Host: www.baidu.com</span><br><span class="line">&gt; Accept: */*</span><br><span class="line">&gt;</span><br><span class="line">&lt; HTTP/1.1 200 OK</span><br><span class="line">&lt; Date: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Server: BWS/1.0</span><br><span class="line">&lt; Content-Length: 8216</span><br><span class="line">&lt; Content-Type: text/html;charset=gbk</span><br><span class="line">&lt; Cache-Control: private</span><br><span class="line">&lt; Expires: Wed, 01 Aug 2012 12:39:15 GMT</span><br><span class="line">&lt; Set-Cookie: BAIDUID=AF0E3C36DBB60C0D7C29DE11705028D7:FG=1; expires=Wed, 01-Aug-42 12:39:15 GMT; path=/; domain=.baidu.com</span><br><span class="line">&lt; P3P: CP=&quot; OTI DSP COR IVA OUR IND COM &quot;</span><br><span class="line">&lt; Connection: Keep-Alive</span><br><span class="line">&lt;</span><br><span class="line">&lt;!doctype html&gt;以下为HTML内容，略</span><br></pre></td></tr></table></figure></p>
-<p>以下所有命令都可以通过加入-v选项，查看具体通信过程。<br>更详细的调试信息可以使用–trace-ascii选项，如：<br><code>curl --trace-ascii debug.txt http://www.baidu.com</code></p>
-<h2 id="A-–user-agent指定User-Agent字段"><a href="#A-–user-agent指定User-Agent字段" class="headerlink" title="-A/–user-agent指定User-Agent字段"></a>-A/–user-agent指定User-Agent字段</h2><p>此选项字段用于指定HTTP请求头的User-Agent字段，即客户端（如浏览器）类型。<br>很多网站为了防止自动化程序采集，仅允许浏览器访问，最简单的办法就是通过User-Agent字段识别客户端类型做出处理。而如下命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p><code>&quot;Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)&quot;</code>为firefox的UserAgent值。<br>通过-A指定User-Agent字段，使curl伪装成Firefox，从而绕过网站的检测。<br>User-Agent字段可以通过抓包分析得到，或者通过chrome的Developer Tools、Firefox的Firebug等工具得到。<br>而如果一个网站对浏览器的限制也很严格的话，那我们甚至可以通过修改User-Agent伪装成百度蜘蛛或者googlebot突破限制，因为基于SEO的考虑，网站对搜索引擎蜘蛛的限制很小。</p>
-<h2 id="e-–referer-设置Referer"><a href="#e-–referer-设置Referer" class="headerlink" title="-e/–referer 设置Referer"></a>-e/–referer <url>设置Referer</url></h2><p>此选项字段用于指定HTTP请求头中的Referer字段，即来源网页。<br>为了防盗链，很多网页尤其是图片等可下载资源会检测Referer字段，对于非自己站内的来源全部屏蔽掉，此时我们就需要这个参数。<br>通过执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com http://www.stackeye.com</span><br><span class="line">http://www.stackeye.com将检测到来源网站为http://www.baidu.com</span><br></pre></td></tr></table></figure></p>
-<h2 id="cookie使用"><a href="#cookie使用" class="headerlink" title="cookie使用"></a>cookie使用</h2><p>cookie的介绍参考上一篇。<br>我们登录网站后，为保持登录状态，需要使用cookie信息。</p>
-<h3 id="D-–dump-header-保存协议头部信息"><a href="#D-–dump-header-保存协议头部信息" class="headerlink" title="-D/–dump-header 保存协议头部信息"></a>-D/–dump-header 保存协议头部信息</h3><p><code>-D/--dump-header &lt;file&gt;</code>保存协议头部信息<br>头部信息中包含最常使用的cookie信息，如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -D stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会将头部信息保存至stackeyecookie.txt中。</p>
-<h3 id="b-–cookie-指定cookie"><a href="#b-–cookie-指定cookie" class="headerlink" title="-b/–cookie 指定cookie"></a>-b/–cookie 指定cookie</h3><p><code>-b/--cookie &lt;name=data&gt;/&lt;file&gt;</code>指定cookie<br>-b后可直接加-D保存的文件，curl会自动从中读取出cookie值，而且-b选项不会修改此文件。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -e http://www.baidu.com -b stackeyecookie.txt http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会自动将stackeyecookie.txt中cookie信息附加至HTTP请求头中。</p>
-<p>结合-D和-b参数，即可完成cookie的保存和后续使用。</p>
-<p>cookie的形式就是“属性:值”对形式，-b后可直接以“属性=值”的形式给出cookie，当有多个属性时以分号间隔且包含在双引号中。如执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span></span><br><span class="line"> -b <span class="string">"user=Adeploy;pass=password"</span> http://www.stackeye.com</span><br></pre></td></tr></table></figure></p>
-<p>会将cookie信息<code>user=Adeploy;pass=password</code>附加在HTTP请求头中。</p>
-<h2 id="Redirects重定向"><a href="#Redirects重定向" class="headerlink" title="Redirects重定向"></a>Redirects重定向</h2><p>打开某些网页，网页会显示“ 3XX Moved Permanently ”，即网页被移动到其他位置，新位置一般由HTTP响应头中的Location字段给出。<br>重定向一般是因为网站结构调整后，避免用户访问原来页面出现404错误。<br>而另一类常见的用法就是在登陆成功后，网页显示成功信息，然后将用户重定向至内容页面。<br><code>-L/--location</code>选项可以自动跟踪重定向。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇只介绍简单的curl使用选项，下篇将结合实例具体说明。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间</title>
     <url>/2012/08/linux-curl-example-post-to-baidu-hi/</url>
     <content><![CDATA[<p>前六篇之后，我们对curl的基本使用已经有了一定的了解。下面我们就在实际场景中使用我们的所学。<br>本篇实例目标为编写linux脚本,使用curl完成发布文章至百度空间。<br>下文将从百度空间登陆到发表文章，对每个过程的HTTP进行分析，并编写脚本实现。</p>
@@ -899,39 +998,16 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之二：HTTP协议概述</title>
-    <url>/2012/07/linux-curl-http-protocol/</url>
-    <content><![CDATA[<p>虽然cURL支持多种协议，但日常我们最常用的还是HTTP协议，下文中着重介绍HTTP的相关使用方法，因此我们要对HTTP协议有所了解。</p>
-<blockquote>
-<p>HTTP，超文本传送协议，通过因特网传送万维网文档的数据传送协议。</p>
-</blockquote>
-<p>我们访问一个网页的实际过程如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">客户端C===HTTP请求===&gt;服务端S：GET index.html http/1.1</span><br><span class="line">客户端C&lt;==HTTP响应====服务端S：HTTP/1.1 200 OK HTML文件内容</span><br></pre></td></tr></table></figure></p>
-<p>HTTP协议本身是个无状态协议，它不像其他基于会话的协议那样去不断追踪、记忆事务处理过程。而它要做的就只是简单的：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">连接=&gt;发起HTTP请求(HTTP Request)=&gt;得到HTTP响应(HTTP Response)=&gt;断开连接</span><br></pre></td></tr></table></figure></p>
-<p>而平常我们通过浏览器浏览网页这个过程，浏览器自动完成发送HTTP请求及对服务端应答的数据进行解析的工作，从而将网页呈现给我们。</p>
-<p>我们使用cURL要做的就是模仿浏览器的动作，因此要对HTTP请求的格式进行进一步的解析。</p>
-<h2 id="HTTP请求"><a href="#HTTP请求" class="headerlink" title="HTTP请求"></a>HTTP请求</h2><p>在你向HTTP服务器请求一个资源（比如简单的使用浏览器打开一个网页），TCP三次握手建立连接后，HTTP请求发出。<br>HTTP请求信息由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">l 请求行(Request Line)</span><br><span class="line">l 请求头(Request Header)</span><br><span class="line">l 请求正文(Message Body)</span><br></pre></td></tr></table></figure></p>
-<a id="more"></a>
-<h3 id="HTTP请求行"><a href="#HTTP请求行" class="headerlink" title="HTTP请求行"></a>HTTP请求行</h3><p>典型的HTTP请求行格式为：<br><code>HTTP命令 请求资源的URI HTTP版本号</code><br>HTTP请求行例子如下：<br><code>GET / HTTP/1.1\r\n</code></p>
-<p>这个请求行的意思是：请求得到（GET）/路径下的默认主页文件，使用HTTP协议1.1版本。</p>
-<p>根据HTTP标准，HTTP请求可以使用多种请求方法。例如：HTTP1.1支持7种请求方法：GET、POST、HEAD、OPTIONS、PUT、DELETE和TARCE。而服务器也可以自定义请求命令供客户端使用。具体请参考HTTP的RFC文档。而我们最常用的是GET和POST命令：</p>
-<h4 id="GET命令"><a href="#GET命令" class="headerlink" title="GET命令"></a>GET命令</h4><p>GET主要用于取得URL指定的资源信息，也可用来提交表单。GET提交的信息实际上是附加在url之后作为URL的一部分。<br>当年盛行一时的SQL注入，最常见的检测手段就是在GET提交的链接后加单引号来检测是否存在注入漏洞。<br>如提交username和password两个字段，正常的GET网址如下：<br><code>http://www.xxx.com/login.php?username=user&amp;password=pass</code><br>网站后台就会在_GET数组中取得username和password的值，从而组建SQL语句：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> user_table <span class="keyword">where</span> username=<span class="keyword">user</span> <span class="keyword">and</span> <span class="keyword">password</span>=pass</span><br></pre></td></tr></table></figure></p>
-<p>如果返回的count值大于0即为用户名密码正确。<br>而添加单引号后：<br><code>http://www.xxx.com/login.php?username=user&amp;password=pass&#39;</code><br>组建的SQL语句为<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> user_table <span class="keyword">where</span> username=<span class="keyword">user</span> <span class="keyword">and</span> <span class="keyword">password</span>=pass<span class="string">'</span></span><br></pre></td></tr></table></figure></p>
-<p>这个SQL语句执行出错，网页显示错误信息，黑客从而得知网页有SQL注入漏洞。<br>因此使用GET提交表单是不安全的，只进行了简单的编码无法加密，可以很容易的从网址猜出各字段的意思。而且受限于URL长度限制，GET提交表单能携带的数据也有限。</p>
-<h4 id="POST命令"><a href="#POST命令" class="headerlink" title="POST命令"></a>POST命令</h4><p>POST主要用于提交表单，尤其是提交大批量的表单数据。<br>POST方法克服了GET方法的一些缺点。通过POST方法提交表单数据时，数据不是作为URL请求的一部分而是作为标准数据传送给Web服务器，这就克服了GET方法中的信息无法加密和数据量太小的缺点。</p>
-<p>HTTP请求的下一段数据为HTTP请求头。</p>
-<h3 id="HTTP请求头"><a href="#HTTP请求头" class="headerlink" title="HTTP请求头"></a>HTTP请求头</h3><p>HTTP请求头中主要包含关于请求本身或者客户端的有用信息，比如浏览器的类型、浏览器语言、编码、压缩算法等信息。服务器上的动态脚本如PHP等可以利用请求头信息生成动态的网页内容。</p>
-<p>典型的HTTP请求头例子如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 QIHU 360EE</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Referer: http://www.adeploy.com/</span><br><span class="line">Accept-Encoding: gzip,deflate,sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br><span class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</span><br></pre></td></tr></table></figure></p>
-<p><code>\r\n</code>表示换行。由此可以看到HTTP请求头是由几行“属性:值”对组成的，例如属性Accept的值为<code>*/*\r\n</code> ，表示客户端可以接受任意数据类型。<br>而我们最常用的是<code>User-Agent</code>字段和<code>Referer</code>字段，分别用于指定客户端类型和来源页面。<br>最末行额外多出的一对<code>\r\n</code>表示一个空白行，此空白行表示HTTP请求头结束，以下部分为请求正文。</p>
-<h3 id="HTTP请求正文"><a href="#HTTP请求正文" class="headerlink" title="HTTP请求正文"></a>HTTP请求正文</h3><p>HTTP请求正文经常为空，除非需要向服务端提交信息，如在使用POST向网站提交表单的时候。<br>例如如下是一个完整的HTTP请求的例子：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET / HTTP/1.1</span><br><span class="line">Host: www.adeploy.com</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 QIHU 360EE</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Referer: http://www.adeploy.com/</span><br><span class="line">Accept-Encoding: gzip,deflate,sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br><span class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</span><br></pre></td></tr></table></figure></p>
-<h2 id="HTTP响应"><a href="#HTTP响应" class="headerlink" title="HTTP响应"></a>HTTP响应</h2><p>当收到HTTP请求之后，HTTP服务器会进行处理然后返回一个HTTP响应给客户端（典型的客户端为浏览器）。HTTP响应中包含几乎与HTTP请求同样类型的数据。<br>HTTP响应信息也由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">l 响应行(Response Status Line)</span><br><span class="line">l 响应头(Response Header)</span><br><span class="line">l 响应正文(Message Body)</span><br></pre></td></tr></table></figure></p>
-<p>响应行以服务端使用的HTTP协议版本号开始，后加响应状态码，表示请求结果状态，例如：<br><code>HTTP/1.1 200 OK</code><br>状态码200表示请求成功。</p>
-<p>紧接着的是响应头。响应头与请求头十分相似，也是由几行“属性:值”对组成。其中包含关于服务器的有用信息、响应数据等。典型响应头如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Content-Type: text/html; charset=utf-8</span><br><span class="line">Cache-Control: no-cache</span><br><span class="line">Expires: Fri, 01 Jan 1990 00:00:00 GMT</span><br><span class="line">Content-Encoding: gzip</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Date: Tue, 31 Jul 2012 07:20:31 GMT</span><br><span class="line">Server: Google Frontend</span><br><span class="line">Content-Length: 10387</span><br></pre></td></tr></table></figure></p>
-<p>如果请求成功，响应正文中将包含请求的数据，如图片文件的二进制数据、HTML文件等。一旦响应正文传输完毕，服务端又没有使用HTTP 1.1/2版本的Keep-Alive请求，HTTP连接将会断开。</p>
-<h2 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h2><p>Cookie是服务器为了辨别用户身份、进行session跟踪用户识别，而储存在客户端的数据。用以判断在HTTP传输中的状态，从而弥补HTTP协议无状态的缺陷。</p>
-<p>比如我们登录一个网站后，关闭网页后重新打开网页，服务端就可以通过cookie信息判断我们曾经登录过，从而跳过重新登录的过程，让用户感觉到亲切、方便、人性化。</p>
-<p>当客户端向服务端发起请求时，浏览器会自动将cookie信息添加在HTTP请求头中。例子如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Cookie: __utmc=90639562; __utma=90639562.1273157993.1343361841.1343361841.1343718828.2; __utmb=90639562.1.10.1343718828; __utmz=90639562.1343361841.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)</span><br></pre></td></tr></table></figure></p>
-<p>在我们使用cURL时，每次访问网页都相当于浏览器打开关闭一次，因此cookie会起到很大的作用。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇介绍后续会使用的HTTP协议知识，只做简要概括，具体请参考RFC文档。</p>
+    <title>Linux下cURL使用教程之十四：libcurl编程</title>
+    <url>/2012/09/linux-curl-libcurl/</url>
+    <content><![CDATA[<p>在<a href="http://127.0.0.1:4000/2012/09/curl-vs-wget/" target="_blank" rel="noopener">Linux下cURL使用教程之十三：curl vs wget</a>中我们谈到，curl是基于libcurl库实现的。<br>而libcurl库是开源免费跨平台的，可用于多种语言。<br>有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。</p>
+<p>官方提供了一些demo代码，大家下载查看。<br>本篇文章我们只谈谈各种语言下的使用，及一些参考。</p>
+<h2 id="C-C"><a href="#C-C" class="headerlink" title="C/C++"></a>C/C++</h2><p>C/C++语言下使用libcurl有些繁琐，但功能很强大、稳定高效。而且尤其C下本身开源库相比其它语言较少，因此libcurl库使用较多。<br>参考：<br><a href="http://curl.haxx.se/libcurl/c/libcurl-tutorial.html" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/c/libcurl-tutorial.html</a><br><a href="http://curl.haxx.se/libcurl/c/" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/c/</a></p>
+<h2 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h2><p>PHP的libcurl库使用较多。<br><a id="more"></a><br>参考：<br><a href="http://cn2.php.net/curl" target="_blank" rel="noopener">http://cn2.php.net/curl</a><br><a href="http://curl.haxx.se/libcurl/php/" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/php/</a></p>
+<h2 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h2><p>python中也有curl库：PycURL。<br>但更易用使用更普遍的还是<a href="https://pypi.python.org/pypi/requests" target="_blank" rel="noopener">requests</a>。</p>
+<h2 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h2><p>Java下的curl库一度被抛弃：<a href="https://curl.haxx.se/libcurl/java/" target="_blank" rel="noopener">accessing libcurl from Java</a>。<br>不知道目前github上的版本是否稳定。<br>更建议使用apache httpclient(貌似现在叫做httpcomponents)，参考：<a href="http://hc.apache.org/" target="_blank" rel="noopener">Apache HttpComponents</a>。</p>
+<h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><p>如果作为日常请求工作使用，如在测试接口时，更建议使用带有GUI界面的postman，功能很强大，而且自带分组、回归等CI功能。<br>参考：<a href="http://www.getpostman.com/" target="_blank" rel="noopener">Postman | Supercharge your API workflow</a>。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>如果需要编写shell脚本进行功能更强大的CI测试，curl仍是首选。<br>此系列告一段落。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -939,7 +1015,78 @@
       <tags>
         <tag>curl</tag>
         <tag>linux curl</tag>
-        <tag>http协议</tag>
+        <tag>linux</tag>
+        <tag>libcurl</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十一：HTTPS及证书使用简介</title>
+    <url>/2012/08/linux-curl-usage-https-cert/</url>
+    <content><![CDATA[<p>某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:</span><br><span class="line">error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed</span><br><span class="line">More details here: http://curl.haxx.se/docs/sslcerts.html</span><br></pre></td></tr></table></figure></p>
+<p>此时就需要使用证书。<br>因此本篇只对curl相关选项做出介绍，详细原理请参考HTTPS协议。</p>
+<h2 id="使用到的选项"><a href="#使用到的选项" class="headerlink" title="使用到的选项"></a>使用到的选项</h2><h3 id="E-–cert-导入证书"><a href="#E-–cert-导入证书" class="headerlink" title="-E/–cert 导入证书"></a>-E/–cert 导入证书</h3><p><code>-E/--cert &lt;certificate[:password]&gt;</code>导入证书。curl默认使用PEM格式的证书。<br>一般我们从浏览器导出的cert都是X.509格式。可以使用openssl转化为PEM格式。<br><a id="more"></a></p>
+<h3 id="–cert-type-指定证书类型"><a href="#–cert-type-指定证书类型" class="headerlink" title="–cert-type 指定证书类型"></a>–cert-type 指定证书类型</h3><p><code>--cert-type &lt;type&gt;</code>指定证书类型，可以为PEM、 DER 或 ENG类型。</p>
+<h3 id="–cacert-指定CA证书"><a href="#–cacert-指定CA证书" class="headerlink" title="–cacert 指定CA证书"></a>–cacert 指定CA证书</h3><p><code>--cacert &lt;CA certificate&gt;</code><br>指定使用的CA证书。CA证书必须是PEM格式。<br>默认情况下，curl使用一个自带的CA文件。可以在<a href="http://curl.haxx.se/docs/caextract.html" target="_blank" rel="noopener">这里</a>下载curl提供的最新的CA证书。<br>curl通过读取环境变量CURL_CA_BUNDLE的值作为CA证书库（CA cert bundle）的路径。此选项优先级高于此环境变量被使用。</p>
+<h3 id="–capath-指定CA路径"><a href="#–capath-指定CA路径" class="headerlink" title="–capath 指定CA路径"></a>–capath 指定CA路径</h3><p><code>--capath &lt;CA certificate directory&gt;</code><br>指定使用的CA证书路径目录。证书必须为PEM格式，且此目录已被curl自带的c_rehash工具处理过。<br>在需要指定多个CA证书的时候，使用–capath指定CA目录更高效。</p>
+<h3 id="k-–insecure-跳过验证"><a href="#k-–insecure-跳过验证" class="headerlink" title="-k/–insecure 跳过验证"></a>-k/–insecure 跳过验证</h3><p><code>-k/--insecure</code><br>指定允许使用不安全的ssl连接传输。<br>所有的连接都是试图通过使用默认安装的CA证书库（CA certificate bundle）来验证是安全的。非安全的连接默认是不允许的。</p>
+<h3 id="指定私钥"><a href="#指定私钥" class="headerlink" title="指定私钥"></a>指定私钥</h3><p><code>--key &lt;key&gt;</code><br>指定私钥文件名。</p>
+<p><code>--key-type &lt;type&gt;</code><br>指定私钥文件类型，可以为DER、PEM 或 ENG。默认使用PEM。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://curl.haxx.se/docs/sslcerts.html" target="_blank" rel="noopener">Details on Server SSL Certificates</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，curl脚本HTTP相关部分告一段落。<br>后续会介绍些curl使用其他协议的例子，及在编程中使用libcurl库。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十：HTTP文件下载</title>
+    <url>/2012/08/linux-curl-usage-download-file/</url>
+    <content><![CDATA[<p>其实每次我们使用curl去打开一个url都是执行一次下载操作，因此我们甚至可以认为curl是一个下载工具。<br>而且curl的某些选项及特性，使得curl能完成非常强大的下载功能。<br>基本命令及一些有用的参数如下。</p>
+<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><p>使用<code>curl [URL...]</code>下载URL，并输出在终端。<br>可指定多个URL。多个URL时，下载内容同时在终端显示。</p>
+<h2 id="–progress-bar-进度条"><a href="#–progress-bar-进度条" class="headerlink" title="-#/–progress-bar 进度条"></a>-#/–progress-bar 进度条</h2><p>添加参数<code>-#/--progress-bar</code>查看下载进度条。</p>
+<h2 id="o-–output-输出文件"><a href="#o-–output-输出文件" class="headerlink" title="-o/–output 输出文件"></a>-o/–output 输出文件</h2><p>使用参数<code>-o/--output &lt;file&gt;</code>下载并保存至文件file。<br>可同时下载多个URL，每个-o对应一个URL。<br>如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>会下载<a href="http://www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而" target="_blank" rel="noopener">www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而</a><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com -o b.html http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html -o b.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
+<p>会分别下载两个URL至两个文件中。<br><a id="more"></a></p>
+<h2 id="O-–remote-name"><a href="#O-–remote-name" class="headerlink" title="-O/–remote-name"></a>-O/–remote-name</h2><p>下载并从url中提取文件名。<br>多个URL的情况同-o选项相同：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O -O http://www.xxx.com/a.html http://www.xxx.com/b.html</span><br><span class="line">curl -O http://www.xxx.com/a.html -O http://www.xxx.com/b.html</span><br></pre></td></tr></table></figure></p>
+<p>都会将两个URL分别保存在a.html和b.html中。</p>
+<h2 id="C-–continue-at-断点续传"><a href="#C-–continue-at-断点续传" class="headerlink" title="-C/–continue-at 断点续传"></a>-C/–continue-at 断点续传</h2><p>使用参数<code>-C/--continue-at &lt;offset&gt;</code>进行断点续传。offset参数指定跳过多少bytes。<br>“-C -”指定自动检测断点续传开始位置。<br>使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>下载QQ安装程序，在下载未完成时Ctrl+C结束下载，然后使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -C - -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>进行断点续传。可看到第二次下载时并不是重新下载，而是从上次结束的地方下载。</p>
+<h2 id="r-–range-分块下载"><a href="#r-–range-分块下载" class="headerlink" title="-r/–range 分块下载"></a>-r/–range 分块下载</h2><p>使用<code>-r/--range &lt;range&gt;</code>分块下载，指定每块下载的字节范围。如上例中下载qq，分块下载如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 0-10240 -o qq.exe.part1 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载前10240bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 10241-20480 -o qq.exe.part2 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载10241-20480bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 20481- -o qq.exe.part3 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
+<p>下载20481bytes及之后的字节。<br>下载完后可使用<code>cat qq.exe.part&gt;qq.exe</code>的形式得到完整文件（win下需要使用copy /b）。<br>此选项适用于HTTP/FTP/SFTP及本地文件。</p>
+<h2 id="–limit-rate-限速下载"><a href="#–limit-rate-限速下载" class="headerlink" title="–limit-rate 限速下载"></a>–limit-rate 限速下载</h2><p>使用参数<code>--limit-rate &lt;speed&gt;</code>限速下载。默认单位为bytes/s，’k’或’K’指定使用单位KB/s，可以使用’m’或’M’指定使用单位MB/s，’g’或’G’指定使用单位GB/s。如<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O --limit-rate 100K http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
+<p>指定限速为100KB/s。<br>限速是限制平均速度，某时刻的突发速度可能超过限制速度，但平均速度会低于限制速度。<br>如果同时使用了-Y/–speed-limit限制了最低下载速度，-Y/–speed-limit选择优先级更高。因此如果-Y/–speed-limit指定的值高于限制的速度，那么限制的速度回被突破，以保证最低下载速度有效（因为如果低于-Y/–speed-limit指定的最低下载速度，下载会被取消）。</p>
+<h2 id="y-Y-限制速度"><a href="#y-Y-限制速度" class="headerlink" title="-y/-Y 限制速度"></a>-y/-Y 限制速度</h2><p>使用参数<code>-y/--speed-time &lt;time&gt;</code>或<code>-Y/--speed-limit &lt;speed&gt;</code>限制速度。<br>网速太慢时取消下载。</p>
+<ul>
+<li>-Y指定最低速度。使用-y指定超时时间而未指定最低速度时，最低速度默认为1.</li>
+<li>-y指定超时时间，即低于最低速度多次时间时取消下载。使用-Y指定最低速度而未指定超时时间时，超时时间默认为30。</li>
+</ul>
+<h2 id="z-–time-cond-更新下载"><a href="#z-–time-cond-更新下载" class="headerlink" title="-z/–time-cond 更新下载"></a>-z/–time-cond 更新下载</h2><p>使用参数<code>-z/--time-cond &lt;date expression&gt;</code>设置只在更新时下载。具体的时间格式请参考<code>man 3 curl_getdate</code>（这个只有在安装了libcurl开发库之后才有），或者<a href="http://curl.haxx.se/libcurl/c/curl_getdate.html" target="_blank" rel="noopener">curl_getdate在线文档</a>。<br>如果时间格式解析失败，curl将会把此字段理解为文件名，从文件中读取时间。<br>需要网页中有相关字段表明最后更新日期。<br>如curl_getdate在线文档网页内有字段:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Page updated June 20, 2012.</span><br></pre></td></tr></table></figure></p>
+<p>表明网页最后更新日期是2012-06-20，因此执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z 20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
+<p>curl_getdate.html在2012-06-20以后被更新，会被下载。而在日期前加上”-“，则表示相反意思，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z -20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
+<p>只有 curl_getdate.html 在2012-06-20之前被更新才会下载。因此此命令不会下载curl_getdate.html。</p>
+<h2 id="文件批量下载"><a href="#文件批量下载" class="headerlink" title="文件批量下载"></a>文件批量下载</h2><p>通过使用正则表达式，可以对有一定规律的文件批量下载。如我们在PHP服务器的/var/www下新建a、b两个目录，新建如下文件：<br><code>a/1.php a/2.php...a/7.php,b/1.php b/2.php...b/5.php</code><br>PHP文件内容相同，都为输出绝对路径，用以标志文件的不同：<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="keyword">__FILE__</span> ;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>可以使用命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O http://127.0.0.1/&#123;a,b&#125;/[1-7].php</span><br></pre></td></tr></table></figure></p>
+<p>批量下载文件。<br>a/1.php-a/7.php会保存在当前目录下的1.php-7.php中。b/1.php-b/5.php如果也保存在当前目录下的1.php-5.php的话，会覆盖以前的文件。因此curl会把b/1.php-b/5.php的内容在终端输出而不会保存文件。而执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl <span class="string">"http://10.1.1.103/&#123;a,b&#125;/[1-7].php"</span> -o <span class="string">"#1_#2.php"</span></span><br></pre></td></tr></table></figure></p>
+<p>则会使用“目录<em>文件”的形式命名文件，避免文件名冲突。<br>{}、[]类似于正则表达式中的语法，用以取得多个文件。#加数字的形式用以取得正则表达式的当前值。<br>如#1表示第一个正则表达式的当前值，上例中即为{a,b}的值。<br>当下载<code>http://10.1.1.103/a/1.php</code>时，#1为“a”，#2为“1”，#1</em>#2.php即为“a_1.php”。从而完成批量文件的自动命名。</p>
+<p>注：注意此时网址包含在双引号中，这是因为如果不被包含在引号中，{}中的内容无法使用#1的形式引用，会出现如下错误<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">internal error: invalid pattern type (0)</span><br><span class="line">Warning: bad output glob!</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实日常使用，我们更多使用wget下载文件。相比wget，curl功能更具体一些。<br>关于二者的区别，请参考后续文章。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -1075,107 +1222,6 @@
         <tag>openstack</tag>
         <tag>ci</tag>
         <tag>持续集成</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之十：HTTP文件下载</title>
-    <url>/2012/08/linux-curl-usage-download-file/</url>
-    <content><![CDATA[<p>其实每次我们使用curl去打开一个url都是执行一次下载操作，因此我们甚至可以认为curl是一个下载工具。<br>而且curl的某些选项及特性，使得curl能完成非常强大的下载功能。<br>基本命令及一些有用的参数如下。</p>
-<h2 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h2><p>使用<code>curl [URL...]</code>下载URL，并输出在终端。<br>可指定多个URL。多个URL时，下载内容同时在终端显示。</p>
-<h2 id="–progress-bar-进度条"><a href="#–progress-bar-进度条" class="headerlink" title="-#/–progress-bar 进度条"></a>-#/–progress-bar 进度条</h2><p>添加参数<code>-#/--progress-bar</code>查看下载进度条。</p>
-<h2 id="o-–output-输出文件"><a href="#o-–output-输出文件" class="headerlink" title="-o/–output 输出文件"></a>-o/–output 输出文件</h2><p>使用参数<code>-o/--output &lt;file&gt;</code>下载并保存至文件file。<br>可同时下载多个URL，每个-o对应一个URL。<br>如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
-<p>会下载<a href="http://www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而" target="_blank" rel="noopener">www.a.com的内容在a.html中，并在终端输出www.b.com的内容。而</a><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html http://www.a.com -o b.html http://www.b.com</span><br></pre></td></tr></table></figure></p>
-<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -o a.html -o b.html http://www.a.com http://www.b.com</span><br></pre></td></tr></table></figure></p>
-<p>会分别下载两个URL至两个文件中。<br><a id="more"></a></p>
-<h2 id="O-–remote-name"><a href="#O-–remote-name" class="headerlink" title="-O/–remote-name"></a>-O/–remote-name</h2><p>下载并从url中提取文件名。<br>多个URL的情况同-o选项相同：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O -O http://www.xxx.com/a.html http://www.xxx.com/b.html</span><br><span class="line">curl -O http://www.xxx.com/a.html -O http://www.xxx.com/b.html</span><br></pre></td></tr></table></figure></p>
-<p>都会将两个URL分别保存在a.html和b.html中。</p>
-<h2 id="C-–continue-at-断点续传"><a href="#C-–continue-at-断点续传" class="headerlink" title="-C/–continue-at 断点续传"></a>-C/–continue-at 断点续传</h2><p>使用参数<code>-C/--continue-at &lt;offset&gt;</code>进行断点续传。offset参数指定跳过多少bytes。<br>“-C -”指定自动检测断点续传开始位置。<br>使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
-<p>下载QQ安装程序，在下载未完成时Ctrl+C结束下载，然后使用<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -C - -O http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
-<p>进行断点续传。可看到第二次下载时并不是重新下载，而是从上次结束的地方下载。</p>
-<h2 id="r-–range-分块下载"><a href="#r-–range-分块下载" class="headerlink" title="-r/–range 分块下载"></a>-r/–range 分块下载</h2><p>使用<code>-r/--range &lt;range&gt;</code>分块下载，指定每块下载的字节范围。如上例中下载qq，分块下载如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 0-10240 -o qq.exe.part1 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
-<p>下载前10240bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 10241-20480 -o qq.exe.part2 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
-<p>下载10241-20480bytes。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -r 20481- -o qq.exe.part3 http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span><br></pre></td></tr></table></figure></p>
-<p>下载20481bytes及之后的字节。<br>下载完后可使用<code>cat qq.exe.part&gt;qq.exe</code>的形式得到完整文件（win下需要使用copy /b）。<br>此选项适用于HTTP/FTP/SFTP及本地文件。</p>
-<h2 id="–limit-rate-限速下载"><a href="#–limit-rate-限速下载" class="headerlink" title="–limit-rate 限速下载"></a>–limit-rate 限速下载</h2><p>使用参数<code>--limit-rate &lt;speed&gt;</code>限速下载。默认单位为bytes/s，’k’或’K’指定使用单位KB/s，可以使用’m’或’M’指定使用单位MB/s，’g’或’G’指定使用单位GB/s。如<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -<span class="comment"># -O --limit-rate 100K http://dl_dir.qq.com/qqfile/qd/QQ2012Beta3_QQProtect2.8.exe</span></span><br></pre></td></tr></table></figure></p>
-<p>指定限速为100KB/s。<br>限速是限制平均速度，某时刻的突发速度可能超过限制速度，但平均速度会低于限制速度。<br>如果同时使用了-Y/–speed-limit限制了最低下载速度，-Y/–speed-limit选择优先级更高。因此如果-Y/–speed-limit指定的值高于限制的速度，那么限制的速度回被突破，以保证最低下载速度有效（因为如果低于-Y/–speed-limit指定的最低下载速度，下载会被取消）。</p>
-<h2 id="y-Y-限制速度"><a href="#y-Y-限制速度" class="headerlink" title="-y/-Y 限制速度"></a>-y/-Y 限制速度</h2><p>使用参数<code>-y/--speed-time &lt;time&gt;</code>或<code>-Y/--speed-limit &lt;speed&gt;</code>限制速度。<br>网速太慢时取消下载。</p>
-<ul>
-<li>-Y指定最低速度。使用-y指定超时时间而未指定最低速度时，最低速度默认为1.</li>
-<li>-y指定超时时间，即低于最低速度多次时间时取消下载。使用-Y指定最低速度而未指定超时时间时，超时时间默认为30。</li>
-</ul>
-<h2 id="z-–time-cond-更新下载"><a href="#z-–time-cond-更新下载" class="headerlink" title="-z/–time-cond 更新下载"></a>-z/–time-cond 更新下载</h2><p>使用参数<code>-z/--time-cond &lt;date expression&gt;</code>设置只在更新时下载。具体的时间格式请参考<code>man 3 curl_getdate</code>（这个只有在安装了libcurl开发库之后才有），或者<a href="http://curl.haxx.se/libcurl/c/curl_getdate.html" target="_blank" rel="noopener">curl_getdate在线文档</a>。<br>如果时间格式解析失败，curl将会把此字段理解为文件名，从文件中读取时间。<br>需要网页中有相关字段表明最后更新日期。<br>如curl_getdate在线文档网页内有字段:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Page updated June 20, 2012.</span><br></pre></td></tr></table></figure></p>
-<p>表明网页最后更新日期是2012-06-20，因此执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z 20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
-<p>curl_getdate.html在2012-06-20以后被更新，会被下载。而在日期前加上”-“，则表示相反意思，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -z -20-jun-12 http://curl.haxx.se/libcurl/c/curl_getdate.html</span><br></pre></td></tr></table></figure></p>
-<p>只有 curl_getdate.html 在2012-06-20之前被更新才会下载。因此此命令不会下载curl_getdate.html。</p>
-<h2 id="文件批量下载"><a href="#文件批量下载" class="headerlink" title="文件批量下载"></a>文件批量下载</h2><p>通过使用正则表达式，可以对有一定规律的文件批量下载。如我们在PHP服务器的/var/www下新建a、b两个目录，新建如下文件：<br><code>a/1.php a/2.php...a/7.php,b/1.php b/2.php...b/5.php</code><br>PHP文件内容相同，都为输出绝对路径，用以标志文件的不同：<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="keyword">__FILE__</span> ;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>可以使用命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -O http://127.0.0.1/&#123;a,b&#125;/[1-7].php</span><br></pre></td></tr></table></figure></p>
-<p>批量下载文件。<br>a/1.php-a/7.php会保存在当前目录下的1.php-7.php中。b/1.php-b/5.php如果也保存在当前目录下的1.php-5.php的话，会覆盖以前的文件。因此curl会把b/1.php-b/5.php的内容在终端输出而不会保存文件。而执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl <span class="string">"http://10.1.1.103/&#123;a,b&#125;/[1-7].php"</span> -o <span class="string">"#1_#2.php"</span></span><br></pre></td></tr></table></figure></p>
-<p>则会使用“目录<em>文件”的形式命名文件，避免文件名冲突。<br>{}、[]类似于正则表达式中的语法，用以取得多个文件。#加数字的形式用以取得正则表达式的当前值。<br>如#1表示第一个正则表达式的当前值，上例中即为{a,b}的值。<br>当下载<code>http://10.1.1.103/a/1.php</code>时，#1为“a”，#2为“1”，#1</em>#2.php即为“a_1.php”。从而完成批量文件的自动命名。</p>
-<p>注：注意此时网址包含在双引号中，这是因为如果不被包含在引号中，{}中的内容无法使用#1的形式引用，会出现如下错误<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">internal error: invalid pattern type (0)</span><br><span class="line">Warning: bad output glob!</span><br></pre></td></tr></table></figure></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实日常使用，我们更多使用wget下载文件。相比wget，curl功能更具体一些。<br>关于二者的区别，请参考后续文章。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之十二：ftp及其他协议</title>
-    <url>/2012/08/curl-ftp-usage/</url>
-    <content><![CDATA[<p>在<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">Linux下cURL使用教程之一：cURL简介</a>里，提到curl支持多种协议。本篇就以ftp协议为主，对curl对其他协议的操作进行简介。</p>
-<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>基本使用方法同HTTP没有区别：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl ftp://ftp.cisco.com/pub/mibs/</span><br></pre></td></tr></table></figure></p>
-<p>只不过ftp一般会有用户名密码，所有在命令中要加上用户名密码：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -O ftp://ftp_server/index.php</span><br></pre></td></tr></table></figure></p>
-<p>或者<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl ftp:// ftpuser:ftppass ftp://ftp_server/index.php</span><br></pre></td></tr></table></figure></p>
-<h2 id="上传文件"><a href="#上传文件" class="headerlink" title="上传文件"></a>上传文件</h2><p>使用-T选项。具体请参考<a href="https://adeployblog.appspot.com/2012/08/11/linux-curl-basic-usage-upload-file.html" target="_blank" rel="noopener">Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</a>。<a id="more"></a><br>上传一个文件：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T myfile.txt ftp://ftp.testserver.com</span><br></pre></td></tr></table></figure></p>
-<p>上传多个文件：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T <span class="string">"&#123;file1,file2&#125;"</span> ftp://ftp.testserver.com</span><br></pre></td></tr></table></figure></p>
-<p>从标准输入获得文件内容：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -u ftpuser:ftppass -T - ftp://ftp.testserver.com/myfile_1.txt</span><br></pre></td></tr></table></figure></p>
-<p>这个命令会将标准输入的内容保存在<a href="ftp://ftp.testserver.com/myfile_1.txt中。" target="_blank" rel="noopener">ftp://ftp.testserver.com/myfile_1.txt中。</a></p>
-<h2 id="FTP四种模式"><a href="#FTP四种模式" class="headerlink" title="FTP四种模式"></a>FTP四种模式</h2><p>FTP有两种基本模式：PASV和PORT，也即主动模式和被动模式。在二者基础上分别有两种扩展：ERSV和EPRT。具体请参考相关RFC文档。<br>curl默认使用EPSV模式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
-<p>会看到curl执行了EPSV命令。–eprt参数显式指定使用EPRT模式。<br>使用<code>--disable-epsv</code>选项禁用EPSV而使用PASV：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --<span class="built_in">disable</span>-epsv ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
-<p>使用<code>-P/--ftp-port &lt;address&gt;</code>选项指定使用EPRT，其中address参数可以指定为“-”，指定使用FTP控制连接相同的地址：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ftp-port - ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
-<p>会看到使用了EPRT命令。<br>而使用<code>--disable-epsv</code>选项，如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ftp-port - --<span class="built_in">disable</span>-epsv ftp://ftp_server/ --user user</span><br></pre></td></tr></table></figure></p>
-<p>及指定了使用PORT模式。</p>
-<h2 id="其他协议"><a href="#其他协议" class="headerlink" title="其他协议"></a>其他协议</h2><p>以SMTP协议发邮件为例，执行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --verbose --ssl --mail-rcpt <span class="built_in">test</span>@163.com --mail-from <span class="built_in">test</span>@163.com smtp://smtp.163.com -u <span class="built_in">test</span></span><br></pre></td></tr></table></figure></p>
-<p>–ssl指定使用SSL， smtp://一定要加在url上，否则curl会使用默认的HTTP协议。</p>
-<p>之后，按提示输入如下内容：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Subject: Testing</span><br><span class="line">This is a test mail</span><br><span class="line">.</span><br></pre></td></tr></table></figure></p>
-<p>即可发送邮件。<br>但是估计是有防作弊机制，测试发现163、GMAIL的SMTP发信都失败，提示“curl: (67) Access denied: 500”，追踪详细过程，发现是“MAIL FROM: <a href="mailto:test@163.com" target="_blank" rel="noopener">test@163.com</a>”这句提示语法错误。不知道是什么原因。<br>但是使用自己搭建的邮件服务器测试成功。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-        <tag>ftp</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之十一：HTTPS及证书使用简介</title>
-    <url>/2012/08/linux-curl-usage-https-cert/</url>
-    <content><![CDATA[<p>某些HTTPS网站对证书的要求比较严格，使用curl直接访问时会出现如下错误：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:</span><br><span class="line">error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed</span><br><span class="line">More details here: http://curl.haxx.se/docs/sslcerts.html</span><br></pre></td></tr></table></figure></p>
-<p>此时就需要使用证书。<br>因此本篇只对curl相关选项做出介绍，详细原理请参考HTTPS协议。</p>
-<h2 id="使用到的选项"><a href="#使用到的选项" class="headerlink" title="使用到的选项"></a>使用到的选项</h2><h3 id="E-–cert-导入证书"><a href="#E-–cert-导入证书" class="headerlink" title="-E/–cert 导入证书"></a>-E/–cert 导入证书</h3><p><code>-E/--cert &lt;certificate[:password]&gt;</code>导入证书。curl默认使用PEM格式的证书。<br>一般我们从浏览器导出的cert都是X.509格式。可以使用openssl转化为PEM格式。<br><a id="more"></a></p>
-<h3 id="–cert-type-指定证书类型"><a href="#–cert-type-指定证书类型" class="headerlink" title="–cert-type 指定证书类型"></a>–cert-type 指定证书类型</h3><p><code>--cert-type &lt;type&gt;</code>指定证书类型，可以为PEM、 DER 或 ENG类型。</p>
-<h3 id="–cacert-指定CA证书"><a href="#–cacert-指定CA证书" class="headerlink" title="–cacert 指定CA证书"></a>–cacert 指定CA证书</h3><p><code>--cacert &lt;CA certificate&gt;</code><br>指定使用的CA证书。CA证书必须是PEM格式。<br>默认情况下，curl使用一个自带的CA文件。可以在<a href="http://curl.haxx.se/docs/caextract.html" target="_blank" rel="noopener">这里</a>下载curl提供的最新的CA证书。<br>curl通过读取环境变量CURL_CA_BUNDLE的值作为CA证书库（CA cert bundle）的路径。此选项优先级高于此环境变量被使用。</p>
-<h3 id="–capath-指定CA路径"><a href="#–capath-指定CA路径" class="headerlink" title="–capath 指定CA路径"></a>–capath 指定CA路径</h3><p><code>--capath &lt;CA certificate directory&gt;</code><br>指定使用的CA证书路径目录。证书必须为PEM格式，且此目录已被curl自带的c_rehash工具处理过。<br>在需要指定多个CA证书的时候，使用–capath指定CA目录更高效。</p>
-<h3 id="k-–insecure-跳过验证"><a href="#k-–insecure-跳过验证" class="headerlink" title="-k/–insecure 跳过验证"></a>-k/–insecure 跳过验证</h3><p><code>-k/--insecure</code><br>指定允许使用不安全的ssl连接传输。<br>所有的连接都是试图通过使用默认安装的CA证书库（CA certificate bundle）来验证是安全的。非安全的连接默认是不允许的。</p>
-<h3 id="指定私钥"><a href="#指定私钥" class="headerlink" title="指定私钥"></a>指定私钥</h3><p><code>--key &lt;key&gt;</code><br>指定私钥文件名。</p>
-<p><code>--key-type &lt;type&gt;</code><br>指定私钥文件类型，可以为DER、PEM 或 ENG。默认使用PEM。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://curl.haxx.se/docs/sslcerts.html" target="_blank" rel="noopener">Details on Server SSL Certificates</a></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，curl脚本HTTP相关部分告一段落。<br>后续会介绍些curl使用其他协议的例子，及在编程中使用libcurl库。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
       </tags>
   </entry>
   <entry>
@@ -1348,10 +1394,193 @@
         <category>openstack</category>
       </categories>
       <tags>
+        <tag>docker</tag>
         <tag>openstack</tag>
         <tag>kolla</tag>
-        <tag>docker</tag>
         <tag>容器化</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之二：HTTP协议概述</title>
+    <url>/2012/07/linux-curl-http-protocol/</url>
+    <content><![CDATA[<p>虽然cURL支持多种协议，但日常我们最常用的还是HTTP协议，下文中着重介绍HTTP的相关使用方法，因此我们要对HTTP协议有所了解。</p>
+<blockquote>
+<p>HTTP，超文本传送协议，通过因特网传送万维网文档的数据传送协议。</p>
+</blockquote>
+<p>我们访问一个网页的实际过程如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">客户端C===HTTP请求===&gt;服务端S：GET index.html http/1.1</span><br><span class="line">客户端C&lt;==HTTP响应====服务端S：HTTP/1.1 200 OK HTML文件内容</span><br></pre></td></tr></table></figure></p>
+<p>HTTP协议本身是个无状态协议，它不像其他基于会话的协议那样去不断追踪、记忆事务处理过程。而它要做的就只是简单的：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">连接=&gt;发起HTTP请求(HTTP Request)=&gt;得到HTTP响应(HTTP Response)=&gt;断开连接</span><br></pre></td></tr></table></figure></p>
+<p>而平常我们通过浏览器浏览网页这个过程，浏览器自动完成发送HTTP请求及对服务端应答的数据进行解析的工作，从而将网页呈现给我们。</p>
+<p>我们使用cURL要做的就是模仿浏览器的动作，因此要对HTTP请求的格式进行进一步的解析。</p>
+<h2 id="HTTP请求"><a href="#HTTP请求" class="headerlink" title="HTTP请求"></a>HTTP请求</h2><p>在你向HTTP服务器请求一个资源（比如简单的使用浏览器打开一个网页），TCP三次握手建立连接后，HTTP请求发出。<br>HTTP请求信息由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">l 请求行(Request Line)</span><br><span class="line">l 请求头(Request Header)</span><br><span class="line">l 请求正文(Message Body)</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h3 id="HTTP请求行"><a href="#HTTP请求行" class="headerlink" title="HTTP请求行"></a>HTTP请求行</h3><p>典型的HTTP请求行格式为：<br><code>HTTP命令 请求资源的URI HTTP版本号</code><br>HTTP请求行例子如下：<br><code>GET / HTTP/1.1\r\n</code></p>
+<p>这个请求行的意思是：请求得到（GET）/路径下的默认主页文件，使用HTTP协议1.1版本。</p>
+<p>根据HTTP标准，HTTP请求可以使用多种请求方法。例如：HTTP1.1支持7种请求方法：GET、POST、HEAD、OPTIONS、PUT、DELETE和TARCE。而服务器也可以自定义请求命令供客户端使用。具体请参考HTTP的RFC文档。而我们最常用的是GET和POST命令：</p>
+<h4 id="GET命令"><a href="#GET命令" class="headerlink" title="GET命令"></a>GET命令</h4><p>GET主要用于取得URL指定的资源信息，也可用来提交表单。GET提交的信息实际上是附加在url之后作为URL的一部分。<br>当年盛行一时的SQL注入，最常见的检测手段就是在GET提交的链接后加单引号来检测是否存在注入漏洞。<br>如提交username和password两个字段，正常的GET网址如下：<br><code>http://www.xxx.com/login.php?username=user&amp;password=pass</code><br>网站后台就会在_GET数组中取得username和password的值，从而组建SQL语句：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> user_table <span class="keyword">where</span> username=<span class="keyword">user</span> <span class="keyword">and</span> <span class="keyword">password</span>=pass</span><br></pre></td></tr></table></figure></p>
+<p>如果返回的count值大于0即为用户名密码正确。<br>而添加单引号后：<br><code>http://www.xxx.com/login.php?username=user&amp;password=pass&#39;</code><br>组建的SQL语句为<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> user_table <span class="keyword">where</span> username=<span class="keyword">user</span> <span class="keyword">and</span> <span class="keyword">password</span>=pass<span class="string">'</span></span><br></pre></td></tr></table></figure></p>
+<p>这个SQL语句执行出错，网页显示错误信息，黑客从而得知网页有SQL注入漏洞。<br>因此使用GET提交表单是不安全的，只进行了简单的编码无法加密，可以很容易的从网址猜出各字段的意思。而且受限于URL长度限制，GET提交表单能携带的数据也有限。</p>
+<h4 id="POST命令"><a href="#POST命令" class="headerlink" title="POST命令"></a>POST命令</h4><p>POST主要用于提交表单，尤其是提交大批量的表单数据。<br>POST方法克服了GET方法的一些缺点。通过POST方法提交表单数据时，数据不是作为URL请求的一部分而是作为标准数据传送给Web服务器，这就克服了GET方法中的信息无法加密和数据量太小的缺点。</p>
+<p>HTTP请求的下一段数据为HTTP请求头。</p>
+<h3 id="HTTP请求头"><a href="#HTTP请求头" class="headerlink" title="HTTP请求头"></a>HTTP请求头</h3><p>HTTP请求头中主要包含关于请求本身或者客户端的有用信息，比如浏览器的类型、浏览器语言、编码、压缩算法等信息。服务器上的动态脚本如PHP等可以利用请求头信息生成动态的网页内容。</p>
+<p>典型的HTTP请求头例子如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 QIHU 360EE</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Referer: http://www.adeploy.com/</span><br><span class="line">Accept-Encoding: gzip,deflate,sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br><span class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</span><br></pre></td></tr></table></figure></p>
+<p><code>\r\n</code>表示换行。由此可以看到HTTP请求头是由几行“属性:值”对组成的，例如属性Accept的值为<code>*/*\r\n</code> ，表示客户端可以接受任意数据类型。<br>而我们最常用的是<code>User-Agent</code>字段和<code>Referer</code>字段，分别用于指定客户端类型和来源页面。<br>最末行额外多出的一对<code>\r\n</code>表示一个空白行，此空白行表示HTTP请求头结束，以下部分为请求正文。</p>
+<h3 id="HTTP请求正文"><a href="#HTTP请求正文" class="headerlink" title="HTTP请求正文"></a>HTTP请求正文</h3><p>HTTP请求正文经常为空，除非需要向服务端提交信息，如在使用POST向网站提交表单的时候。<br>例如如下是一个完整的HTTP请求的例子：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET / HTTP/1.1</span><br><span class="line">Host: www.adeploy.com</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 QIHU 360EE</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Referer: http://www.adeploy.com/</span><br><span class="line">Accept-Encoding: gzip,deflate,sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br><span class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</span><br></pre></td></tr></table></figure></p>
+<h2 id="HTTP响应"><a href="#HTTP响应" class="headerlink" title="HTTP响应"></a>HTTP响应</h2><p>当收到HTTP请求之后，HTTP服务器会进行处理然后返回一个HTTP响应给客户端（典型的客户端为浏览器）。HTTP响应中包含几乎与HTTP请求同样类型的数据。<br>HTTP响应信息也由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">l 响应行(Response Status Line)</span><br><span class="line">l 响应头(Response Header)</span><br><span class="line">l 响应正文(Message Body)</span><br></pre></td></tr></table></figure></p>
+<p>响应行以服务端使用的HTTP协议版本号开始，后加响应状态码，表示请求结果状态，例如：<br><code>HTTP/1.1 200 OK</code><br>状态码200表示请求成功。</p>
+<p>紧接着的是响应头。响应头与请求头十分相似，也是由几行“属性:值”对组成。其中包含关于服务器的有用信息、响应数据等。典型响应头如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Content-Type: text/html; charset=utf-8</span><br><span class="line">Cache-Control: no-cache</span><br><span class="line">Expires: Fri, 01 Jan 1990 00:00:00 GMT</span><br><span class="line">Content-Encoding: gzip</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Date: Tue, 31 Jul 2012 07:20:31 GMT</span><br><span class="line">Server: Google Frontend</span><br><span class="line">Content-Length: 10387</span><br></pre></td></tr></table></figure></p>
+<p>如果请求成功，响应正文中将包含请求的数据，如图片文件的二进制数据、HTML文件等。一旦响应正文传输完毕，服务端又没有使用HTTP 1.1/2版本的Keep-Alive请求，HTTP连接将会断开。</p>
+<h2 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h2><p>Cookie是服务器为了辨别用户身份、进行session跟踪用户识别，而储存在客户端的数据。用以判断在HTTP传输中的状态，从而弥补HTTP协议无状态的缺陷。</p>
+<p>比如我们登录一个网站后，关闭网页后重新打开网页，服务端就可以通过cookie信息判断我们曾经登录过，从而跳过重新登录的过程，让用户感觉到亲切、方便、人性化。</p>
+<p>当客户端向服务端发起请求时，浏览器会自动将cookie信息添加在HTTP请求头中。例子如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Cookie: __utmc=90639562; __utma=90639562.1273157993.1343361841.1343361841.1343718828.2; __utmb=90639562.1.10.1343718828; __utmz=90639562.1343361841.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)</span><br></pre></td></tr></table></figure></p>
+<p>在我们使用cURL时，每次访问网页都相当于浏览器打开关闭一次，因此cookie会起到很大的作用。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇介绍后续会使用的HTTP协议知识，只做简要概括，具体请参考RFC文档。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>http协议</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>rpmbuild实战</title>
+    <url>/2014/08/rpmbuild-in-action/</url>
+    <content><![CDATA[<p>在生产环境下，未确保软件版本的可靠及软件的稳定性，我们一般不使用源码安装软件。一般会根据os的不同，选择apt-get或yum安装软件。<br>本文主要讲解如何使用rpmbuild工具制作rpm包。并以Openstack为例，讲述了Openstack打包的过程。</p>
+<h2 id="RPM基础知识"><a href="#RPM基础知识" class="headerlink" title="RPM基础知识"></a>RPM基础知识</h2><p>本节主要分析是什么以及为什么的问题。<br>以及常用的rpm和yum命令。</p>
+<h3 id="RPM包管理是什么？"><a href="#RPM包管理是什么？" class="headerlink" title="RPM包管理是什么？"></a>RPM包管理是什么？</h3><p>RPM全称是RedHat Package Manager，是红帽系Linux默认使用的软件管理方法。主要包括centos、fedora、rhel等Linux分支。<br>其格式为Linux标准（LSB），是数据库驱动的包管理解决方案。<br>配合软件源，在centos系操作系统下，使用yum命令（最新版本应该是逐渐向dnf过渡）可以很容易的解决软件安装时的版本依赖问题。</p>
+<h3 id="为什么使用RPM包管理？"><a href="#为什么使用RPM包管理？" class="headerlink" title="为什么使用RPM包管理？"></a>为什么使用RPM包管理？</h3><p>RPM包管理的优点如下：</p>
+<ul>
+<li>易于分发，安装、卸载、升级</li>
+<li>自动依赖跟踪，结合yum自动解决依赖问题</li>
+<li>自带包验证，保证安装的正确性</li>
+<li>保存软件包安装的一致性</li>
+<li>易于保持对系统安装包的跟踪管理</li>
+</ul>
+<h3 id="基本RPM命令"><a href="#基本RPM命令" class="headerlink" title="基本RPM命令"></a>基本RPM命令</h3><p>我们可以直接使用rpm命令，对软件包进行一些操作。</p>
+<ul>
+<li>安装<br><code>rpm –ivh &lt;package_name&gt;</code><br><code>--nodeps</code>忽略依赖问题，一般仅用于测试<a id="more"></a></li>
+<li><p>卸载<br><code>rpm –e &lt;package_name&gt;</code><br>有其它包依赖此RPM包时，卸载会报错</p>
+</li>
+<li><p>升级<br>升级时使用-ivh会提示文件冲突<br><code>rpm –Uvh &lt;package_name&gt;</code> 没有安装过，则安装<br><code>rpm –Fvh &lt;package_name&gt;</code> 没有安装过，则忽略</p>
+</li>
+<li><p>查找<br><code>rpm –q[option] &lt;package name&gt;</code><br>-q 仅查询是否安装<br>-qi 列出软件包的详细信息<br>-ql 列出软件包的目录及文件<br>-qf 列出文件对应的安装包<br>-qa 列出所有已安装的软件包<br>-qp 列出未安装的RPM包的信息</p>
+</li>
+<li><p>验证<br>对已安装的包进行文件校验：<br><code>rpm –V &lt;package_name&gt;</code><br><code>rpm -Vp &lt;rpm_file&gt;</code><br><code>rpm -Va</code><br>导入key：<br><code>rpm --import &lt;RPM_KEY&gt;</code><br>在包安装之前进行签名校验：<br><code>rpm -K &lt;rpm_&gt;file</code></p>
+</li>
+<li><p>重建数据库<br><code>rpm –rebuilddb</code> 解决系统RPM数据库的异常</p>
+</li>
+</ul>
+<h3 id="基本YUM命令"><a href="#基本YUM命令" class="headerlink" title="基本YUM命令"></a>基本YUM命令</h3><p>yum其实是透明的调用rpm，相当于在rpm基础上封装的更易使用的“前端”。<br>它主要设计来解决软件包之间的依赖性，并可从多个资源库（我们称之为“源”，典型的由<code>/etc/yum.repos.d/</code>目录下的每个.repo文件定义）。</p>
+<ul>
+<li>源制作<br><code>createrepo &lt;dir&gt;</code><br>一般的centos系的iso镜像中，都带有安装时使用的rpm包。可以将这部分文件mount到本地，创建本地源，以减少软件安装时的上网下载。</li>
+<li>安装<br><code>yum install &lt;package_name&gt; -y</code><br><code>yum localinstall &lt;rpm_file&gt;</code> 本地安装<br><code>yum groupinstall &lt;group_name&gt;</code> 组安装</li>
+<li>升级<br><code>yum update [package_name]</code></li>
+<li>卸载<br><code>yum remove/erase &lt;package_name&gt;</code><br>谨慎使用: 此命令会卸载掉所有依赖此包的RPM包</li>
+<li>查找<br><code>yum search &lt;name&gt;</code><br><code>yum list|grep</code></li>
+<li><p>本地缓存相关<br><code>yum makecache</code> 只做本地缓存<br><code>yum clean all</code> 清除本地缓存</p>
+</li>
+<li><p>repo文件格式<br>一个典型的repo文件格式如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[repo-name]</span><br><span class="line">name=repo-name</span><br><span class="line">baseurl=http://yourserver.com/path/to/repo</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="RPM-Build相关知识"><a href="#RPM-Build相关知识" class="headerlink" title="RPM Build相关知识"></a>RPM Build相关知识</h2><h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><ol>
+<li>软件包安装<br><code>yum install rpm-build -y</code></li>
+<li>创建目录<br>~/rpmbuild: 默认使用主目录下的rpmbuild目录<br>~/rpmbuild/SPECS: 存放spec文件<br>~/rpmbuild/SOURCES : 存放源代码等source文件<br>~/rpmbuild/RPMS : 存放RPM包<br>~/rpmbuild/BUILD和~/rpmbuild/BUILDROOT: 存放build中间文件</li>
+</ol>
+<h3 id="rpmbuild命令"><a href="#rpmbuild命令" class="headerlink" title="rpmbuild命令"></a>rpmbuild命令</h3><p><code>rpmbuild –ba</code> 编译二进制及源RPM包<br><code>rpmbuild –bb</code> 仅编译二进制RPM包<br><code>rpmbuild –bs</code> 仅编译源RPM包<br>编译后的二进制RPM包在<code>~/rpmbuild/RPMS/&lt;arch&gt;</code>目录下，如<code>~/rpmbuild/RPMS/noarch</code>。<br>源RPM包在<code>~/rpmbuild/SRPMS/</code>下。</p>
+<h3 id="Build准备"><a href="#Build准备" class="headerlink" title="Build准备"></a>Build准备</h3><ul>
+<li>源码包<br>按SPEC文件中指定名称，放在SOURCES文件夹下</li>
+<li>patch、init脚本<br>按SPEC文件中指定名称，放在SOURCES文件夹下</li>
+<li>SPEC文件<br>放在SPECS文件夹下</li>
+</ul>
+<h2 id="SPEC文件语法"><a href="#SPEC文件语法" class="headerlink" title="SPEC文件语法"></a>SPEC文件语法</h2><p>spec文件内容主要：</p>
+<ul>
+<li>指定编译、安装源码的过程</li>
+<li>编译和生成RPM包指令的集合</li>
+<li>指定RPM包的内容及信息</li>
+</ul>
+<p>语法与shell类似，也可直接使用shell命令。</p>
+<h3 id="Spec文件分为不同的节"><a href="#Spec文件分为不同的节" class="headerlink" title="Spec文件分为不同的节"></a>Spec文件分为不同的节</h3><p>不同的节用于不同的阶段，分别用于完成不同功能。<br>主要分为以下几个阶段：</p>
+<ul>
+<li>Preamble</li>
+<li>Setup</li>
+<li>Build</li>
+<li>Install</li>
+<li>Clean</li>
+<li>Files</li>
+<li>Changelog</li>
+</ul>
+<h3 id="Preamble"><a href="#Preamble" class="headerlink" title="Preamble"></a>Preamble</h3><p>此节主要用于初始化，定义RPM包的特性：</p>
+<ul>
+<li>Name/Version/Group/License</li>
+<li>Release信息：BUILD版本号</li>
+<li>Sources/Patches：编译时使用的源代码及patch</li>
+<li>Requirements：使用Requires、BuildRequires指定依赖包及版本。</li>
+<li>Summary/Description</li>
+<li>其它自定义属性</li>
+</ul>
+<h3 id="Setup"><a href="#Setup" class="headerlink" title="Setup"></a>Setup</h3><p>通过解压源码包等方式，生成需要的源码树<br>对源码进行patch等操作<br>build之前的所有其它操作，如删除不需要的文件<br>例子：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%prep #定义prep节开始</span><br><span class="line">%setup –q #解压Source0</span><br><span class="line">%patch0 –p1 #对源码包使用patch0</span><br></pre></td></tr></table></figure></p>
+<h3 id="Build"><a href="#Build" class="headerlink" title="Build"></a>Build</h3><p>编译二进制文件<br>可以使用%configure指定build时需要加入的参数<br>举例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%build</span><br><span class="line">%configure</span><br><span class="line">%&#123;__python&#125; setup.py build #python编译</span><br><span class="line">make %&#123;?_smp_mflags&#125; #C语言等使用make编译</span><br></pre></td></tr></table></figure></p>
+<h3 id="Install"><a href="#Install" class="headerlink" title="Install"></a>Install</h3><p>创建BUILDROOT目录<br>在BUILDROOT中创建需要的目录结构<br>将编译后的文件安装在BUILDROOT对应位置<br>清理不需要的文件<br>可以通过<code>%pre/%post/%preun/%postun</code>分别指定安装前、安装后、卸载前、卸载后要执行的动作。</p>
+<p>举例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%install  #执行python setup.py install进行安装，跳过编译阶段</span><br><span class="line"> %&#123;__python&#125; setup.py install -O1 --skip-build --root %&#123;buildroot&#125; #在%&#123;_sharedstatedir&#125;这个宏指定的目录下安装文件夹hello，并指定权限</span><br><span class="line"> install -d -m 755 %&#123;buildroot&#125;%&#123;_sharedstatedir&#125;/cinder</span><br><span class="line"> %pre</span><br><span class="line"> %post</span><br><span class="line"> %preun</span><br><span class="line">%postun</span><br></pre></td></tr></table></figure></p>
+<h3 id="Clean"><a href="#Clean" class="headerlink" title="Clean"></a>Clean</h3><p>清理资源，如移除BUILDROOT目录<br>举例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%clean</span><br><span class="line">rm –rf %&#123;buildroot&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Files"><a href="#Files" class="headerlink" title="Files"></a>Files</h3><p>指定所有RPM安装的文件<br>Install但未指定的文件，会报错<br>举例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%files</span><br><span class="line">%defattr(-, cinder, cinder, -) #指定权限</span><br><span class="line">#已安装的文件，注意与install处不同，文件前无%&#123;buildroot&#125;</span><br><span class="line">%dir %&#123;_sharedstatedir&#125;/cinder</span><br></pre></td></tr></table></figure></p>
+<h3 id="Changelog"><a href="#Changelog" class="headerlink" title="Changelog"></a>Changelog</h3><p>用于跟踪spec文件的修改记录<br>应该在每次修改后增加相关记录<br>举例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">%changelog</span><br><span class="line">* Fri May 16 2014 Fansp &lt;wangbin@awcloud.com&gt; - 2014.1-15</span><br><span class="line">Make a demo</span><br><span class="line">* Mon Apr 21 2014 Eric Harney &lt;eharney@redhat.com&gt; - 2014.1-2</span><br><span class="line">- Remove qpid settings from cinder-dist.conf</span><br></pre></td></tr></table></figure></p>
+<h3 id="常用的宏"><a href="#常用的宏" class="headerlink" title="常用的宏"></a>常用的宏</h3><p>使用宏，而不是指定绝对路径，增加灵活性。因为不同系统中，使用不同系统路径，spec文件无需修改。<br>内置宏定义在 /usr/lib/rpm/macros文件中。同时支持自定义宏。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Built-in macros</span></span><br><span class="line"> %_prefix /usr  </span><br><span class="line"> %_exec_prefix %&#123;_prefix&#125;  </span><br><span class="line"> %_bindir %&#123;_exec_prefix&#125;/bin  </span><br><span class="line"> %_sbindir %&#123;_exec_prefix&#125;/sbin  </span><br><span class="line"> %_libexecdir %&#123;_exec_prefix&#125;/libexec  </span><br><span class="line"> %_datadir %&#123;_prefix&#125;/share  </span><br><span class="line"> %_sysconfdir %&#123;_prefix&#125;/etc  </span><br><span class="line"> %_sharedstatedir %&#123;_prefix&#125;/com  </span><br><span class="line"> %_localstatedir %&#123;_prefix&#125;/var  </span><br><span class="line"> %_libdir %&#123;_exec_prefix&#125;/lib  </span><br><span class="line"> %_includedir %&#123;_prefix&#125;/include  </span><br><span class="line"> %_oldincludedir /usr/include  </span><br><span class="line"> %_infodir %&#123;_prefix&#125;/info  </span><br><span class="line"> %_mandir %&#123;_prefix&#125;/man</span><br></pre></td></tr></table></figure></p>
+<h2 id="RPM-Build最佳实践建议"><a href="#RPM-Build最佳实践建议" class="headerlink" title="RPM Build最佳实践建议"></a>RPM Build最佳实践建议</h2><p>总结的一些经验教训：</p>
+<ul>
+<li>对于源码需要的修改，使用patch，而不是RPM Hacks</li>
+<li>避免脚本，减少pre/post的使用，逻辑尽量放在代码中</li>
+<li>使用Changelog或版本控制，便于查找及维护</li>
+<li>避免使用root用户制作RPM包</li>
+<li>在Fedora/EPEL中查找现成RPM包、SPEC文件</li>
+</ul>
+<h2 id="Openstack-RPM制作"><a href="#Openstack-RPM制作" class="headerlink" title="Openstack RPM制作"></a>Openstack RPM制作</h2><h3 id="打包前准备"><a href="#打包前准备" class="headerlink" title="打包前准备"></a>打包前准备</h3><p>编写需要的SPEC文件及init脚本。或使用已有的SRPM包，如通过RDO：<a href="https://repos.fedorapeople.org/repos/openstack/" target="_blank" rel="noopener">https://repos.fedorapeople.org/repos/openstack/</a>。</p>
+<ol>
+<li>解压SRPM找到spec文件，放在SPECS目录下</li>
+<li>找到其他source文件，放在SOURCES目录下</li>
+<li>Git clone代码，压缩为SPEC文件指定的名称，放在SOURCES目录下</li>
+<li>按需修改各文件<br><code>rpmbuild –ba &lt;spec_file&gt;</code></li>
+<li>安装RPM包进行测试</li>
+</ol>
+<h3 id="以Nova为例"><a href="#以Nova为例" class="headerlink" title="以Nova为例"></a>以Nova为例</h3><ul>
+<li>SPEC文件<br>openstack-nova.spec</li>
+<li>SOURCES<br>nova-2014.1.3.tar.gz<br>.init及.upstart文件，conf及logrotate等文件</li>
+<li>需要的patch</li>
+<li>rpmbuild<br><code>rpmbuild –ba openstack-nova.spec</code></li>
+<li>按照RDO文档依次安装RPM包搭建环境进行测试</li>
+</ul>
+<h3 id="各组件对应spec文件"><a href="#各组件对应spec文件" class="headerlink" title="各组件对应spec文件"></a>各组件对应spec文件</h3><ul>
+<li>nova - openstack-nova.spec</li>
+<li>Neutron - openstack-neutron.spec</li>
+<li>Keystone - openstack-keystone.spec</li>
+<li>Glance - openstack-glance.spec</li>
+<li>Cinder - openstack-cinder.spec</li>
+<li>Swift - openstack-swift.spec</li>
+<li>Horizon - python-django-horizon.spec</li>
+</ul>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><p>Fedora官网文档：<br><a href="http://fedoraproject.org/wiki/Packaging/Guidelines" target="_blank" rel="noopener">http://fedoraproject.org/wiki/Packaging/Guidelines</a><br><a href="http://fedoraproject.org/wiki/Packaging/ReviewGuidelines" target="_blank" rel="noopener">http://fedoraproject.org/wiki/Packaging/ReviewGuidelines</a></p>
+</li>
+<li><p>Maximum RPM:<br><a href="http://www.rpm.org/max-rpm-snapshot/" target="_blank" rel="noopener">http://www.rpm.org/max-rpm-snapshot/</a></p>
+</li>
+<li><p>RDO仓库：<br><a href="https://repos.fedorapeople.org/repos/openstack/" target="_blank" rel="noopener">https://repos.fedorapeople.org/repos/openstack/</a></p>
+</li>
+<li><p>《鸟哥的Linux私房菜》：<br><a href="http://vbird.dic.ksu.edu.tw/linux_basic/0520rpm_and_srpm.php" target="_blank" rel="noopener">http://vbird.dic.ksu.edu.tw/linux_basic/0520rpm_and_srpm.php</a></p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>openstack</category>
+      </categories>
+      <tags>
+        <tag>openstack</tag>
+        <tag>ci</tag>
+        <tag>rpmbuild</tag>
+        <tag>rpm</tag>
+        <tag>yum</tag>
       </tags>
   </entry>
   <entry>
@@ -1429,39 +1658,6 @@
         <tag>web</tag>
         <tag>orm</tag>
         <tag>sqlalchemy</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>解密Redis持久化</title>
-    <url>/2017/04/redis-persistence-demystified/</url>
-    <content><![CDATA[<p>本文主要是对<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">antirez博客</a>的翻译。其实<a href="http://blog.nosqlfan.com/html/3813.html" target="_blank" rel="noopener"></a>nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。</p>
-<p>首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久化的工作原理，Redis的持久化如何可靠，以及与其它数据库的对比。</p>
-<h2 id="操作系统和磁盘"><a href="#操作系统和磁盘" class="headerlink" title="操作系统和磁盘"></a>操作系统和磁盘</h2><h3 id="写操作的流程"><a href="#写操作的流程" class="headerlink" title="写操作的流程"></a>写操作的流程</h3><p>我们应该考虑的第一件事是对于数据库的持久化，我们的期望是什么。因此我们将一个简单的写操作中发生的事情可视化：</p>
-<ol>
-<li>客户端发送写命令到数据库（数据库在客户端内存中）</li>
-<li>数据库接收到写操作（数据在服务器内存中）</li>
-<li>数据库调用系统调用，将数据写入磁盘（数据在内核缓冲区中）</li>
-<li>操作系统将写缓冲区的数据转移到磁盘控制器上（数据在磁盘缓存中）</li>
-<li>磁盘控制器真正将数据写入到物理介质（数据真正落在磁盘上）<a id="more"></a>
-<blockquote>
-<p>注意：以上是一个各方面简单化的版本，因为实际有更多的cache和buffer。<br>步骤2经常被实现为数据库内部的一个复杂缓存系统。写操作也经常被不同的线程或进程处理。然而数据库或早或晚要将数据写入磁盘，而这就是我们关心的。也就是说，内存中的数据在某个节点必须要被传输到内核（步骤3）。<br>另外一个大的细节省略在步骤3.现实要更复杂，因为大多数高级操作系统内核实现了不同级别的缓存，其中通常包含文件系统级别的chache和一个略小一些的buffer cache。</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="故障分析"><a href="#故障分析" class="headerlink" title="故障分析"></a>故障分析</h3><p>在这个流程中什么时候我们的写操作才是安全的呢？</p>
-<p>如果我们考虑一个仅涉及数据库软件的失效（例如进程被管理员杀掉或崩溃），而不涉及操作系统内核，那成功执行完成步骤3的写操作就被认为是安全的。也就是在write这个系统调用（或其它用于将数据转移到内核的系统调用）返回成功后。在此步骤之后，即使数据库进程崩溃，内核仍然会负责将数据转移到磁盘控制器。</p>
-<p>如果我们考虑一个更灾难性的事件，如电力中断，只有在步骤5执行完成后我们才是安全的。也就是在数据真正被转移到物理设备中时。</p>
-<p>我们可以总结为，数据安全的重要阶段位于步骤3、4、5：</p>
-<h3 id="POSIX-API"><a href="#POSIX-API" class="headerlink" title="POSIX API"></a>POSIX API</h3><h3 id="我们无法控制的部分"><a href="#我们无法控制的部分" class="headerlink" title="我们无法控制的部分"></a>我们无法控制的部分</h3><h3 id="数据损坏"><a href="#数据损坏" class="headerlink" title="数据损坏"></a>数据损坏</h3><h2 id="Redis持久化实现"><a href="#Redis持久化实现" class="headerlink" title="Redis持久化实现"></a>Redis持久化实现</h2><h3 id="RDB快照"><a href="#RDB快照" class="headerlink" title="RDB快照"></a>RDB快照</h3><h3 id="AOF文件"><a href="#AOF文件" class="headerlink" title="AOF文件"></a>AOF文件</h3><h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><p>appendfsync no<br>appendfsync everysec<br>appendfsync always<br>为什么pipeline不同<br>AOF和Redis事务</p>
-<h3 id="与PostgreSQL和MySQL的对比"><a href="#与PostgreSQL和MySQL的对比" class="headerlink" title="与PostgreSQL和MySQL的对比"></a>与PostgreSQL和MySQL的对比</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h2 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h2><h2 id="附录：关于重启阶段的笔记"><a href="#附录：关于重启阶段的笔记" class="headerlink" title="附录：关于重启阶段的笔记"></a>附录：关于重启阶段的笔记</h2>]]></content>
-      <categories>
-        <category>Redis</category>
-      </categories>
-      <tags>
-        <tag>redis</tag>
-        <tag>nosql</tag>
-        <tag>aof</tag>
-        <tag>rdb</tag>
       </tags>
   </entry>
   <entry>
@@ -1544,93 +1740,36 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之十四：libcurl编程</title>
-    <url>/2012/09/linux-curl-libcurl/</url>
-    <content><![CDATA[<p>在<a href="http://127.0.0.1:4000/2012/09/curl-vs-wget/" target="_blank" rel="noopener">Linux下cURL使用教程之十三：curl vs wget</a>中我们谈到，curl是基于libcurl库实现的。<br>而libcurl库是开源免费跨平台的，可用于多种语言。<br>有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。</p>
-<p>官方提供了一些demo代码，大家下载查看。<br>本篇文章我们只谈谈各种语言下的使用，及一些参考。</p>
-<h2 id="C-C"><a href="#C-C" class="headerlink" title="C/C++"></a>C/C++</h2><p>C/C++语言下使用libcurl有些繁琐，但功能很强大、稳定高效。而且尤其C下本身开源库相比其它语言较少，因此libcurl库使用较多。<br>参考：<br><a href="http://curl.haxx.se/libcurl/c/libcurl-tutorial.html" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/c/libcurl-tutorial.html</a><br><a href="http://curl.haxx.se/libcurl/c/" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/c/</a></p>
-<h2 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h2><p>PHP的libcurl库使用较多。<br><a id="more"></a><br>参考：<br><a href="http://cn2.php.net/curl" target="_blank" rel="noopener">http://cn2.php.net/curl</a><br><a href="http://curl.haxx.se/libcurl/php/" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/php/</a></p>
-<h2 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h2><p>python中也有curl库：PycURL。<br>但更易用使用更普遍的还是<a href="https://pypi.python.org/pypi/requests" target="_blank" rel="noopener">requests</a>。</p>
-<h2 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h2><p>Java下的curl库一度被抛弃：<a href="https://curl.haxx.se/libcurl/java/" target="_blank" rel="noopener">accessing libcurl from Java</a>。<br>不知道目前github上的版本是否稳定。<br>更建议使用apache httpclient(貌似现在叫做httpcomponents)，参考：<a href="http://hc.apache.org/" target="_blank" rel="noopener">Apache HttpComponents</a>。</p>
-<h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><p>如果作为日常请求工作使用，如在测试接口时，更建议使用带有GUI界面的postman，功能很强大，而且自带分组、回归等CI功能。<br>参考：<a href="http://www.getpostman.com/" target="_blank" rel="noopener">Postman | Supercharge your API workflow</a>。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>如果需要编写shell脚本进行功能更强大的CI测试，curl仍是首选。<br>此系列告一段落。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-        <tag>libcurl</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网关类产品的性能测试之一：简介及性能指标介绍</title>
-    <url>/2013/03/gateway-performance-test-desc/</url>
-    <content><![CDATA[<p>本文所指的网关类产品，是指实际拓扑中会被部署作为网关的产品，典型的如路由器/交换机、防火墙、IDS/IPS、UTM、NGFW等。<br>但是性能测试中很多种类，对于大多数产品其实是相通的，因此对其它产品的性能测试也有参考价值。<br>文章主要面向的对象为性能测试及性能调优人员，同时对选购产品的潜在客户有指导意义。</p>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>对于网关类产品性能和稳定性是前提。如今各种NGFW、应用防火墙等概念不断涌现，各大厂商反复在功能的丰富性上做文章，但所有这些只能算作锦上添花，只有产品的性能与稳定性才是真正的根基。对于任何网络环境，如果网关的吞吐小于实际需要的带宽值，必将是一场灾难。而更多的功能导致数据包经过的路径更长，对性能带来了更严峻的挑战。同时，稳定性和性能往往是相关的，且性能测试更标准。<br>因此客户评价网关产品的优劣，除了产品所支持功能以外，更关注的指标就是性能。另外，现在市场上大部分的网络安全类产品或者网关类产品在功能和协议的支持上，同质化较为严重，客户在选取时，性能指标就成为衡量的一个很重的指标项。<br>产品的性能指标不仅客户非常关注，设备厂商在向市场发布产品时，性能指标也会做为重点进行宣传，正面PK。由此可见性能指标对于网关类产品的重要性。</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>此系列文章将介绍业界较为常用的性能指标及测试方法。因篇幅较长，为竭尽所能说的更清楚明白，将本系列分为以下四部分：</p>
+    <title>解密Redis持久化</title>
+    <url>/2017/04/redis-persistence-demystified/</url>
+    <content><![CDATA[<p>本文主要是对<a href="http://oldblog.antirez.com/post/redis-persistence-demystified.html" target="_blank" rel="noopener">antirez博客</a>的翻译。其实<a href="http://blog.nosqlfan.com/html/3813.html" target="_blank" rel="noopener"></a>nosqlfan已经有一篇译文，但不知道为什么省略了很多重要的细节，因此完整翻译了本篇。</p>
+<p>首先antirez感觉到，他看到的所有针对Redis的文章和讨论中，对Redis持久化的误解是最大的。因此在这篇文章中，他将尝试真正的公正一些：不做Redis的广告，不尝试跳过任何细节以避免使Redis模糊不清。作者想做的仅是提供一个清晰易懂的描绘，介绍Redis持久化的工作原理，Redis的持久化如何可靠，以及与其它数据库的对比。</p>
+<h2 id="操作系统和磁盘"><a href="#操作系统和磁盘" class="headerlink" title="操作系统和磁盘"></a>操作系统和磁盘</h2><h3 id="写操作的流程"><a href="#写操作的流程" class="headerlink" title="写操作的流程"></a>写操作的流程</h3><p>我们应该考虑的第一件事是对于数据库的持久化，我们的期望是什么。因此我们将一个简单的写操作中发生的事情可视化：</p>
 <ol>
-<li>简介及性能指标介绍 - 本篇</li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-rfc2544/" target="_blank" rel="noopener">RFC2544四项指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/03/gateway-performance-test-others/" target="_blank" rel="noopener">其它指标测试方法</a></li>
-<li><a href="http://stackeye.com/2013/04/gateway-performance-test-tools/" target="_blank" rel="noopener">测试工具、注意事项及经验总结</a></li>
-</ol>
-<a id="more"></a>
-<h2 id="性能测试简介"><a href="#性能测试简介" class="headerlink" title="性能测试简介"></a>性能测试简介</h2><p>以下解释来自百度百科：</p>
+<li>客户端发送写命令到数据库（数据库在客户端内存中）</li>
+<li>数据库接收到写操作（数据在服务器内存中）</li>
+<li>数据库调用系统调用，将数据写入磁盘（数据在内核缓冲区中）</li>
+<li>操作系统将写缓冲区的数据转移到磁盘控制器上（数据在磁盘缓存中）</li>
+<li>磁盘控制器真正将数据写入到物理介质（数据真正落在磁盘上）<a id="more"></a>
 <blockquote>
-<p>性能测试是通过自动化的测试<strong>工具</strong>模拟多种正常、峰值以及异常<strong>负载</strong>条件来对系统的各项性能指标进行测试。负载测试和压力测试都属于性能测试，两者可以结合进行。通过负载测试，确定在各种工作负载下系统的性能，目标是测试当负载逐渐增加时，系统各项性能指标的变化情况。压力测试是通过确定一个系统的<strong>瓶颈</strong>或者不能接受的性能点，来获得系统能提供的最大服务级别的测试。</p>
+<p>注意：以上是一个各方面简单化的版本，因为实际有更多的cache和buffer。<br>步骤2经常被实现为数据库内部的一个复杂缓存系统。写操作也经常被不同的线程或进程处理。然而数据库或早或晚要将数据写入磁盘，而这就是我们关心的。也就是说，内存中的数据在某个节点必须要被传输到内核（步骤3）。<br>另外一个大的细节省略在步骤3.现实要更复杂，因为大多数高级操作系统内核实现了不同级别的缓存，其中通常包含文件系统级别的chache和一个略小一些的buffer cache。</p>
 </blockquote>
-<p>其中有三个关键词需要关注：</p>
-<ul>
-<li>工具：性能测试一般需要的压力较大较复杂，单纯依靠手工很难做到，因此一般需要专业化的设备、工具，或编写自动化测试脚本完成。网关类产品一般要求的负载较高，在千兆、万兆设置更高级别，一般需要专业配置千兆万兆网卡的硬件设备，如IAXA等，价格较昂贵。而其它产品一般也需要如Loadruner、Jmeter等专业化的性能测试软件并根据场景编写脚本完成。</li>
-<li>负载：性能测试有别于功能测试的点就在于使用的负载较高。而且负载的构造需要根据实际的场景才有价值，并需要使用特定的工具或自行研发软件实现。</li>
-<li>瓶颈：逐渐加大负载到达瓶颈。测试中比较重要的就是各个性能拐点，因为各个拐点往往都有重要的意义。如保持最优响应的拐点、延迟急剧增加的拐点、系统彻底瘫痪的拐点。持续测试找到各个拐点，对于产品的调优、部署及运维都有很大的价值。<br><img src="/img/jmeter-result.png" alt="性能测试结果"></li>
-</ul>
-<h2 id="术语介绍"><a href="#术语介绍" class="headerlink" title="术语介绍"></a>术语介绍</h2><p>文章中会涉及到一些术语，现总结如下，供参考。</p>
-<ul>
-<li>性能测试，对产品负载压力承受能力的测试。</li>
-<li>RFC，互联网及软件等的一些标准，基本的互联网通信协议都有在RFC文件内详细说明。</li>
-<li>网关类产品，部署作为网关的设备及软件。</li>
-<li>IDS，入侵检测系统</li>
-<li>IPS，入侵防御系统</li>
-<li>UTM，对防火墙、IDS\、IPS三个的综合，可以比较全面的进行管理。但是UTM通过一台物理设备集成大量功能，导致了应对大量数据的时候效率会下降，同时存在设备损坏导致全面崩溃的可能。</li>
-<li>NGFW，下一代防火墙，安全设备类产品未来的发展方向。</li>
-<li>DUT，devices under test，测试设备。</li>
-</ul>
-<h2 id="性能指标名词解释"><a href="#性能指标名词解释" class="headerlink" title="性能指标名词解释"></a>性能指标名词解释</h2><p>网络安全类产品或网关类产品常见的性能指标有：</p>
-<ul>
-<li>RFC2544 四项值（吞吐量、延迟、丢包率、背靠背）</li>
-<li>TCP 的每秒新建连接数（CPS）</li>
-<li>HTTP 的每秒处理事务数（TPS）、HTTP 有效吞吐量（HTTP Throughput）</li>
-<li>最大并发连接数等</li>
-</ul>
-<p>除此之外，部分评测机构或客户也会根据自己的实际情况增加性能指标，如：IPS/UTM下的HTTP有效吞吐量和每秒新建，Mail协议（SMTP/POP3/IMAP）的有效吞吐量和新建，特殊场景的混合流量（如加入恶意流量）的吞吐量等。<br>可参考业界标杆Fortinet的<a href="https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/Fortinet_Product_Matrix.pdf" target="_blank" rel="noopener">性能测试报告</a>。<br><img src="/img/fortinet-product-matrix-sample.png" alt="Fortinet product matrix"></p>
-<p>下面我们先认识一下各性能指标名词的含义。本篇只介绍各名词的含义，测试方法后续章节中说明。</p>
-<h3 id="RFC2544-四项值"><a href="#RFC2544-四项值" class="headerlink" title="RFC2544 四项值"></a>RFC2544 四项值</h3><p><a href="https://tools.ietf.org/html/rfc1242" target="_blank" rel="noopener">RFC1242</a>文档中定义了吞吐量（Throughput）、延迟（Latency）、丢包率（Frame Loss）、背靠背（Back-to-Back）四个标准术语。<br><a href="https://www.ietf.org/rfc/rfc2544.txt" target="_blank" rel="noopener">RFC2544</a>是RFC组织提出的用于评测网络互联设备（防火墙、IDS、交换机路由器等）的国际标准，其中主要对RFC1242 中定义的性能评测参数的具体测试方法、结果的提交形式作了较详细的规定。</p>
-<p>下面将对这四项值是做为重点进行介绍。</p>
-<h4 id="吞吐量（Throughput）"><a href="#吞吐量（Throughput）" class="headerlink" title="吞吐量（Throughput）"></a>吞吐量（Throughput）</h4><p>吞吐量是指被测设备在不丢包的情况下，所能转发的最大速率或最大流量。通常测试结果以每秒通过的最大数据包数（PPS）或比特数（Mb/s）。<br>用于反映被测设备所能够处理的最大的数据流量，重在测试被测设备的转发能力。<br>结果值越大越好。<br>吞吐量比较通用，适用于绝大多数软件系统的性能测试。</p>
-<h4 id="延迟（Latency）"><a href="#延迟（Latency）" class="headerlink" title="延迟（Latency）"></a>延迟（Latency）</h4><p>发送一定数量的数据包，记录中间数据包发出的时间T1，以及经由被测设备转发后到达接收端口的时间T2：Latency＝T2－T1。延迟的测试结果以毫秒（ms）或微秒（μs）表示。<br>测试延迟是在测试过程中不存在丢包的条件下进行的，也就是说在测试延迟时，先要知道被测设备的吞吐量，从而定义发包的速率。<br>延迟用于反映被测设备处理数据包的速度。<br>延迟越小，表明设备处理速度越快。<br>延迟比较通用，是大多数软件系统性能测试的重要指标。</p>
-<h4 id="丢包率（Frame-Loss）"><a href="#丢包率（Frame-Loss）" class="headerlink" title="丢包率（Frame Loss）"></a>丢包率（Frame Loss）</h4><p>丢包率是指在一定的负载下，由于缺乏资源而未能被转发的包占应该转发的包数的百分比。<br>用于反映被测设备承受特定负载能力。<br>结果值越小越好。</p>
-<h4 id="背靠背（Back-to-Back）"><a href="#背靠背（Back-to-Back）" class="headerlink" title="背靠背（Back-to-Back）"></a>背靠背（Back-to-Back）</h4><p>以能够产生的最大的速率，发送一定长度的数据包，并不断改变单次发送的数据包数目，直到被测设备能够完全转发所有发送的数据包而不丢包，这个包数就是该设备的背对背值。<br>用于反映被测设备处理突发数据的缓存能力。背对背的值越大，路由器的缓存能力就越强，处理突发数据包的能力越强。</p>
-<h3 id="TCP每秒新建连接数（CPS）"><a href="#TCP每秒新建连接数（CPS）" class="headerlink" title="TCP每秒新建连接数（CPS）"></a>TCP每秒新建连接数（CPS）</h3><p>TCP每秒新建是在业界提到最多的一个。这个性能指标出自<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档。全称是 Maximum TCP Connection Establishment Rate（最大TCP 建立速率），大家习惯将这个指标称为CPS（TCPConnection Per Second）。<br>TCP每秒新建速率是指在被测设备能够成功建立所有请求连接的条件下，所能承受的最大TCP 连接建立速度。其测试采用迭代搜索算法，每次迭代过程中，以低于被测设备所能承受的最大并发连接数发起速率不同的TCP 连接请求，直到得到所有连接成功建立的最大速率。<br>TCP每秒新建速率以连接数/秒表示结果，其值越大越好。<br>注：TCP Connection Establishment已在<a href="https://tools.ietf.org/html/rfc2647" target="_blank" rel="noopener">RFC2647</a>文档中进行定义。</p>
-<h3 id="HTTP的每秒处理事务数（TPS）"><a href="#HTTP的每秒处理事务数（TPS）" class="headerlink" title="HTTP的每秒处理事务数（TPS）"></a>HTTP的每秒处理事务数（TPS）</h3><p>TPS性能指标是反映被测设备应用层的新建速率，这个性能指标也出自RFC3511文档。全称是Maximum HTTP Transaction Rate（最大HTTP传输事务速率），大家习惯将这个指标称为TPS（HTTPTransaction Per Second）。<br>HTTP的每秒事务数是指在被测设备能够成功建立连接的条件下，所能承受的最大的HTTP 协议的请求/回应操作的速度。其测试采用反复搜索过程，每次反复过程中，以低于被测设备所能承受的最大处理速率，直到所有连接被成功建立并且有对相应的请求。<br>结果以连接数/秒表示结果。其值越大越好。</p>
-<h3 id="HTTP有效吞吐量（HTTP-Good-Throughput）"><a href="#HTTP有效吞吐量（HTTP-Good-Throughput）" class="headerlink" title="HTTP有效吞吐量（HTTP Good Throughput）"></a>HTTP有效吞吐量（HTTP Good Throughput）</h3><p>HTTP有效吞吐量是反映被测设备在应用层的最大传输速率，这个性能指标在RFC3511文档中没有明确描述，但可以通过将HTTP Transaction Rate调整转化为HTTP有效吞吐量的测试方法。HTTP有效吞吐量是指在被测设备能够成功建立连接的条件下，在同一时间内所能承受的最大的有效数据量。<br>测试结果值越大越好。</p>
-<h3 id="最大并发连接数"><a href="#最大并发连接数" class="headerlink" title="最大并发连接数"></a>最大并发连接数</h3><p>最大并发连接数性能指标是反映被测设备最大的会话条目数，这个性能指标也出自RFC3511文档。全称是 Concurrent TCP Connection Capacity。最大并发连接数是指在被测设备能够成功建立连接的条件下，所能同时承受的最大的链接条目数，也反映了被测设备维持多个会话的能力。<br>测试结果值越大越好。</p>
-<h3 id="其它性能指标项"><a href="#其它性能指标项" class="headerlink" title="其它性能指标项"></a>其它性能指标项</h3><p>在<a href="https://www.ietf.org/rfc/rfc3511.txt" target="_blank" rel="noopener">RFC3511</a>文档中主要描述了HTTP协议的性能测试，但随着产品及技术的大幅度更新，这往往已经不能满足客户或厂商的需求。我们还需要测试其它协议的性能，通常以应用层为主：包括FTP协议、Mail协议等。但测试的内容基本都是一样的，以每秒新建（每秒会话）和吞吐量为主。只需将HTTP协议变为其它应用层协议即可。</p>
-<p>随着网关产品尤其是网络安全类产品的发展，性能测试的范围不再局限于防火墙功能上的性能测试，还新增加了对其它功能如IPS、AV（防病毒）和UTM（集成安全网关）等的性能测试。但可以看到，这些功能的增加对于测试过程或者测试方法而言其实没有直接的影响，仍然要使用原来的测试过程或测试方法。下篇我们将介绍具体的测试方法。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要是简介及测试方法的概念介绍。所有的性能指标中，RFC2544的四项指标是其中比较重要的部分且目前基本以形成标准，下篇文章将对其进行介绍。</p>
-]]></content>
+</li>
+</ol>
+<h3 id="故障分析"><a href="#故障分析" class="headerlink" title="故障分析"></a>故障分析</h3><p>在这个流程中什么时候我们的写操作才是安全的呢？</p>
+<p>如果我们考虑一个仅涉及数据库软件的失效（例如进程被管理员杀掉或崩溃），而不涉及操作系统内核，那成功执行完成步骤3的写操作就被认为是安全的。也就是在write这个系统调用（或其它用于将数据转移到内核的系统调用）返回成功后。在此步骤之后，即使数据库进程崩溃，内核仍然会负责将数据转移到磁盘控制器。</p>
+<p>如果我们考虑一个更灾难性的事件，如电力中断，只有在步骤5执行完成后我们才是安全的。也就是在数据真正被转移到物理设备中时。</p>
+<p>我们可以总结为，数据安全的重要阶段位于步骤3、4、5：</p>
+<h3 id="POSIX-API"><a href="#POSIX-API" class="headerlink" title="POSIX API"></a>POSIX API</h3><h3 id="我们无法控制的部分"><a href="#我们无法控制的部分" class="headerlink" title="我们无法控制的部分"></a>我们无法控制的部分</h3><h3 id="数据损坏"><a href="#数据损坏" class="headerlink" title="数据损坏"></a>数据损坏</h3><h2 id="Redis持久化实现"><a href="#Redis持久化实现" class="headerlink" title="Redis持久化实现"></a>Redis持久化实现</h2><h3 id="RDB快照"><a href="#RDB快照" class="headerlink" title="RDB快照"></a>RDB快照</h3><h3 id="AOF文件"><a href="#AOF文件" class="headerlink" title="AOF文件"></a>AOF文件</h3><h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><p>appendfsync no<br>appendfsync everysec<br>appendfsync always<br>为什么pipeline不同<br>AOF和Redis事务</p>
+<h3 id="与PostgreSQL和MySQL的对比"><a href="#与PostgreSQL和MySQL的对比" class="headerlink" title="与PostgreSQL和MySQL的对比"></a>与PostgreSQL和MySQL的对比</h3><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h2 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h2><h2 id="附录：关于重启阶段的笔记"><a href="#附录：关于重启阶段的笔记" class="headerlink" title="附录：关于重启阶段的笔记"></a>附录：关于重启阶段的笔记</h2>]]></content>
       <categories>
-        <category>Testing</category>
+        <category>Redis</category>
       </categories>
       <tags>
-        <tag>性能测试</tag>
-        <tag>ips</tag>
-        <tag>NGFW</tag>
-        <tag>防火墙</tag>
-        <tag>spi firewall</tag>
+        <tag>redis</tag>
+        <tag>nosql</tag>
+        <tag>aof</tag>
+        <tag>rdb</tag>
       </tags>
   </entry>
 </search>
