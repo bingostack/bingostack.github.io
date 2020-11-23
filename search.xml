@@ -1,104 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>buildbot实战</title>
-    <url>/2014/11/buildbot-in-action/</url>
-    <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
-<ul>
-<li>监控代码仓库</li>
-<li>代码仓库有变化后，立即拉取代码</li>
-<li>执行build、部署、测试及发布工作</li>
-<li>反馈结果</li>
-</ul>
-<p>我们对这样一个工具的一般要求为：</p>
-<ul>
-<li>轻量级，安装、配置简单，本身耗费资源较少</li>
-<li>高效率，较快的完成自动化任务</li>
-<li>通用性强，在不同的操作系统，甚至与不同的代码系统兼容</li>
-<li>易扩展、配置及管理，能较简单的配置自动化任务</li>
-</ul>
-<p>Buildbot和Jenkins都能很好的满足我们这些要求。但相比Jenkins，buildbot更轻量级，部署配置更为简单。<br>Web界面也更简单美观一些。</p>
-<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>buildbot架构比较简单，主要分为三部分：</p>
-<ul>
-<li>版本控制层<br>外部版本控制，通过插件或主动触发的方式触发buildbot执行任务。</li>
-<li>任务执行层<br>master接收任务后，调度其slave执行任务，并获取到返回的结果</li>
-<li>通知层<br>master获取结果后，可通过邮件、IRC等方式进行通知。</li>
-</ul>
-<p>其中重要的主体是master和slave，其主要采用星形拓扑结构，一个集群中可以多个master、多个slave。master主要负责任务接收、调度并通知任务，slave负责具体的任务执行。各节点本身无状态，横向扩展性很好。<br><a id="more"></a><br><img src="/img/buildbot-overview.png" alt="buildbot架构"></p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="pip安装"><a href="#pip安装" class="headerlink" title="pip安装"></a>pip安装</h3><p>建议使用pip安装，避免麻烦的依赖问题。<br>同时当前对python3版本支持不太好，建议使用python2.7版本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install gcc python-devel </span><br><span class="line">yum install python-dateutil15 git expect</span><br><span class="line"><span class="comment"># master安装</span></span><br><span class="line">pip install buildbot</span><br><span class="line"><span class="comment"># salve安装</span></span><br><span class="line">pip install buildbot-slave</span><br></pre></td></tr></table></figure></p>
-<p>如果是python2.6的话，因为最新版本的Twisted需要python2.7，所以需要提前指定版本安装：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install Twisted==15.1.0</span><br></pre></td></tr></table></figure></p>
-<p>为充分利用资源，同一台机器可配置为多个master、slave：可使用不同用户或virtualenv，每个用户或virtualenv环境部署为一个节点。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install virtualenv</span><br></pre></td></tr></table></figure></p>
-<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>最近看到<a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">buildbot官方</a>给出了Dockerfile(但Dockerfile地址是错的，可以自行在github代码中查找)，可下载后自行构建镜像使用，运行后即可使用：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Download Buildbot Dockerfile.</span></span><br><span class="line">wget https://raw.githubusercontent.com/buildbot/buildbot/master/master/Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the Buildbot container (it will take a few minutes to download packages)</span></span><br><span class="line">docker build -t buildbot - &lt; Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Run buildbot</span></span><br><span class="line">CONTAINER_ID=$(docker run -d -p 8010:8010 -p 22 buildbot)</span><br></pre></td></tr></table></figure></p>
-<p>然后打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可。</p>
-<h2 id="创建及运行"><a href="#创建及运行" class="headerlink" title="创建及运行"></a>创建及运行</h2><h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildbot create-master master</span><br><span class="line"><span class="comment"># 配置文件</span></span><br><span class="line">mv master/master.cfg.sample master/master.cfg</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildbot start master</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f master/twistd.log</span><br></pre></td></tr></table></figure>
-<p>buildbot会在当前目录下创建master名称的目录，以上为<code>master</code>。<br>看到最后显示<code>BuildMaster is running</code>即为启动成功，此时可通过<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>访问，默认用户名密码都是<code>pyflakes</code>。</p>
-<h3 id="slave"><a href="#slave" class="headerlink" title="slave"></a>slave</h3><p>创建slave时需要指定mater的地址，或者修改配置文件指定。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildslave create-slave slave1 localhost:9989 slave1 pass</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildslave start slave</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f slave/twistd.log</span><br></pre></td></tr></table></figure></p>
-<p>create-slave的参数分布是：slave目录、master、名字、密码。其中master默认都采用9989与slave通信。名字、密码必须与master的master.cfg中配置的一致：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'slaves'</span>] = [buildslave.BuildSlave(<span class="string">"example-slave"</span>, <span class="string">"pass"</span>)]</span><br></pre></td></tr></table></figure></p>
-<h3 id="预览"><a href="#预览" class="headerlink" title="预览"></a>预览</h3><p>此时打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可看到如下页面：<br><img src="/img/buildbot-index.png" alt="buildbot预览"><br>其中Buildslaves页面可查看到我们新添加的example-slave，且状态为<code>Idle</code>。<br>而Waterfall页面可查看到当前的builder，目前只有runtest，点进去点击forcebuild即可进行测试build。成功后记录显示为绿色。</p>
-<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>Buildbot的配置文件为<code>.cfg</code>后缀的python脚本，使用python语法。如上文slave的定义就是一个python list的定义。</p>
-<h3 id="master配置"><a href="#master配置" class="headerlink" title="master配置"></a>master配置</h3><p>主要配置如下。</p>
-<ul>
-<li>BUILDSLAVES<br>slave的定义，以list的形式呈现。需要主要名字和密码与slave一致。<br>其中protocols可定义与slave的通信方式，包括端口等。</li>
-<li><p>CHANGESOURCES<br>指定需要监控的源代码地址。格式如下，其中可指定git地址、工作目录、分支、监控周期等。可定义多个，每个append进list即可。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c[&apos;change_source&apos;] = []</span><br><span class="line">c[&apos;change_source&apos;].append(changes.GitPoller(</span><br><span class="line">        &apos;git://github.com/buildbot/pyflakes.git&apos;,</span><br><span class="line">        workdir=&apos;gitpoller-workdir&apos;, branch=&apos;master&apos;,</span><br><span class="line">        pollinterval=300))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>SCHEDULERS<br>scheduler指定何时、如何触发执行builder，其中builder在BUILDERS中定义。下文定义了两个scheduler：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'schedulers'</span>] = []</span><br><span class="line"><span class="comment"># 定义每小时运行的scheduler</span></span><br><span class="line">hourlyscheduler = Periodic(name = <span class="string">"hourly"</span>,</span><br><span class="line">                           builderNames = [<span class="string">"simplebuild"</span>],</span><br><span class="line">                           periodicBuildTimer = <span class="number">3600</span>)</span><br><span class="line"><span class="comment"># 定义手动触发的scheduler</span></span><br><span class="line">c[<span class="string">'schedulers'</span>].append(schedulers.ForceScheduler(</span><br><span class="line">                            name=<span class="string">"force"</span>,</span><br><span class="line">                            builderNames=[<span class="string">"master"</span>]))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>BUILDERS<br>builder定义具体执行的任务内容，由一系列的步骤组成。每个步骤定义在step中，factory包含一系列的step，builder通过指定factory等参数创建。可定义多个builder。<br>代码如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义factory</span></span><br><span class="line">factory = util.BuildFactory()</span><br><span class="line"><span class="comment"># 定义具体step</span></span><br><span class="line">factory.addStep(steps.Git(repourl=<span class="string">'git://github.com/buildbot/pyflakes.git'</span>, mode=<span class="string">'incremental'</span>))</span><br><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"trial"</span>, <span class="string">"pyflakes"</span>]))</span><br><span class="line"><span class="comment"># 创建builder</span></span><br><span class="line">c[<span class="string">'builders'</span>] = []</span><br><span class="line"><span class="comment"># 指定名称、使用的slave、factory</span></span><br><span class="line">c[<span class="string">'builders'</span>].append(</span><br><span class="line">    util.BuilderConfig(name=<span class="string">"master"</span>,</span><br><span class="line">      slavenames=[<span class="string">"master"</span>],</span><br><span class="line">      factory=factory))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>STATUS TARGETS<br>此处定义buildbot对外通知build信息的方式。最基本的方式就是显示在页面中，因此此处同时定义了页面的认证方式，即登录使用的用户名、密码在此处修改。同时可定义IRC、邮件等通知方式。</p>
-</li>
-<li>PROJECT IDENTITY<br>此处主要为buildbot的基本信息，如title、超链接、url等。</li>
-<li>DB URL<br>此处定义使用的数据库，默认使用sqlite，地址为本地文件路径。</li>
-</ul>
-<h3 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h3><p>slave的定义主要在<code>buildbot.tac</code>文件中，可用于定义使用的master及slave基本信息。</p>
-<h2 id="启动及使用"><a href="#启动及使用" class="headerlink" title="启动及使用"></a>启动及使用</h2><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><ul>
-<li>启动<br>master、slave的启动上文已提及，子命令为start，参数为路径。</li>
-<li>停止、重启<br>stop和restart，其余同start</li>
-<li>master重新加载配置<br><code>buildbot reconfig master</code>即可重新加载配置。</li>
-</ul>
-<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>平时比较常用手动触发build，即forcebuild：web页面登录-&gt;Builders-&gt;选择builder-&gt;Force Build-&gt;在Waterfall查看打包结果及详细日志。<br><img src="/img/buildbot-waterfall.png" alt="buildbot waterfall"><br>注意：只有登录后才有build权限。</p>
-<h3 id="各页面介绍"><a href="#各页面介绍" class="headerlink" title="各页面介绍"></a>各页面介绍</h3><p>Buildbot比较方便的一点是全部通过页面来进行操作。主要页面介绍如下：</p>
-<ul>
-<li>Waterfall，以瀑布流的方式显示build任务，可点击任务查看详情、执行操作等</li>
-<li>Grid/T-Grid，以对应的方式显示build任务</li>
-<li>Console，还在开发中，当前主要显示revision信息</li>
-<li>Builders，定义的所有builder</li>
-<li>Recent Builds，最近的build</li>
-<li>Buildslaves，定义的所有slave</li>
-<li>Changesources，定义的所有代码仓库</li>
-<li>JSON API，对外提供的JSON API文档</li>
-</ul>
-<h2 id="高级使用"><a href="#高级使用" class="headerlink" title="高级使用"></a>高级使用</h2><h3 id="多分支build"><a href="#多分支build" class="headerlink" title="多分支build"></a>多分支build</h3><p>定义一个Changesource。<br>定义多个schedulers，分别对应不同分支。<br>定义多个factory，其中的step除branch不同外，其余step通用。通用的step可一次定义，多次使用。<br>builder分别指定分支和factory。</p>
-<h3 id="多项目build"><a href="#多项目build" class="headerlink" title="多项目build"></a>多项目build</h3><p>新版本可使用此功能，但不太推荐。buildbot的一个master还是更多的擅长对一个项目的管理。<br>需要定义多个Changesource，然后在其它定义时通过<code>project</code>和<code>repository</code>参数指定项目。</p>
-<h3 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h3><p>通过检查step的返回结果判断是否执行成功，规则同shell：0为成功，其它失败。<br>因此如果step中调用了自己的脚本，需要保证按上述规则返回结果。</p>
-<h3 id="添加参数"><a href="#添加参数" class="headerlink" title="添加参数"></a>添加参数</h3><p>使用<code>util.Property</code>获得网页上指定的参数，可设置默认值：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"bash"</span>, <span class="string">"autorpm.sh"</span>, util.Property(<span class="string">'project'</span>, default=<span class="string">''</span>)]))</span><br></pre></td></tr></table></figure></p>
-<p>在build页面通过name/value指定，如：<br><img src="/img/buildbot-param.png" alt="buildbot指定参数"></p>
-<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><p>实际使用中发现，buildslave所创建的文件，权限都为600或700。<br>这样会造成如cp到apache目录时，apache无法读取文件。<br>通过官方文档查看到slave启动时有umask选项：</p>
-<blockquote>
-<p>–umask<br>This is a string (generally an octal representation of an integer) which will cause the buildslave process’ umask value to be set shortly after initialization.<br>The twistddaemonization utility forces the umask to 077 at startup (which means that all files created by the buildslave or its child processes will be unreadable by any user other than the buildslave account).<br>If you want build products to be readable by other accounts, you can add –umask=022 to tell the buildslave to fix the umask after twistd clobbers it.<br>If you want build products to be writable by other accounts too, use –umask=000, but this is likely to be a security problem.</p>
-</blockquote>
-<p>通过修改slave目录下的buildbot.tac，修改：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">umask = 022</span><br></pre></td></tr></table></figure></p>
-<p>然后重启slave解决此问题:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">buildbot stop slave1</span><br><span class="line">buildbot stop slave2</span><br></pre></td></tr></table></figure></p>
-<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
-<li><a href="https://build.chromium.org/p/chromium/console" target="_blank" rel="noopener">chromium buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">docker安装buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/tour.html" target="_blank" rel="noopener">quick tour of buildbot</a></li>
-<li><a href="http://docs.buildbot.net/current/tutorial/fiveminutes.html" target="_blank" rel="noopener">Buildbot in 5 minutes</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>openstack</category>
-      </categories>
-      <tags>
-        <tag>openstack</tag>
-        <tag>ci</tag>
-        <tag>持续集成</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>自动化测试实践：自动化测试的思考总结</title>
     <url>/2013/09/auto-testing-summary/</url>
     <content><![CDATA[<p>目前所在的团队一直主要负责部门产品的自动化测试方案。团队在自动化测试方面已经有了几年的探索，但直到最近才真正发挥作用大大提升了产品的测试效率，在这个过程中走了很多的弯路。<br>以下是我这一个阶段以来做自动化测试的思考及总结，有一些大的方向上的讨论，也有一些细节的探讨，希望给大家参考。</p>
@@ -209,6 +111,166 @@
       </tags>
   </entry>
   <entry>
+    <title>buildbot实战</title>
+    <url>/2014/11/buildbot-in-action/</url>
+    <content><![CDATA[<p><a href="http://buildbot.net/" target="_blank" rel="noopener">Buildbot</a>是一套基于python的的持续集成系统，可方便的进行自动化构建、部署、测试和发布。类似于Jenkins，但更轻量化且易于直接使用python进行扩展。Chrome社区就使用的buildbot作为其CI系统。<br>类似于Jenkins，buildbot在一个CI系统中扮演的更多是一个任务执行者的角色，其工作流程如下：</p>
+<ul>
+<li>监控代码仓库</li>
+<li>代码仓库有变化后，立即拉取代码</li>
+<li>执行build、部署、测试及发布工作</li>
+<li>反馈结果</li>
+</ul>
+<p>我们对这样一个工具的一般要求为：</p>
+<ul>
+<li>轻量级，安装、配置简单，本身耗费资源较少</li>
+<li>高效率，较快的完成自动化任务</li>
+<li>通用性强，在不同的操作系统，甚至与不同的代码系统兼容</li>
+<li>易扩展、配置及管理，能较简单的配置自动化任务</li>
+</ul>
+<p>Buildbot和Jenkins都能很好的满足我们这些要求。但相比Jenkins，buildbot更轻量级，部署配置更为简单。<br>Web界面也更简单美观一些。</p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>buildbot架构比较简单，主要分为三部分：</p>
+<ul>
+<li>版本控制层<br>外部版本控制，通过插件或主动触发的方式触发buildbot执行任务。</li>
+<li>任务执行层<br>master接收任务后，调度其slave执行任务，并获取到返回的结果</li>
+<li>通知层<br>master获取结果后，可通过邮件、IRC等方式进行通知。</li>
+</ul>
+<p>其中重要的主体是master和slave，其主要采用星形拓扑结构，一个集群中可以多个master、多个slave。master主要负责任务接收、调度并通知任务，slave负责具体的任务执行。各节点本身无状态，横向扩展性很好。<br><a id="more"></a><br><img src="/img/buildbot-overview.png" alt="buildbot架构"></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="pip安装"><a href="#pip安装" class="headerlink" title="pip安装"></a>pip安装</h3><p>建议使用pip安装，避免麻烦的依赖问题。<br>同时当前对python3版本支持不太好，建议使用python2.7版本：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install gcc python-devel </span><br><span class="line">yum install python-dateutil15 git expect</span><br><span class="line"><span class="comment"># master安装</span></span><br><span class="line">pip install buildbot</span><br><span class="line"><span class="comment"># salve安装</span></span><br><span class="line">pip install buildbot-slave</span><br></pre></td></tr></table></figure></p>
+<p>如果是python2.6的话，因为最新版本的Twisted需要python2.7，所以需要提前指定版本安装：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install Twisted==15.1.0</span><br></pre></td></tr></table></figure></p>
+<p>为充分利用资源，同一台机器可配置为多个master、slave：可使用不同用户或virtualenv，每个用户或virtualenv环境部署为一个节点。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pip install virtualenv</span><br></pre></td></tr></table></figure></p>
+<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>最近看到<a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">buildbot官方</a>给出了Dockerfile(但Dockerfile地址是错的，可以自行在github代码中查找)，可下载后自行构建镜像使用，运行后即可使用：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Download Buildbot Dockerfile.</span></span><br><span class="line">wget https://raw.githubusercontent.com/buildbot/buildbot/master/master/Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the Buildbot container (it will take a few minutes to download packages)</span></span><br><span class="line">docker build -t buildbot - &lt; Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># Run buildbot</span></span><br><span class="line">CONTAINER_ID=$(docker run -d -p 8010:8010 -p 22 buildbot)</span><br></pre></td></tr></table></figure></p>
+<p>然后打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可。</p>
+<h2 id="创建及运行"><a href="#创建及运行" class="headerlink" title="创建及运行"></a>创建及运行</h2><h3 id="master"><a href="#master" class="headerlink" title="master"></a>master</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildbot create-master master</span><br><span class="line"><span class="comment"># 配置文件</span></span><br><span class="line">mv master/master.cfg.sample master/master.cfg</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildbot start master</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f master/twistd.log</span><br></pre></td></tr></table></figure>
+<p>buildbot会在当前目录下创建master名称的目录，以上为<code>master</code>。<br>看到最后显示<code>BuildMaster is running</code>即为启动成功，此时可通过<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>访问，默认用户名密码都是<code>pyflakes</code>。</p>
+<h3 id="slave"><a href="#slave" class="headerlink" title="slave"></a>slave</h3><p>创建slave时需要指定mater的地址，或者修改配置文件指定。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">buildslave create-slave slave1 localhost:9989 slave1 pass</span><br><span class="line"><span class="comment"># 运行</span></span><br><span class="line">buildslave start slave</span><br><span class="line"><span class="comment"># 查看日志</span></span><br><span class="line">tail -f slave/twistd.log</span><br></pre></td></tr></table></figure></p>
+<p>create-slave的参数分布是：slave目录、master、名字、密码。其中master默认都采用9989与slave通信。名字、密码必须与master的master.cfg中配置的一致：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'slaves'</span>] = [buildslave.BuildSlave(<span class="string">"example-slave"</span>, <span class="string">"pass"</span>)]</span><br></pre></td></tr></table></figure></p>
+<h3 id="预览"><a href="#预览" class="headerlink" title="预览"></a>预览</h3><p>此时打开<a href="http://localhost:8010" target="_blank" rel="noopener">http://localhost:8010</a>即可看到如下页面：<br><img src="/img/buildbot-index.png" alt="buildbot预览"><br>其中Buildslaves页面可查看到我们新添加的example-slave，且状态为<code>Idle</code>。<br>而Waterfall页面可查看到当前的builder，目前只有runtest，点进去点击forcebuild即可进行测试build。成功后记录显示为绿色。</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>Buildbot的配置文件为<code>.cfg</code>后缀的python脚本，使用python语法。如上文slave的定义就是一个python list的定义。</p>
+<h3 id="master配置"><a href="#master配置" class="headerlink" title="master配置"></a>master配置</h3><p>主要配置如下。</p>
+<ul>
+<li>BUILDSLAVES<br>slave的定义，以list的形式呈现。需要主要名字和密码与slave一致。<br>其中protocols可定义与slave的通信方式，包括端口等。</li>
+<li><p>CHANGESOURCES<br>指定需要监控的源代码地址。格式如下，其中可指定git地址、工作目录、分支、监控周期等。可定义多个，每个append进list即可。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">c[&apos;change_source&apos;] = []</span><br><span class="line">c[&apos;change_source&apos;].append(changes.GitPoller(</span><br><span class="line">        &apos;git://github.com/buildbot/pyflakes.git&apos;,</span><br><span class="line">        workdir=&apos;gitpoller-workdir&apos;, branch=&apos;master&apos;,</span><br><span class="line">        pollinterval=300))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>SCHEDULERS<br>scheduler指定何时、如何触发执行builder，其中builder在BUILDERS中定义。下文定义了两个scheduler：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">c[<span class="string">'schedulers'</span>] = []</span><br><span class="line"><span class="comment"># 定义每小时运行的scheduler</span></span><br><span class="line">hourlyscheduler = Periodic(name = <span class="string">"hourly"</span>,</span><br><span class="line">                           builderNames = [<span class="string">"simplebuild"</span>],</span><br><span class="line">                           periodicBuildTimer = <span class="number">3600</span>)</span><br><span class="line"><span class="comment"># 定义手动触发的scheduler</span></span><br><span class="line">c[<span class="string">'schedulers'</span>].append(schedulers.ForceScheduler(</span><br><span class="line">                            name=<span class="string">"force"</span>,</span><br><span class="line">                            builderNames=[<span class="string">"master"</span>]))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>BUILDERS<br>builder定义具体执行的任务内容，由一系列的步骤组成。每个步骤定义在step中，factory包含一系列的step，builder通过指定factory等参数创建。可定义多个builder。<br>代码如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义factory</span></span><br><span class="line">factory = util.BuildFactory()</span><br><span class="line"><span class="comment"># 定义具体step</span></span><br><span class="line">factory.addStep(steps.Git(repourl=<span class="string">'git://github.com/buildbot/pyflakes.git'</span>, mode=<span class="string">'incremental'</span>))</span><br><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"trial"</span>, <span class="string">"pyflakes"</span>]))</span><br><span class="line"><span class="comment"># 创建builder</span></span><br><span class="line">c[<span class="string">'builders'</span>] = []</span><br><span class="line"><span class="comment"># 指定名称、使用的slave、factory</span></span><br><span class="line">c[<span class="string">'builders'</span>].append(</span><br><span class="line">    util.BuilderConfig(name=<span class="string">"master"</span>,</span><br><span class="line">      slavenames=[<span class="string">"master"</span>],</span><br><span class="line">      factory=factory))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>STATUS TARGETS<br>此处定义buildbot对外通知build信息的方式。最基本的方式就是显示在页面中，因此此处同时定义了页面的认证方式，即登录使用的用户名、密码在此处修改。同时可定义IRC、邮件等通知方式。</p>
+</li>
+<li>PROJECT IDENTITY<br>此处主要为buildbot的基本信息，如title、超链接、url等。</li>
+<li>DB URL<br>此处定义使用的数据库，默认使用sqlite，地址为本地文件路径。</li>
+</ul>
+<h3 id="配置slave"><a href="#配置slave" class="headerlink" title="配置slave"></a>配置slave</h3><p>slave的定义主要在<code>buildbot.tac</code>文件中，可用于定义使用的master及slave基本信息。</p>
+<h2 id="启动及使用"><a href="#启动及使用" class="headerlink" title="启动及使用"></a>启动及使用</h2><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><ul>
+<li>启动<br>master、slave的启动上文已提及，子命令为start，参数为路径。</li>
+<li>停止、重启<br>stop和restart，其余同start</li>
+<li>master重新加载配置<br><code>buildbot reconfig master</code>即可重新加载配置。</li>
+</ul>
+<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><p>平时比较常用手动触发build，即forcebuild：web页面登录-&gt;Builders-&gt;选择builder-&gt;Force Build-&gt;在Waterfall查看打包结果及详细日志。<br><img src="/img/buildbot-waterfall.png" alt="buildbot waterfall"><br>注意：只有登录后才有build权限。</p>
+<h3 id="各页面介绍"><a href="#各页面介绍" class="headerlink" title="各页面介绍"></a>各页面介绍</h3><p>Buildbot比较方便的一点是全部通过页面来进行操作。主要页面介绍如下：</p>
+<ul>
+<li>Waterfall，以瀑布流的方式显示build任务，可点击任务查看详情、执行操作等</li>
+<li>Grid/T-Grid，以对应的方式显示build任务</li>
+<li>Console，还在开发中，当前主要显示revision信息</li>
+<li>Builders，定义的所有builder</li>
+<li>Recent Builds，最近的build</li>
+<li>Buildslaves，定义的所有slave</li>
+<li>Changesources，定义的所有代码仓库</li>
+<li>JSON API，对外提供的JSON API文档</li>
+</ul>
+<h2 id="高级使用"><a href="#高级使用" class="headerlink" title="高级使用"></a>高级使用</h2><h3 id="多分支build"><a href="#多分支build" class="headerlink" title="多分支build"></a>多分支build</h3><p>定义一个Changesource。<br>定义多个schedulers，分别对应不同分支。<br>定义多个factory，其中的step除branch不同外，其余step通用。通用的step可一次定义，多次使用。<br>builder分别指定分支和factory。</p>
+<h3 id="多项目build"><a href="#多项目build" class="headerlink" title="多项目build"></a>多项目build</h3><p>新版本可使用此功能，但不太推荐。buildbot的一个master还是更多的擅长对一个项目的管理。<br>需要定义多个Changesource，然后在其它定义时通过<code>project</code>和<code>repository</code>参数指定项目。</p>
+<h3 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h3><p>通过检查step的返回结果判断是否执行成功，规则同shell：0为成功，其它失败。<br>因此如果step中调用了自己的脚本，需要保证按上述规则返回结果。</p>
+<h3 id="添加参数"><a href="#添加参数" class="headerlink" title="添加参数"></a>添加参数</h3><p>使用<code>util.Property</code>获得网页上指定的参数，可设置默认值：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">factory.addStep(steps.ShellCommand(command=[<span class="string">"bash"</span>, <span class="string">"autorpm.sh"</span>, util.Property(<span class="string">'project'</span>, default=<span class="string">''</span>)]))</span><br></pre></td></tr></table></figure></p>
+<p>在build页面通过name/value指定，如：<br><img src="/img/buildbot-param.png" alt="buildbot指定参数"></p>
+<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><p>实际使用中发现，buildslave所创建的文件，权限都为600或700。<br>这样会造成如cp到apache目录时，apache无法读取文件。<br>通过官方文档查看到slave启动时有umask选项：</p>
+<blockquote>
+<p>–umask<br>This is a string (generally an octal representation of an integer) which will cause the buildslave process’ umask value to be set shortly after initialization.<br>The twistddaemonization utility forces the umask to 077 at startup (which means that all files created by the buildslave or its child processes will be unreadable by any user other than the buildslave account).<br>If you want build products to be readable by other accounts, you can add –umask=022 to tell the buildslave to fix the umask after twistd clobbers it.<br>If you want build products to be writable by other accounts too, use –umask=000, but this is likely to be a security problem.</p>
+</blockquote>
+<p>通过修改slave目录下的buildbot.tac，修改：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">umask = 022</span><br></pre></td></tr></table></figure></p>
+<p>然后重启slave解决此问题:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">buildbot stop slave1</span><br><span class="line">buildbot stop slave2</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://build.chromium.org/p/chromium/console" target="_blank" rel="noopener">chromium buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/docker.html" target="_blank" rel="noopener">docker安装buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/tour.html" target="_blank" rel="noopener">quick tour of buildbot</a></li>
+<li><a href="http://docs.buildbot.net/current/tutorial/fiveminutes.html" target="_blank" rel="noopener">Buildbot in 5 minutes</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>openstack</category>
+      </categories>
+      <tags>
+        <tag>openstack</tag>
+        <tag>ci</tag>
+        <tag>持续集成</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用ffjson加快golang中json序列化的速度</title>
+    <url>/2016/05/ffjson-intro/</url>
+    <content><![CDATA[<p>ffjson是一个开源的golang工具库，它能大幅度提高json序列化、反序列化的性能，根据作者数据比标准库快2-3倍。<br>本文旨在分析ffjson的原理及实现，同时分析了ffjson作者对golang程序进行性能优化的思路。</p>
+<h2 id="go中的json为什么慢"><a href="#go中的json为什么慢" class="headerlink" title="go中的json为什么慢"></a>go中的json为什么慢</h2><p>json序列化是指将实体类转化成json字符串的过程，而反序列是此过程的逆向操作。<br>官方提供的标准库是<code>encoding/json</code>。我们可以猜想下标准库是怎么实现的：</p>
+<ul>
+<li>给出一个struct，如何将其json序列化？最简单的解决办法是逐个字段读取，然后按json格式拼接字符串即可。前提是我们需要知道这个struct的结构。</li>
+<li>任意给出一个struct，如何json序列化？这时必须首先对struct的内部结构进行探测。<br>对于动态类型语言，如python这很容易，在python中一切皆为对象，其成员也是对象，其中保持了其类型及成员的信息。给定一个对象，通过方法<code>items()</code>可以轻易得到其全部成员，然后对每个成员调用<code>__str__()</code>方法转化为字符串。<br>虽然go是静态类型语言，但这个方法在go中也可以实现，通过使用reflect包也可在运行时动态探测到变量的结构，从而对实现序列化。</li>
+</ul>
+<p>一个标准库提供的接口，肯定不能只适用于某些struct，而要写出通用的方法，必须要动态识别其成员及类型，然后进行转化。<br><a id="more"></a></p>
+<h3 id="encoding-json实现"><a href="#encoding-json实现" class="headerlink" title="encoding/json实现"></a>encoding/json实现</h3><p>如我们上述分析，<a href="https://github.com/golang/go/blob/master/src/encoding/json/encode.go" target="_blank" rel="noopener">标准库具体实现代码</a>如下：<br><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 对外接口</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Marshal</span><span class="params">(v <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	e := &amp;encodeState&#123;&#125;</span><br><span class="line">	err := e.marshal(v, encOpts&#123;escapeHTML: <span class="literal">true</span>&#125;)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> e.Bytes(), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 实际功能struct</span></span><br><span class="line"><span class="comment">// An encodeState encodes JSON into a bytes.Buffer.</span></span><br><span class="line"><span class="keyword">type</span> encodeState <span class="keyword">struct</span> &#123;</span><br><span class="line">	bytes.Buffer <span class="comment">// accumulated output</span></span><br><span class="line">	scratch      [<span class="number">64</span>]<span class="keyword">byte</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *encodeState)</span> <span class="title">marshal</span><span class="params">(v <span class="keyword">interface</span>&#123;&#125;, opts encOpts)</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> r := <span class="built_in">recover</span>(); r != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> _, ok := r.(runtime.Error); ok &#123;</span><br><span class="line">				<span class="built_in">panic</span>(r)</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> s, ok := r.(<span class="keyword">string</span>); ok &#123;</span><br><span class="line">				<span class="built_in">panic</span>(s)</span><br><span class="line">			&#125;</span><br><span class="line">			err = r.(error)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	e.reflectValue(reflect.ValueOf(v), opts)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *encodeState)</span> <span class="title">reflectValue</span><span class="params">(v reflect.Value, opts encOpts)</span></span> &#123;</span><br><span class="line">	valueEncoder(v)(e, v, opts)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">valueEncoder</span><span class="params">(v reflect.Value)</span> <span class="title">encoderFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> !v.IsValid() &#123;</span><br><span class="line">		<span class="keyword">return</span> invalidValueEncoder</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> typeEncoder(v.Type())</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 类型和方法的映射关系</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">typeEncoder</span><span class="params">(t reflect.Type)</span> <span class="title">encoderFunc</span></span> &#123;</span><br><span class="line">	encoderCache.RLock()</span><br><span class="line">	f := encoderCache.m[t]</span><br><span class="line">	encoderCache.RUnlock()</span><br><span class="line">	<span class="keyword">if</span> f != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> f</span><br><span class="line">	&#125;</span><br><span class="line">	encoderCache.Lock()</span><br><span class="line">	<span class="keyword">if</span> encoderCache.m == <span class="literal">nil</span> &#123;</span><br><span class="line">		encoderCache.m = <span class="built_in">make</span>(<span class="keyword">map</span>[reflect.Type]encoderFunc)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">	wg.Add(<span class="number">1</span>)</span><br><span class="line">	encoderCache.m[t] = <span class="function"><span class="keyword">func</span><span class="params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> &#123;</span><br><span class="line">		wg.Wait()</span><br><span class="line">		f(e, v, opts)</span><br><span class="line">	&#125;</span><br><span class="line">	encoderCache.Unlock()</span><br><span class="line">	<span class="comment">// 类型对应方法的实际构造过程在newTypeEncoder里面</span></span><br><span class="line">	f = newTypeEncoder(t, <span class="literal">true</span>)</span><br><span class="line">	wg.Done()</span><br><span class="line">	encoderCache.Lock()</span><br><span class="line">	encoderCache.m[t] = f</span><br><span class="line">	encoderCache.Unlock()</span><br><span class="line">	<span class="keyword">return</span> f</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 类似对于的解码方法构造过程</span></span><br><span class="line"><span class="comment">// newTypeEncoder constructs an encoderFunc for a type.</span></span><br><span class="line"><span class="comment">// The returned encoder only checks CanAddr when allowAddr is true.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newTypeEncoder</span><span class="params">(t reflect.Type, allowAddr <span class="keyword">bool</span>)</span> <span class="title">encoderFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> t.Implements(marshalerType) &#123;</span><br><span class="line">		<span class="keyword">return</span> marshalerEncoder</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> t.Kind() != reflect.Ptr &amp;&amp; allowAddr &#123;</span><br><span class="line">		<span class="keyword">if</span> reflect.PtrTo(t).Implements(marshalerType) &#123;</span><br><span class="line">			<span class="keyword">return</span> newCondAddrEncoder(addrMarshalerEncoder, newTypeEncoder(t, <span class="literal">false</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> t.Implements(textMarshalerType) &#123;</span><br><span class="line">		<span class="keyword">return</span> textMarshalerEncoder</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> t.Kind() != reflect.Ptr &amp;&amp; allowAddr &#123;</span><br><span class="line">		<span class="keyword">if</span> reflect.PtrTo(t).Implements(textMarshalerType) &#123;</span><br><span class="line">			<span class="keyword">return</span> newCondAddrEncoder(addrTextMarshalerEncoder, newTypeEncoder(t, <span class="literal">false</span>))</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">switch</span> t.Kind() &#123; <span class="comment">// 除上述类型外的其它类型</span></span><br><span class="line">	<span class="keyword">case</span> reflect.Bool:</span><br><span class="line">		<span class="keyword">return</span> boolEncoder</span><br><span class="line">	<span class="keyword">case</span> reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:</span><br><span class="line">		<span class="keyword">return</span> intEncoder</span><br><span class="line">	<span class="keyword">case</span> reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:</span><br><span class="line">		<span class="keyword">return</span> uintEncoder</span><br><span class="line">	<span class="keyword">case</span> reflect.Float32:</span><br><span class="line">		<span class="keyword">return</span> float32Encoder</span><br><span class="line">	<span class="keyword">case</span> reflect.Float64:</span><br><span class="line">		<span class="keyword">return</span> float64Encoder</span><br><span class="line">	<span class="keyword">case</span> reflect.String:</span><br><span class="line">		<span class="keyword">return</span> stringEncoder</span><br><span class="line">	<span class="keyword">case</span> reflect.Interface:</span><br><span class="line">		<span class="keyword">return</span> interfaceEncoder</span><br><span class="line">	<span class="keyword">case</span> reflect.Struct:</span><br><span class="line">		<span class="keyword">return</span> newStructEncoder(t)</span><br><span class="line">	<span class="keyword">case</span> reflect.Map:</span><br><span class="line">		<span class="keyword">return</span> newMapEncoder(t)</span><br><span class="line">	<span class="keyword">case</span> reflect.Slice:</span><br><span class="line">		<span class="keyword">return</span> newSliceEncoder(t)</span><br><span class="line">	<span class="keyword">case</span> reflect.Array:</span><br><span class="line">		<span class="keyword">return</span> newArrayEncoder(t)</span><br><span class="line">	<span class="keyword">case</span> reflect.Ptr:</span><br><span class="line">		<span class="keyword">return</span> newPtrEncoder(t)</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">return</span> unsupportedTypeEncoder</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 以下是解码函数的具体实例</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">invalidValueEncoder</span><span class="params">(e *encodeState, v reflect.Value, _ encOpts)</span></span> &#123;</span><br><span class="line">	e.WriteString(<span class="string">"null"</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">intEncoder</span><span class="params">(e *encodeState, v reflect.Value, opts encOpts)</span></span> &#123;</span><br><span class="line">	b := strconv.AppendInt(e.scratch[:<span class="number">0</span>], v.Int(), <span class="number">10</span>)</span><br><span class="line">	<span class="keyword">if</span> opts.quoted &#123;</span><br><span class="line">		e.WriteByte(<span class="string">'"'</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	e.Write(b)</span><br><span class="line">	<span class="keyword">if</span> opts.quoted &#123;</span><br><span class="line">		e.WriteByte(<span class="string">'"'</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到其中大量使用了interface和reflect，用来遍历struct的所有元素并判断类型。</p>
+<h3 id="reflect的效率"><a href="#reflect的效率" class="headerlink" title="reflect的效率"></a>reflect的效率</h3><p>可以使用reflect编写demo进行下benchmark，证明reflect的使用会导致程序效率降低。其原因简单概括如下：</p>
+<ul>
+<li>为了识别struct的结构及字段类型，额外构造了一些数据结构，申请了一些内存空间，即增加了allocation</li>
+<li>寻找内部成员的时候，算法复杂度是线性的，对于有大量属性或方法的结构，性能下降严重</li>
+</ul>
+<h2 id="ffjson原理"><a href="#ffjson原理" class="headerlink" title="ffjson原理"></a>ffjson原理</h2><p>由上所述，为了通用使用了reflect导致性能降低。而如果struct都编写对应的序列化处理方法，就不需要使用reflect而导致性能下降了。因为go是静态类型语言且不提供泛型支持，很难找到别的方式。但这样无疑会牺牲代码的通用性。这就需要在性能和通用性之间做出折衷。<br>一种好的思路就是生成代码：使用通用方法如调用reflect，提前为所有的struct生成好序列化代码。这样只需要在生成的时候使用reflect，而运行时序列化通过使用生成的代码效率得到大幅提高。而代码的生成一般手动执行或在编译时执行，引入reflect导致的性能下降是完全可以忍受的。<br>通过适当增加编码的复杂度，换取了效率提升：</p>
+<blockquote>
+<p>ffjson works by generating static code for Go’s JSON serialization interfaces.</p>
+</blockquote>
+<p><a href="https://code.google.com/p/gogoprotobuf/" target="_blank" rel="noopener">Protobuf</a>也是使用的这种方案，详见：<a href="https://github.com/golang/protobuf/tree/master/protoc-gen-go" target="_blank" rel="noopener">proto-gen-go</a>。</p>
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><p>ffjson工作流如下：<br><img src="https://journal.paul.querna.org/assets/posts/ffjson/flow.png" alt="ffjson工作流"><br>内部实现是动态为指定结构生成MarshalJSON和UnmarshalJSON方法的代码实现。go的encoding/json库中包含两个interface：Marchaler和Unmarshaler，其中分别要求实现MarshalJSON和UnmarshalJSON两个方法。若这两个接口被实现，则会在进行json转化的时候被使用，取代标准库的默认方法。<br>ffjson在编译时通过调用reflect动态生成代码，而不是在运行时。且部分方法针对gc优化从而大幅提升json操作速度。</p>
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">go get -u github.com/pquerna/ffjson</span><br><span class="line"><span class="comment"># 将$GOPATH/bin添加到$PATH中</span></span><br><span class="line">ffjson myfile.go</span><br><span class="line">git add myfile_ffjson.go <span class="comment"># 生成的文件</span></span><br><span class="line"><span class="comment"># 每次修改myfile.go后都需要重新生成一遍</span></span><br></pre></td></tr></table></figure>
+<p>每次修改后，需要重新运行ffjson命令生成<code>*_ffjson.go</code>文件。在使用时，通过调用<code>MarshalJSON</code>和<code>UnmarshalJSON</code>实现json的序列化、反序列化。<br>在结构体定义时，可以指定<code>skip</code>不生成或指定不生成encode/decode方法。<br>可将ffjson集成进<code>go generate</code>执行。<br>而可以根据需要选择生成后的文件需不需要维护在代码库中：</p>
+<ul>
+<li>生成的文件不建议人为修改，随时可以使用ffjson生成。</li>
+<li>但为了避免对ffjson的依赖，避免不同版本的ffjson可能引入的差异，建议维护在代码库中。</li>
+<li>对于其在代码库中造成的大量修改，<code>git diff</code>时可以指定忽略此文件。</li>
+</ul>
+<h3 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h3><p>实例代码见：<a href="https://github.com/bingostack/ffjson-demo" target="_blank" rel="noopener">https://github.com/bingostack/ffjson-demo</a></p>
+<h3 id="性能问题"><a href="#性能问题" class="headerlink" title="性能问题"></a>性能问题</h3><p>在一些特殊场景下，ffjson无法理解指定类型而无法生成代码时，会回退到使用标准库<code>encoding/json</code>，虽然导致性能下降到未优化的水平，但避免了特殊场景下导致程序出错。<br>以下场景因为各种原因，会退回至使用<code>encode/json</code>：</p>
+<ul>
+<li>interface成员，只有在运行时才能获得其具体类型，甚至会比直接使用json库慢</li>
+<li>拥有自定义marshal和unmarshal方法的结构体</li>
+<li>拥有复杂类型值的map，但简单类型没有问题</li>
+<li>内嵌结构体类型的结构体的decoder函数</li>
+<li>切片的切换或map的切片的decoder函数</li>
+</ul>
+<p>通过在生成的文件中搜索“Falling back”，可查找到退回使用<code>encode/json</code>的字段。</p>
+<h3 id="遇见的问题"><a href="#遇见的问题" class="headerlink" title="遇见的问题"></a>遇见的问题</h3><ol>
+<li><code>ffjson Error: error=Could not find source directory</code>:<br>出现这个错误的原因是，ffjson执行的对象文件，必须在GOPATH的src目录下，<a href="https://github.com/pquerna/ffjson/issues/119" target="_blank" rel="noopener">参考</a></li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="减少reflect使用"><a href="#减少reflect使用" class="headerlink" title="减少reflect使用"></a>减少reflect使用</h3><p>虽然很多情况下，无法避免使用reflect。特别是在一些通用的库函数，如orm中，难以避免使用reflect。但reflect对性能的影响确实很大，因此在常用场景下，应尽可能避免使用。</p>
+<h3 id="代码生成器的使用"><a href="#代码生成器的使用" class="headerlink" title="代码生成器的使用"></a>代码生成器的使用</h3><p>因为go是静态类型语言，且不提供类似C++的泛型支持，而内置的reflect又有性能问题。因此很多情况下，代码生成器是个很好的思路。如sql语句与struct声明语句之间的互转、项目模板代码的生成等。<br>而go1.4中加入了go generate似乎也肯定了这一点。</p>
+<h2 id="参考索引"><a href="#参考索引" class="headerlink" title="参考索引"></a>参考索引</h2><ul>
+<li><a href="https://github.com/pquerna/ffjson" target="_blank" rel="noopener">ffjson in github</a></li>
+<li><a href="https://journal.paul.querna.org/articles/2014/03/31/ffjson-faster-json-in-go/" target="_blank" rel="noopener">ffjson: faster JSON serialization for Golang，项目作者的思考</a></li>
+<li><a href="http://t.cn/RtXitvu" target="_blank" rel="noopener">雨痕Go性能优化技巧reflect部分</a></li>
+<li><a href="https://github.com/bingostack/ffjson-demo" target="_blank" rel="noopener">ffjson-demo</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>golang</category>
+      </categories>
+      <tags>
+        <tag>golang</tag>
+        <tag>go</tag>
+        <tag>ffjson</tag>
+        <tag>reflect</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Linux下cURL使用教程之十二：ftp及其他协议</title>
     <url>/2012/08/curl-ftp-usage/</url>
     <content><![CDATA[<p>在<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">Linux下cURL使用教程之一：cURL简介</a>里，提到curl支持多种协议。本篇就以ftp协议为主，对curl对其他协议的操作进行简介。</p>
@@ -285,29 +347,6 @@
         <tag>linux curl</tag>
         <tag>linux</tag>
         <tag>wget</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>新域名启用</title>
-    <url>/2016/07/fresh-start/</url>
-    <content><![CDATA[<p>2020更新：<br>感觉可以做一个我曾经用过的域名的列表了：</p>
-<ul>
-<li>adeploy.com：被创业公司抢注</li>
-<li>stackeye.com：被godaddy拿去拍卖几万刀</li>
-<li>kvguru.com：主动放弃</li>
-<li>bingostack.com：我买了3年<a id="more"></a>
-</li>
-</ul>
-<hr>
-<p>说起来比较搞笑：<br>去年下半年比较忙，比较烦，比较拖延。<br>然后旧域名adeploy.com忘了续费。<br>然后竟然被一个创业团队抢注拿去创业了。。<br>是不是我太有眼光。。</p>
-<p>所有就有了现在的域名。</p>
-<p>网站采用<a href="http://hexo.io" target="_blank" rel="noopener">hexo</a>，建在github上。<br>其实本身想用<a href="http://gohugo.io/" target="_blank" rel="noopener">hugo</a>的，毕竟拿go写的。但是试用了下，卡卡的真心无感。<br>既然也做过一段时间的”伪前端”，那就接着nodejs吧。<br>hexo好多模板真心业界良心。</p>
-]]></content>
-      <categories>
-        <category>Life</category>
-      </categories>
-      <tags>
-        <tag>域名</tag>
       </tags>
   </entry>
   <entry>
@@ -507,6 +546,35 @@
       </tags>
   </entry>
   <entry>
+    <title>HTTP认证模式</title>
+    <url>/2012/08/http-auth-schemes/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在研究curl和httpclient，用到了HTTP认证相关的知识。<br>但是搜索之后发现，网上居然没有很全面的HTTP认证模式的介绍，尤其是中文的文章。<br>因此结合MS的<a href="http://msdn.microsoft.com/en-us/library/ms789031.aspx" target="_blank" rel="noopener">Understanding HTTP Authentication</a>和<a href="http://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html" target="_blank" rel="noopener">HttpClient Tutorial</a>翻译加个人理解写了一篇。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本篇博文简介了几种HTTP认证模式。文章内容要求读者对HTTP请求、响应的基本结构，HTTP状态码和HTTP协议头有一定的了解。<br>请参考<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">Linux下cURL使用教程之二：HTTP协议概述</a>。</p>
+<h2 id="HTTP访问认证框架"><a href="#HTTP访问认证框架" class="headerlink" title="HTTP访问认证框架"></a>HTTP访问认证框架</h2><p>HTTP协议（RFC2616）定义了一个简单的访问认证模式框架。此框架假设有若干页面（被保护资源，也称作realm，区域），只能被特定的人访问，这些人可以在服务器要求时提供凭证。<br>当客户端如浏览器访问一个位于保护区域（protected realm）中的页面时，服务器返回包含401未认证状态码和www认证头（WWW-Authenticate header field）的响应。返回的认证头中必须含有至少一个适用于请求页面的认证要求（challenge）。<br>然后客户端发起第二次请求，此次请求在请求头中包含了试用于服务器认证要求的认证头域。<br>如果服务器接受了客户端提供的凭证，它将返回客户端请求的页面。否则，服务端会返回另一个401未认证响应以提示客户端认证失败。<br>具体认证响应头和请求头的内容取决于认证的方式。RFC2616中定义了两种广泛使用的认证模式：<br>HTTP基本认证（HTTP  Basic authentication）和HTTP摘要认证（HTTP Digest authentication）。<br>此外常用的还有NTLM、SPNEGO（HTTP协商认证，HTTP Negotiate authentication，是其一种）和Kerberos认证方式。<br><a id="more"></a></p>
+<h2 id="认证模式"><a href="#认证模式" class="headerlink" title="认证模式"></a>认证模式</h2><h3 id="1-基本认证Basic-Access-Authentication"><a href="#1-基本认证Basic-Access-Authentication" class="headerlink" title="1. 基本认证Basic Access Authentication"></a>1. 基本认证Basic Access Authentication</h3><p>基本认证是基于用户名密码的。<br>服务端的401响应中包含一个认证要求（authentication challenge），此认证要求中含有“Basic”关键字和一个用以表明访问的被保护资源名称的“名称=值”对，如下：<br><code>WWW-Authenticate: Basic realm=&quot;Protected page&quot;</code><br>如果你使用的浏览器，浏览器在接收到401响应时，将会弹出窗口让你输入用户名密码，然后发送认证请求。认证请求中同样包含”Basic”关键字，此外还有Base64编码后的用户名密码，如下：<br><code>Authorization: Basic QWRlcGxveSdzIGJsb2c=</code><br>服务器将用户名密码解码后比对，成功匹配后即认证成功。<br>因为Base64不算是一种加密方法：无密钥的可逆加密，任何人都可解密（百度搜索一下”在线解码“一大堆）。因此基本认证被认为是明文传输，安全性不好。极易出现密码被窃听和重放攻击等安全性问题。<br>如果资源需要更高强度的保护，请使用其他认证方法。</p>
+<h3 id="2-摘要认证HTTP-Digest-authentication"><a href="#2-摘要认证HTTP-Digest-authentication" class="headerlink" title="2. 摘要认证HTTP Digest authentication"></a>2. 摘要认证HTTP Digest authentication</h3><p>摘要认证被设计用来弥补基本认证的缺点。摘要认证基于请求-响应（challenge-response）模式，而且使用了哈希加密算法（常用为MD5），从而某些程度上解决了基本认证安全性的问题。<br>服务器返回的初始401响应的www认证头（WWW-Authenticate header）中多出了一个称为nonce的随机数的字段。服务端保证每个401响应中的nonce值唯一。如：<br><code>Authorization: Digest username=&quot;admin&quot;, realm=&quot;HiPER&quot;</code><br>接下来的客户端响应中将包含由用户名、密码、nonce和其他信息组成的数据的哈希值（如使用MD5加密）。所有被加密的数据服务端也具有，因此服务端执行同样加密过程。如果二者一直则认证成功。<br>因为如MD5等哈希加密算法是不可逆的，因此用户名密码明文无法被窃听破解。因为服务器对同一个nonce的请求只接受一次客户端请求，从而能避免重放攻击。<br>但是，digest的安全性也有缺点：</p>
+<ul>
+<li>只有密码密码被加密，而客户端最终请求的被保护资源是明文传送的，可被窃听</li>
+<li>客户端无法确认服务端的正确身份，缺少对服务端的认证方式</li>
+<li>近年来，随着计算机性能的提高等因素，传统高强度加密算法的破解已成可能。而MD5更是已有破解方法。</li>
+</ul>
+<p>更多安全性问题请参考RFC2617。</p>
+<h3 id="3-NTML"><a href="#3-NTML" class="headerlink" title="3. NTML"></a>3. NTML</h3><p>NTML由微软开发，使用于Windows平台。被认为是比摘要认证更安全的认证方式。<br>它使用Windows凭证（Windows credentials）来传递认证数据，而不是使用未编码的用户名密码。<br>NTML要求服务器与客户端做出多次数据交换，服务器和所有其中的代理都必须支持永久连接（persistent connections）才能完成认证。</p>
+<h3 id="4-Kerberos"><a href="#4-Kerberos" class="headerlink" title="4. Kerberos"></a>4. Kerberos</h3><p>服务器与客户端通过第三方的Kerberos服务器完成认证。具体请参见<a href="http://baike.baidu.com/view/306687.htm" target="_blank" rel="noopener">百度百科条目</a>和<a href="http://zh.wikipedia.org/wiki/Kerberos" target="_blank" rel="noopener">维基百科条目</a>。<br>Kerberose相比NTML有很大改善：速度快，而且允许相互认证、认证代理和简单的信任关系。参考<a href="http://msdn.microsoft.com/en-us/library/aa480475.aspx" target="_blank" rel="noopener">KERBEROS vs NTLM</a>。</p>
+<h3 id="5-SPNEGO"><a href="#5-SPNEGO" class="headerlink" title="5. SPNEGO"></a>5. SPNEGO</h3><p>全称是Simple and Protected GSS-API Negotiation，是微软提供的一种使用<a href="http://baike.baidu.com/view/1551940.htm" target="_blank" rel="noopener">GSS-API</a>认证机制的安全协议，用于使Webserver共享Windows Credentials，它扩展了Kerberos(一种网络认证协议)。<br>SPNEGO适用于客户端需要认证，但是客户端服务端都不清楚对方支持什么认证协议的场合。<br>SPENGO其实是一种”伪认证机制“（pseudo-mechanism），用以协商出真正的认证机制。<br>最常见的是微软的HTTP协商认证扩展（HTTP Negotiate authentication extension），协商的最终机制在NTML和Kerberos中选择。Kerberos因其优点优先使用。<br>百度词条对此认证的解释是不够准确的，准确的解释可以参考<a href="http://en.wikipedia.org/wiki/SPNEGO" target="_blank" rel="noopener">维基百科条目</a>。</p>
+<h2 id="认证方式选择"><a href="#认证方式选择" class="headerlink" title="认证方式选择"></a>认证方式选择</h2><p>选择何种认证方式取决于资源要被保护的程度。不需要保护的资源使用基本认证方式。因为认证会导致更多的数据传输，可能影响用户体验。<br>认证方式最弱的是基本认证，最强的是协商认证。服务端在WWW-Authentication提供自己支持的认证方式，供客户端任意选择。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>RFC2616-HTTP协议<br>RFC2617-HTTP认证：基本认证和摘要认证<br>RFC1321-MD5摘要加密逻辑<br><a href="http://frontier.userland.com/stories/storyReader$2159" target="_blank" rel="noopener">HTTP Authentication Schemes</a></p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>网关类产品的性能测试之二：RFC2544四项指标测试方法</title>
     <url>/2013/03/gateway-performance-test-rfc2544/</url>
     <content><![CDATA[<p>前面我们介绍了各性能指标项的含义，下面我们针对各性能指标项是如何测试的进行详细描述。<br>对于每家评测机构、客户和安全厂商，同一个性能指标在测试方法上可能有所区别。建议在测试之前首先了解客户的需求，了解客户的性能关注点在哪里，并根据实际的需求适当的调整测试方法。虽然RFC2544文档和RFC3511文档描述了相关的测试方法，但这样的测试方法并不一定能满足客户的需求，而且RFC 文档中对测试细节并没有太详细的描述。下面以我在实际测试中积累的经验和向业界学习到的知识，描述我理解的性能测试方法。</p>
@@ -620,24 +688,65 @@
       </tags>
   </entry>
   <entry>
-    <title>HTTP认证模式</title>
-    <url>/2012/08/http-auth-schemes/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在研究curl和httpclient，用到了HTTP认证相关的知识。<br>但是搜索之后发现，网上居然没有很全面的HTTP认证模式的介绍，尤其是中文的文章。<br>因此结合MS的<a href="http://msdn.microsoft.com/en-us/library/ms789031.aspx" target="_blank" rel="noopener">Understanding HTTP Authentication</a>和<a href="http://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html" target="_blank" rel="noopener">HttpClient Tutorial</a>翻译加个人理解写了一篇。</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本篇博文简介了几种HTTP认证模式。文章内容要求读者对HTTP请求、响应的基本结构，HTTP状态码和HTTP协议头有一定的了解。<br>请参考<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">Linux下cURL使用教程之二：HTTP协议概述</a>。</p>
-<h2 id="HTTP访问认证框架"><a href="#HTTP访问认证框架" class="headerlink" title="HTTP访问认证框架"></a>HTTP访问认证框架</h2><p>HTTP协议（RFC2616）定义了一个简单的访问认证模式框架。此框架假设有若干页面（被保护资源，也称作realm，区域），只能被特定的人访问，这些人可以在服务器要求时提供凭证。<br>当客户端如浏览器访问一个位于保护区域（protected realm）中的页面时，服务器返回包含401未认证状态码和www认证头（WWW-Authenticate header field）的响应。返回的认证头中必须含有至少一个适用于请求页面的认证要求（challenge）。<br>然后客户端发起第二次请求，此次请求在请求头中包含了试用于服务器认证要求的认证头域。<br>如果服务器接受了客户端提供的凭证，它将返回客户端请求的页面。否则，服务端会返回另一个401未认证响应以提示客户端认证失败。<br>具体认证响应头和请求头的内容取决于认证的方式。RFC2616中定义了两种广泛使用的认证模式：<br>HTTP基本认证（HTTP  Basic authentication）和HTTP摘要认证（HTTP Digest authentication）。<br>此外常用的还有NTLM、SPNEGO（HTTP协商认证，HTTP Negotiate authentication，是其一种）和Kerberos认证方式。<br><a id="more"></a></p>
-<h2 id="认证模式"><a href="#认证模式" class="headerlink" title="认证模式"></a>认证模式</h2><h3 id="1-基本认证Basic-Access-Authentication"><a href="#1-基本认证Basic-Access-Authentication" class="headerlink" title="1. 基本认证Basic Access Authentication"></a>1. 基本认证Basic Access Authentication</h3><p>基本认证是基于用户名密码的。<br>服务端的401响应中包含一个认证要求（authentication challenge），此认证要求中含有“Basic”关键字和一个用以表明访问的被保护资源名称的“名称=值”对，如下：<br><code>WWW-Authenticate: Basic realm=&quot;Protected page&quot;</code><br>如果你使用的浏览器，浏览器在接收到401响应时，将会弹出窗口让你输入用户名密码，然后发送认证请求。认证请求中同样包含”Basic”关键字，此外还有Base64编码后的用户名密码，如下：<br><code>Authorization: Basic QWRlcGxveSdzIGJsb2c=</code><br>服务器将用户名密码解码后比对，成功匹配后即认证成功。<br>因为Base64不算是一种加密方法：无密钥的可逆加密，任何人都可解密（百度搜索一下”在线解码“一大堆）。因此基本认证被认为是明文传输，安全性不好。极易出现密码被窃听和重放攻击等安全性问题。<br>如果资源需要更高强度的保护，请使用其他认证方法。</p>
-<h3 id="2-摘要认证HTTP-Digest-authentication"><a href="#2-摘要认证HTTP-Digest-authentication" class="headerlink" title="2. 摘要认证HTTP Digest authentication"></a>2. 摘要认证HTTP Digest authentication</h3><p>摘要认证被设计用来弥补基本认证的缺点。摘要认证基于请求-响应（challenge-response）模式，而且使用了哈希加密算法（常用为MD5），从而某些程度上解决了基本认证安全性的问题。<br>服务器返回的初始401响应的www认证头（WWW-Authenticate header）中多出了一个称为nonce的随机数的字段。服务端保证每个401响应中的nonce值唯一。如：<br><code>Authorization: Digest username=&quot;admin&quot;, realm=&quot;HiPER&quot;</code><br>接下来的客户端响应中将包含由用户名、密码、nonce和其他信息组成的数据的哈希值（如使用MD5加密）。所有被加密的数据服务端也具有，因此服务端执行同样加密过程。如果二者一直则认证成功。<br>因为如MD5等哈希加密算法是不可逆的，因此用户名密码明文无法被窃听破解。因为服务器对同一个nonce的请求只接受一次客户端请求，从而能避免重放攻击。<br>但是，digest的安全性也有缺点：</p>
+    <title>Linux下cURL使用教程之九：代理的使用</title>
+    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
+    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
+<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
+<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
+<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
+<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
+<p>5、如果有多个-x使用，只有最后一个有效。</p>
+<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
+<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
+<p>注：</p>
 <ul>
-<li>只有密码密码被加密，而客户端最终请求的被保护资源是明文传送的，可被窃听</li>
-<li>客户端无法确认服务端的正确身份，缺少对服务端的认证方式</li>
-<li>近年来，随着计算机性能的提高等因素，传统高强度加密算法的破解已成可能。而MD5更是已有破解方法。</li>
+<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
+<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
+</li>
 </ul>
-<p>更多安全性问题请参考RFC2617。</p>
-<h3 id="3-NTML"><a href="#3-NTML" class="headerlink" title="3. NTML"></a>3. NTML</h3><p>NTML由微软开发，使用于Windows平台。被认为是比摘要认证更安全的认证方式。<br>它使用Windows凭证（Windows credentials）来传递认证数据，而不是使用未编码的用户名密码。<br>NTML要求服务器与客户端做出多次数据交换，服务器和所有其中的代理都必须支持永久连接（persistent connections）才能完成认证。</p>
-<h3 id="4-Kerberos"><a href="#4-Kerberos" class="headerlink" title="4. Kerberos"></a>4. Kerberos</h3><p>服务器与客户端通过第三方的Kerberos服务器完成认证。具体请参见<a href="http://baike.baidu.com/view/306687.htm" target="_blank" rel="noopener">百度百科条目</a>和<a href="http://zh.wikipedia.org/wiki/Kerberos" target="_blank" rel="noopener">维基百科条目</a>。<br>Kerberose相比NTML有很大改善：速度快，而且允许相互认证、认证代理和简单的信任关系。参考<a href="http://msdn.microsoft.com/en-us/library/aa480475.aspx" target="_blank" rel="noopener">KERBEROS vs NTLM</a>。</p>
-<h3 id="5-SPNEGO"><a href="#5-SPNEGO" class="headerlink" title="5. SPNEGO"></a>5. SPNEGO</h3><p>全称是Simple and Protected GSS-API Negotiation，是微软提供的一种使用<a href="http://baike.baidu.com/view/1551940.htm" target="_blank" rel="noopener">GSS-API</a>认证机制的安全协议，用于使Webserver共享Windows Credentials，它扩展了Kerberos(一种网络认证协议)。<br>SPNEGO适用于客户端需要认证，但是客户端服务端都不清楚对方支持什么认证协议的场合。<br>SPENGO其实是一种”伪认证机制“（pseudo-mechanism），用以协商出真正的认证机制。<br>最常见的是微软的HTTP协商认证扩展（HTTP Negotiate authentication extension），协商的最终机制在NTML和Kerberos中选择。Kerberos因其优点优先使用。<br>百度词条对此认证的解释是不够准确的，准确的解释可以参考<a href="http://en.wikipedia.org/wiki/SPNEGO" target="_blank" rel="noopener">维基百科条目</a>。</p>
-<h2 id="认证方式选择"><a href="#认证方式选择" class="headerlink" title="认证方式选择"></a>认证方式选择</h2><p>选择何种认证方式取决于资源要被保护的程度。不需要保护的资源使用基本认证方式。因为认证会导致更多的数据传输，可能影响用户体验。<br>认证方式最弱的是基本认证，最强的是协商认证。服务端在WWW-Authentication提供自己支持的认证方式，供客户端任意选择。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>RFC2616-HTTP协议<br>RFC2617-HTTP认证：基本认证和摘要认证<br>RFC1321-MD5摘要加密逻辑<br><a href="http://frontier.userland.com/stories/storyReader$2159" target="_blank" rel="noopener">HTTP Authentication Schemes</a></p>
+<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
+<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
+<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
+<ol>
+<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
+</li>
+<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
+</li>
+<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
+</li>
+<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
+</li>
+<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
+</li>
+</ol>
+<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
+<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
+<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
+<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
+<p>可看到代理IP为10.1.1.2。</p>
+<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
+<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
+<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
+<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
+<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
+<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
+<p>其它常用相关环境变量如下：</p>
+<ul>
+<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
+<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
+<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
+</ul>
+<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
+<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -752,76 +861,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之九：代理的使用</title>
-    <url>/2012/08/linux-curl-basic-usage-proxy/</url>
-    <content><![CDATA[<p>这个时代估计很少有人不知道Facebook，也很少有人不知道为啥国内无法直接访问Facebook。<br>因此，实际应用中，我们会经常使用到代理。<br>本篇着重讲述在curl命令行中对代理的使用。</p>
-<h2 id="代理环境"><a href="#代理环境" class="headerlink" title="代理环境"></a>代理环境</h2><p>本篇中，我们将代理分为HTTP代理和socks代理。<br>可是使用wallproxy+GAE的方式搭建个属于自己的代理，具体请百度或wallproxy官网。wallproxy设置完成后，代理默认为<code>127.0.0.1:8086</code>。</p>
-<h2 id="选项-x-–proxy"><a href="#选项-x-–proxy" class="headerlink" title="选项-x/–proxy"></a>选项-x/–proxy</h2><p>参数格式为： <code>-x/--proxy &lt;proxyhost[:port]&gt;</code><br>1、使用指定的HTTP代理<br>如果未指定端口，默认端口为1080。比如使用我们本机wallproxy搭建的代理：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x 127.0.0.1:8086 -e http://www.ip138.com/ http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>即可看到我们的IP变成了代理服务器的IP。<br><a id="more"></a><br>2、此选项优先级高于环境变量中的代理设置。<br>因此当环境变量中设置使用代理时，可以指定代理为”“而跳过代理。</p>
-<p>3、所有通过HTTP代理的操作都会被显示的转化为HTTP，因此某些协议的特殊操作可能无法正常使用。<br>此问题可以通过使用<code>-p/--proxytunnel</code>选项构建基于代理的通信隧道得到解决。</p>
-<p>4、在版本7.14.1之后，可以通过和环境变量相同的方式指定代理。<br>如使用协议头（http://），或使用内嵌的用户名密码（见下节）。</p>
-<p>5、如果有多个-x使用，只有最后一个有效。</p>
-<p>6、<code>--proxy1.0 &lt;proxyhost[:port]&gt;</code><br>使用HTTP1.0版本的代理。默认使用-x/–proxy时，使用的HTTP/1.1版本的代理。</p>
-<h2 id="选项-U-–proxy-user"><a href="#选项-U-–proxy-user" class="headerlink" title="选项-U/–proxy-user"></a>选项-U/–proxy-user</h2><p>参数格式为： <code>-U/--proxy-user &lt;user:password&gt;</code><br>1、指定用于HTTP代理认证的用户名密码。curl语句如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x proxy.xxx.com:8080 -U username:password -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>此语句等价于使用内嵌用户名密码的形式：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x <span class="string">'http://username:password@proxy.xxx.com'</span> -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure></p>
-<p>注：</p>
-<ul>
-<li>curl中每个需要用户名+密码的参数，你都可以只指定用户名，curl会自动提示你输入密码，这样更安全。</li>
-<li>用户名密码中如果有shell特殊字符，如$、引号等，建议放在单引号中，这样不会转义。特殊字符经常造成难以察觉的错误。如密码为<code>$password</code>，则执行以下代码会提示密码错误，因为shell把$password理解为取变量password的值了：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://username:<span class="variable">$password</span>@proxy.xxx.com -e http://www.ip138.com/ \</span><br><span class="line">http://iframe.ip138.com/city.asp</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>2、如果使用了支持SSIP的curl库而使用NTLM方式认证的话，可以在-U后使用冒号，如”-U :“，从而强制curl从环境中读取用户名密码。</p>
-<p>3、同-x，如果有多个-U使用，只有最后一个有效。</p>
-<h2 id="认证方式类选项"><a href="#认证方式类选项" class="headerlink" title="认证方式类选项"></a>认证方式类选项</h2><p>认证方式介绍请参见HTTP认证模式。</p>
-<ol>
-<li><p><code>--proxy-anyauth</code><br>让curl自动选择合适的认证方法。这时curl会先发出一次请求来查询认证类型。</p>
-</li>
-<li><p><code>--proxy-basic</code><br>让curl使用HTTP基本认证（HTTP  Basic authentication）模式与代理服务器通信。这是默认模式。此模式下用户名密码作为明文传递。<br>使用–basic选项启用HTTP基础模式。</p>
-</li>
-<li><p><code>--proxy-digest</code><br>使用HTTP摘要认证（HTTP Digest authentication）。此模式避免将密码作为明文在网络上传递，相对提高了HTTP认证的安全性。<br>使用–digest选项启用HTTP摘要认证模式。</p>
-</li>
-<li><p><code>--proxy-negotiate</code><br>使用HTTP协商认证（HTTP Negotiate authentication）。<br>使用–negotiate选项启用此模式。</p>
-</li>
-<li><p><code>--proxy-ntlm</code><br>使用HTTP NTLM认证（HTTP NTLM authentication）。<br>同样，–ntlm启用此模式。</p>
-</li>
-</ol>
-<h2 id="socks代理类选项"><a href="#socks代理类选项" class="headerlink" title="socks代理类选项"></a>socks代理类选项</h2><p>因为socks代理与-x选项指定的代理冲突，因此指定socks后，会覆盖掉之前使用-x指定的代理。<br>同-x，如果多次指定socks代理，只有最后一次有效。<br>在7.21.7版本之后，可以通过-x使用协议头指定代理类型的方式使用socks代理。</p>
-<h3 id="1-socks4-lt-host-port-gt"><a href="#1-socks4-lt-host-port-gt" class="headerlink" title="1. --socks4 &lt;host[:port]&gt;"></a>1. <code>--socks4 &lt;host[:port]&gt;</code></h3><p>使用socks4代理。<br>在7.21.7版本之后，可以使用<code>-x socks4://</code> 代替此参数。<br>我们可以采用ssh的-D选项构建转发环境搭建socks代理实际测试一下。</p>
-<p>1）Linux机器A：10.1.1.2，有PHP服务器，开启ssh<br>/var/www下新建ip.php:<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$onlineip = $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"ip:"</span>.$onlineip;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>2）Linux机器B：10.1.1.3，已安装curl、ssh客户端<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh -D 8086 10.1.1.2</span><br></pre></td></tr></table></figure></p>
-<p>开启转发，搭建socks代理<br>3）机器B<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
-<p>可看到本机IP为10.1.1.3。<br>执行<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --socks4 127.0.0.1:8086 http://10.1.1.2/ip.php</span><br></pre></td></tr></table></figure></p>
-<p>可看到代理IP为10.1.1.2。</p>
-<h3 id="2-socks4a-lt-host-port-gt"><a href="#2-socks4a-lt-host-port-gt" class="headerlink" title="2. --socks4a &lt;host[:port]&gt;"></a>2. <code>--socks4a &lt;host[:port]&gt;</code></h3><p>socks4a是socks4的扩展，主要增加了域名解析，其余相同。<br><code>--socks4a</code>参数指定使用代理服务器解析域名，其余使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks4a://</code> 代替。</p>
-<h3 id="3-socks5-lt-host-port-gt"><a href="#3-socks5-lt-host-port-gt" class="headerlink" title="3. --socks5 &lt;host[:port]&gt;"></a>3. <code>--socks5 &lt;host[:port]&gt;</code></h3><p>socks5在socks4的基础上增加了各种验证的支持。参数使用方法相同。<br>在7.21.7版本之后，可以使用<code>-x socks5://</code> 代替。</p>
-<h3 id="4-socks5-hostname-lt-host-port-gt"><a href="#4-socks5-hostname-lt-host-port-gt" class="headerlink" title="4. --socks5-hostname &lt;host[:port]&gt;"></a>4. <code>--socks5-hostname &lt;host[:port]&gt;</code></h3><p>基本同–socks5参数，但是此参数指定使用代理服务器解析域名，而不是本地解析。而–socks5是使用本地域名解析。<br>在7.21.7版本之后，可以使用<code>-x socks5h://</code> 代替。</p>
-<h3 id="5-socks5-gssapi-service-lt-servicename-gt"><a href="#5-socks5-gssapi-service-lt-servicename-gt" class="headerlink" title="5. --socks5-gssapi-service &lt;servicename&gt;"></a>5. <code>--socks5-gssapi-service &lt;servicename&gt;</code></h3><p>设置使用gssapi的socks5代理服务器的服务名。</p>
-<h3 id="6-socks5-gssapi-nec"><a href="#6-socks5-gssapi-nec" class="headerlink" title="6. --socks5-gssapi-nec"></a>6. <code>--socks5-gssapi-nec</code></h3><p>设置对NEC代理服务器的兼容性。</p>
-<h2 id="环境变量及相关选项"><a href="#环境变量及相关选项" class="headerlink" title="环境变量及相关选项"></a>环境变量及相关选项</h2><h3 id="1-环境变量"><a href="#1-环境变量" class="headerlink" title="1. 环境变量"></a>1. 环境变量</h3><p><code>http_proxy [protocol://]&lt;host&gt;[:port]</code><br>设置HTTP协议使用的代理，大小写敏感，只能小写。<br>继续使用wallproxy+GAE搭建的代理，编写脚本curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip变成了代理服务器的IP。</p>
-<p>其它常用相关环境变量如下：</p>
-<ul>
-<li><code>HTTPS_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置HTTPS协议使用的代理，大小写都可以，小写优先。</li>
-<li><code>FTP_PROXY [protocol://]&lt;host&gt;[:port]</code><br>设置FTP协议使用的代理，大小写都可以，小写优先。</li>
-<li><code>ALL_PROXY [protocol://]&lt;host&gt;[:port]</code><br>如果某协议没有指定代理，则使用此代理。大小写都可以，小写优先。</li>
-<li><code>NO_PROXY &lt;comma-separated list of hosts&gt;</code><br>后跟host（服务器）列表，访问在列表中的host时，不使用代理。如果列表使用通配符”*“，则匹配所有host。</li>
-</ul>
-<p>如使用<code>NO_PROXY</code>, 可更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">!/bin/sh</span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line"><span class="built_in">export</span> no_proxy=ip138.com</span><br><span class="line">curl -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
-<h3 id="2-命令选项"><a href="#2-命令选项" class="headerlink" title="2. 命令选项"></a>2. 命令选项</h3><p><code>--noproxy &lt;no-proxy-list&gt;</code><br>指定不使用环境变量中代理的host列表<br>更改curlvariable.sh如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">export</span> http_proxy=http://127.0.0.1:8086</span><br><span class="line">curl --noproxy ip138.com -e http://www.ip138.com/ http://iframe.ip138.com/city.asp;<span class="built_in">echo</span></span><br></pre></td></tr></table></figure></p>
-<p>执行<code>bash curlvariable.sh</code>后将会看到ip不是代理服务器的IP。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇主要介绍与代理相关的curl选项。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Linux下cURL使用教程之六：curl基本使用之HTTP文件上传</title>
     <url>/2012/08/linux-curl-basic-usage-upload-file/</url>
     <content><![CDATA[<p>有些时候，不只需要提交表单，还需要上传附件。本篇针对上传文件，对上篇<a href="http://stackeye.com/2012/08/linux-curl-basic-usage-forms/" target="_blank" rel="noopener">curl提交表单</a>进行补充。<br>注：本篇只针对HTTP上传文件部分。</p>
@@ -868,27 +907,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之一：cURL简介</title>
-    <url>/2012/07/linux-curl-description/</url>
-    <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
-<p>而cURL就是HTTP脚本编程的利器。</p>
-<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
-<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
-<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
-<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
-<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Linux下cURL使用教程之三：curl基本使用</title>
     <url>/2012/08/linux-curl-basic-usage/</url>
     <content><![CDATA[<p>在介绍完<a href="http://stackeye.com/2012/07/linux-curl-description/" target="_blank" rel="noopener">cURL简介</a>和需要的<a href="http://stackeye.com/2012/07/linux-curl-http-protocol/" target="_blank" rel="noopener">HTTP协议概述</a>之后。终于可以回归正题，进入curl的使用方法。</p>
@@ -911,99 +929,6 @@
 <p>会将cookie信息<code>user=Adeploy;pass=password</code>附加在HTTP请求头中。</p>
 <h2 id="Redirects重定向"><a href="#Redirects重定向" class="headerlink" title="Redirects重定向"></a>Redirects重定向</h2><p>打开某些网页，网页会显示“ 3XX Moved Permanently ”，即网页被移动到其他位置，新位置一般由HTTP响应头中的Location字段给出。<br>重定向一般是因为网站结构调整后，避免用户访问原来页面出现404错误。<br>而另一类常见的用法就是在登陆成功后，网页显示成功信息，然后将用户重定向至内容页面。<br><code>-L/--location</code>选项可以自动跟踪重定向。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇只介绍简单的curl使用选项，下篇将结合实例具体说明。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之二：HTTP协议概述</title>
-    <url>/2012/07/linux-curl-http-protocol/</url>
-    <content><![CDATA[<p>虽然cURL支持多种协议，但日常我们最常用的还是HTTP协议，下文中着重介绍HTTP的相关使用方法，因此我们要对HTTP协议有所了解。</p>
-<blockquote>
-<p>HTTP，超文本传送协议，通过因特网传送万维网文档的数据传送协议。</p>
-</blockquote>
-<p>我们访问一个网页的实际过程如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">客户端C===HTTP请求===&gt;服务端S：GET index.html http/1.1</span><br><span class="line">客户端C&lt;==HTTP响应====服务端S：HTTP/1.1 200 OK HTML文件内容</span><br></pre></td></tr></table></figure></p>
-<p>HTTP协议本身是个无状态协议，它不像其他基于会话的协议那样去不断追踪、记忆事务处理过程。而它要做的就只是简单的：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">连接=&gt;发起HTTP请求(HTTP Request)=&gt;得到HTTP响应(HTTP Response)=&gt;断开连接</span><br></pre></td></tr></table></figure></p>
-<p>而平常我们通过浏览器浏览网页这个过程，浏览器自动完成发送HTTP请求及对服务端应答的数据进行解析的工作，从而将网页呈现给我们。</p>
-<p>我们使用cURL要做的就是模仿浏览器的动作，因此要对HTTP请求的格式进行进一步的解析。</p>
-<h2 id="HTTP请求"><a href="#HTTP请求" class="headerlink" title="HTTP请求"></a>HTTP请求</h2><p>在你向HTTP服务器请求一个资源（比如简单的使用浏览器打开一个网页），TCP三次握手建立连接后，HTTP请求发出。<br>HTTP请求信息由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">l 请求行(Request Line)</span><br><span class="line">l 请求头(Request Header)</span><br><span class="line">l 请求正文(Message Body)</span><br></pre></td></tr></table></figure></p>
-<a id="more"></a>
-<h3 id="HTTP请求行"><a href="#HTTP请求行" class="headerlink" title="HTTP请求行"></a>HTTP请求行</h3><p>典型的HTTP请求行格式为：<br><code>HTTP命令 请求资源的URI HTTP版本号</code><br>HTTP请求行例子如下：<br><code>GET / HTTP/1.1\r\n</code></p>
-<p>这个请求行的意思是：请求得到（GET）/路径下的默认主页文件，使用HTTP协议1.1版本。</p>
-<p>根据HTTP标准，HTTP请求可以使用多种请求方法。例如：HTTP1.1支持7种请求方法：GET、POST、HEAD、OPTIONS、PUT、DELETE和TARCE。而服务器也可以自定义请求命令供客户端使用。具体请参考HTTP的RFC文档。而我们最常用的是GET和POST命令：</p>
-<h4 id="GET命令"><a href="#GET命令" class="headerlink" title="GET命令"></a>GET命令</h4><p>GET主要用于取得URL指定的资源信息，也可用来提交表单。GET提交的信息实际上是附加在url之后作为URL的一部分。<br>当年盛行一时的SQL注入，最常见的检测手段就是在GET提交的链接后加单引号来检测是否存在注入漏洞。<br>如提交username和password两个字段，正常的GET网址如下：<br><code>http://www.xxx.com/login.php?username=user&amp;password=pass</code><br>网站后台就会在_GET数组中取得username和password的值，从而组建SQL语句：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> user_table <span class="keyword">where</span> username=<span class="keyword">user</span> <span class="keyword">and</span> <span class="keyword">password</span>=pass</span><br></pre></td></tr></table></figure></p>
-<p>如果返回的count值大于0即为用户名密码正确。<br>而添加单引号后：<br><code>http://www.xxx.com/login.php?username=user&amp;password=pass&#39;</code><br>组建的SQL语句为<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> user_table <span class="keyword">where</span> username=<span class="keyword">user</span> <span class="keyword">and</span> <span class="keyword">password</span>=pass<span class="string">'</span></span><br></pre></td></tr></table></figure></p>
-<p>这个SQL语句执行出错，网页显示错误信息，黑客从而得知网页有SQL注入漏洞。<br>因此使用GET提交表单是不安全的，只进行了简单的编码无法加密，可以很容易的从网址猜出各字段的意思。而且受限于URL长度限制，GET提交表单能携带的数据也有限。</p>
-<h4 id="POST命令"><a href="#POST命令" class="headerlink" title="POST命令"></a>POST命令</h4><p>POST主要用于提交表单，尤其是提交大批量的表单数据。<br>POST方法克服了GET方法的一些缺点。通过POST方法提交表单数据时，数据不是作为URL请求的一部分而是作为标准数据传送给Web服务器，这就克服了GET方法中的信息无法加密和数据量太小的缺点。</p>
-<p>HTTP请求的下一段数据为HTTP请求头。</p>
-<h3 id="HTTP请求头"><a href="#HTTP请求头" class="headerlink" title="HTTP请求头"></a>HTTP请求头</h3><p>HTTP请求头中主要包含关于请求本身或者客户端的有用信息，比如浏览器的类型、浏览器语言、编码、压缩算法等信息。服务器上的动态脚本如PHP等可以利用请求头信息生成动态的网页内容。</p>
-<p>典型的HTTP请求头例子如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 QIHU 360EE</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Referer: http://www.adeploy.com/</span><br><span class="line">Accept-Encoding: gzip,deflate,sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br><span class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</span><br></pre></td></tr></table></figure></p>
-<p><code>\r\n</code>表示换行。由此可以看到HTTP请求头是由几行“属性:值”对组成的，例如属性Accept的值为<code>*/*\r\n</code> ，表示客户端可以接受任意数据类型。<br>而我们最常用的是<code>User-Agent</code>字段和<code>Referer</code>字段，分别用于指定客户端类型和来源页面。<br>最末行额外多出的一对<code>\r\n</code>表示一个空白行，此空白行表示HTTP请求头结束，以下部分为请求正文。</p>
-<h3 id="HTTP请求正文"><a href="#HTTP请求正文" class="headerlink" title="HTTP请求正文"></a>HTTP请求正文</h3><p>HTTP请求正文经常为空，除非需要向服务端提交信息，如在使用POST向网站提交表单的时候。<br>例如如下是一个完整的HTTP请求的例子：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET / HTTP/1.1</span><br><span class="line">Host: www.adeploy.com</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 QIHU 360EE</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Referer: http://www.adeploy.com/</span><br><span class="line">Accept-Encoding: gzip,deflate,sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br><span class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</span><br></pre></td></tr></table></figure></p>
-<h2 id="HTTP响应"><a href="#HTTP响应" class="headerlink" title="HTTP响应"></a>HTTP响应</h2><p>当收到HTTP请求之后，HTTP服务器会进行处理然后返回一个HTTP响应给客户端（典型的客户端为浏览器）。HTTP响应中包含几乎与HTTP请求同样类型的数据。<br>HTTP响应信息也由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">l 响应行(Response Status Line)</span><br><span class="line">l 响应头(Response Header)</span><br><span class="line">l 响应正文(Message Body)</span><br></pre></td></tr></table></figure></p>
-<p>响应行以服务端使用的HTTP协议版本号开始，后加响应状态码，表示请求结果状态，例如：<br><code>HTTP/1.1 200 OK</code><br>状态码200表示请求成功。</p>
-<p>紧接着的是响应头。响应头与请求头十分相似，也是由几行“属性:值”对组成。其中包含关于服务器的有用信息、响应数据等。典型响应头如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Content-Type: text/html; charset=utf-8</span><br><span class="line">Cache-Control: no-cache</span><br><span class="line">Expires: Fri, 01 Jan 1990 00:00:00 GMT</span><br><span class="line">Content-Encoding: gzip</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Date: Tue, 31 Jul 2012 07:20:31 GMT</span><br><span class="line">Server: Google Frontend</span><br><span class="line">Content-Length: 10387</span><br></pre></td></tr></table></figure></p>
-<p>如果请求成功，响应正文中将包含请求的数据，如图片文件的二进制数据、HTML文件等。一旦响应正文传输完毕，服务端又没有使用HTTP 1.1/2版本的Keep-Alive请求，HTTP连接将会断开。</p>
-<h2 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h2><p>Cookie是服务器为了辨别用户身份、进行session跟踪用户识别，而储存在客户端的数据。用以判断在HTTP传输中的状态，从而弥补HTTP协议无状态的缺陷。</p>
-<p>比如我们登录一个网站后，关闭网页后重新打开网页，服务端就可以通过cookie信息判断我们曾经登录过，从而跳过重新登录的过程，让用户感觉到亲切、方便、人性化。</p>
-<p>当客户端向服务端发起请求时，浏览器会自动将cookie信息添加在HTTP请求头中。例子如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Cookie: __utmc=90639562; __utma=90639562.1273157993.1343361841.1343361841.1343718828.2; __utmb=90639562.1.10.1343718828; __utmz=90639562.1343361841.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)</span><br></pre></td></tr></table></figure></p>
-<p>在我们使用cURL时，每次访问网页都相当于浏览器打开关闭一次，因此cookie会起到很大的作用。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇介绍后续会使用的HTTP协议知识，只做简要概括，具体请参考RFC文档。</p>
-]]></content>
-      <categories>
-        <category>curl</category>
-      </categories>
-      <tags>
-        <tag>curl</tag>
-        <tag>linux curl</tag>
-        <tag>http协议</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间</title>
-    <url>/2012/08/linux-curl-example-post-to-baidu-hi/</url>
-    <content><![CDATA[<p>前六篇之后，我们对curl的基本使用已经有了一定的了解。下面我们就在实际场景中使用我们的所学。<br>本篇实例目标为编写linux脚本,使用curl完成发布文章至百度空间。<br>下文将从百度空间登陆到发表文章，对每个过程的HTTP进行分析，并编写脚本实现。</p>
-<h2 id="工欲善其事，必先利其器"><a href="#工欲善其事，必先利其器" class="headerlink" title="工欲善其事，必先利其器"></a>工欲善其事，必先利其器</h2><p>抓包分析我们使用chrome自带的Developer Tools。<br>实际分析过程中最好把Developer Tools的Network标签左下角的“Preserve Log upon Navigation”选中，如下图圈中处：<br><img src="/img/developertoolspreserve.jpg" alt="Chrome Developer Tools Preserve Log upon Navigation"><br>单击变为红色即可。<br>此选项的作用在于当当前页面跳转到其他网页时，保存原来的日志记录。<br>默认不保存，比如在登陆成功一个网站后，自动跳转到其他网页，这样登陆网站过程中的记录都不保存。我们就没有办法对登陆过程进行具体分析。</p>
-<h2 id="POST登陆"><a href="#POST登陆" class="headerlink" title="POST登陆"></a>POST登陆</h2><h3 id="1-操作过程"><a href="#1-操作过程" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>登陆我们采用网址<code>https://passport.baidu.com/?login</code>，而不使用网址<code>http://hi.baidu.com/index.htm</code>或<code>http://hi.baidu.com/go/login</code> 右侧的登陆框。<br>这是因为后者可能因为百度空间改版等原因改变，而前者是百度账号的登陆界面，变化的几率要小。而且后者界面很多图片等元素，不利于我们抓包分析。</p>
-<h3 id="2-登陆过程分析"><a href="#2-登陆过程分析" class="headerlink" title="2. 登陆过程分析"></a>2. 登陆过程分析</h3><p>登陆成功后找到<code>/?login</code>的POST包，如下图：<br><img src="/img/DeveloperToolsBaiduLogin.jpg" alt="Developer Tools Baidu Login HTTP Analy"><br>主要显示了状态信息、请求头部（Request Headers）、POST数据（Form Data）和响应头部（Response Heades）。<br>Query String Parameters是对GET的参数的解析，即网址中的?login。一般网址中“?”后面的都应该是参数，具体请参考Linux下cURL使用教程之二：HTTP协议概述中“GET命令”一节。<br><a id="more"></a><br>请求头部如下（view source模式）：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /?login HTTP/1.1 Host: passport.baidu.com Connection: keep-alive Content-Length: 215 Cache-Control: max-age=0 Origin: https://passport.baidu.com User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 Content-Type: application/x-www-form-urlencoded Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8 Referer: https://passport.baidu.com/?login Accept-Encoding: gzip,deflate,sdch Accept-Language: zh-CN,zh;q=0.8 Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3 Cookie: BAIDU_WISE_UID=...无关cookie代码，很长，略去</span><br></pre></td></tr></table></figure></p>
-<p>POST数据如下（view decoded模式，因为curl可以完成urlencode，我们发送明文即可）：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tpl_ok:</span><br><span class="line">next_target:</span><br><span class="line">tpl:</span><br><span class="line">skip_ok:</span><br><span class="line">aid:</span><br><span class="line">need_pay:</span><br><span class="line">need_coin:</span><br><span class="line">pay_method:</span><br><span class="line">u: .%2F</span><br><span class="line">return_method: get</span><br><span class="line">more_param:</span><br><span class="line">return_type:</span><br><span class="line">psp_tt: 0</span><br><span class="line">password: youcan&apos;tsee</span><br><span class="line">safeflg: 0</span><br><span class="line">isphone: false</span><br><span class="line">username: Stackeye</span><br><span class="line">verifycode:</span><br><span class="line">mem_pass: on</span><br></pre></td></tr></table></figure></p>
-<h3 id="3-登陆过程curl脚本"><a href="#3-登陆过程curl脚本" class="headerlink" title="3. 登陆过程curl脚本"></a>3. 登陆过程curl脚本</h3><p>百度要求的不严格，因此我们不考虑来源页面（Referer）等信息，只注意隐藏User-Agent字段。同时保存cookie供后续使用。脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br></pre></td></tr></table></figure></p>
-<p>实验发现其他字段非必要，因此舍弃。</p>
-<h2 id="POST发表文章"><a href="#POST发表文章" class="headerlink" title="POST发表文章"></a>POST发表文章</h2><h3 id="1-操作过程-1"><a href="#1-操作过程-1" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>点击“我的空间”，进入<a href="http://hi.baidu.com/home，然后点击“文字“，进入到`http://hi.baidu.com/pub/show/createtext`，随便写些内容，右侧加些标签，发表即可。" target="_blank" rel="noopener">http://hi.baidu.com/home，然后点击“文字“，进入到`http://hi.baidu.com/pub/show/createtext`，随便写些内容，右侧加些标签，发表即可。</a></p>
-<h3 id="2-过程分析"><a href="#2-过程分析" class="headerlink" title="2. 过程分析"></a>2. 过程分析</h3><p>找到对createtext的POST包。POST的url为<code>http://hi.baidu.com/pub/submit/createtext</code>。<br>请求头中没有我们关心的字段：cookie不用具体分析，Referer等字段我们不去关注。</p>
-<p>POST数据如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">title: Stackeye&apos;s title</span><br><span class="line">tags[]: stackeyetag</span><br><span class="line">content: &lt;p&gt;Stackeye&amp;#39;s&amp;nbsp;content&lt;/p&gt;&lt;p&gt;This&amp;nbsp;is&amp;nbsp;for&amp;nbsp;curl&amp;nbsp;learning&amp;nbsp;test.&lt;/p&gt;</span><br><span class="line">private: 0</span><br><span class="line">imgnum: 0</span><br><span class="line">bdstoken: 01ae260f7a99a896a16dfa8d9f75cf16</span><br><span class="line">qbid:</span><br><span class="line">refer: http://hi.baidu.com/home</span><br><span class="line">multimedia[]: undefined#undefined#undefined#undefined</span><br><span class="line">private1: 0</span><br><span class="line">qing_request_source:</span><br></pre></td></tr></table></figure></p>
-<p>title是文章标题，tags是标签，content是内容。<br>除此之外还有一个bdstoken字段猜不出其含义。多次测试发现，其他字段基本固定，而bdstoken字段在每次退出重新登陆后就会发生变化。<br>这种字段来源有三种可能性：</p>
-<ul>
-<li>此字段没有实际意义<br>比如只是个简单的标志，服务器端并不校验此字段值。</li>
-<li>服务器生成，然后在POST之前传给客户端<br>需要我们分析POST之前数据包的响应数据。因为可能的数据包不多（一般来讲，图片、css、js等的包可以直接排除）。</li>
-<li>POST之前的某个网页动态生成<br>比如此网页或之前的某个网页上的js、Ajax等在客户端执行的函数生成。<br>这个需要审视此网页和之前的每个网页中的js等代码，甚至需要动态调试，比较麻烦。因此我们最后考虑这种情况。</li>
-</ul>
-<h3 id="3-寻找bdstoken字段"><a href="#3-寻找bdstoken字段" class="headerlink" title="3. 寻找bdstoken字段"></a>3. 寻找bdstoken字段</h3><p>编写脚本，bdstoken传递格式类似的随机值，文章发表失败。<br>寻找之前的数据包，我们从后向前找，查找每个text/html等网页类型的数据包的Response内容。<br>Developer Tools的搜索功能搜索不到，可以右键数据包”save all as har“保存为har文件，用记事本打开即可查找。但是不能批量保存，比较繁琐。<br>更简单的解决方式是使用wireshark抓包，wireshark的字符串搜索可以搜索到。<br>我们很快找到在GET的createtext页面（<code>http://hi.baidu.com/pub/show/createtext</code>）里有bdstoken字段，GET及bdstoken取出语句：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=<span class="string">""</span></span><br><span class="line"><span class="comment">#`cat baidu002.html |grep bdstoken=|awk -F "bdstoken=" '&#123;print $2&#125;'|awk -F "\&amp;" '&#123;print $1&#125;'`</span></span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#check before submit</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure></p>
-<p>脚本中使用了awk用于从html代码中提取bdstoken字段，HTML中相关内容为：<br><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://passport.baidu.com?logout&amp;bdstoken=393d8ef656bf74c8f739aa3ae5262f94&amp;u=http://hi.baidu.com/pub/show/createtext"</span>&gt;</span>退出<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
-<p>“bdstoken=”作为前分割标志，“&amp;”作为结束标志即可。</p>
-<h3 id="4-curl脚本"><a href="#4-curl脚本" class="headerlink" title="4. curl脚本"></a>4. curl脚本</h3><ul>
-<li><p>POST过程<br>使用的cookie是第一版步产生的bdcookie001<br>这是因为基本上只有第一步登陆的过程产生重要的cookie信息，其他步产生的cookie是非必须的。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is for curl learning test."</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>验证成功与否：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>资源清理语句：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><h3 id="1-POST文章时，title、content中不能含有特殊字符"><a href="#1-POST文章时，title、content中不能含有特殊字符" class="headerlink" title="1. POST文章时，title、content中不能含有特殊字符"></a>1. POST文章时，title、content中不能含有特殊字符</h3><p>title、content中不能含有双引号不能转义的特殊字符，如$,\,<code>。
-单引号不转义除单引号之外的所有特殊字符。而且在title=&quot;Stackeye&#39;s title&quot;和--data-urlencode title=&quot;$title&quot; \两处都使用单引号的会出现错误。
-因此如果实际应用的话，还需要另外一个特殊字符替换函数，替换$,\,</code>和双引号。<br>shell脚本对大批量文字的处理比较繁琐吃力。<br>因此实际场景中，遇到对文字处理较多的场景，shell脚本+curl的方式只作为测试手段探究原理与逻辑，程序使用Java、PHP、Python、C等更强大的语言实现。</p>
-<h3 id="2-没有错误重试"><a href="#2-没有错误重试" class="headerlink" title="2. 没有错误重试"></a>2. 没有错误重试</h3><p>可以使用如下循环进行错误重试：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#retry after fail</span></span><br><span class="line">COUNTER=0</span><br><span class="line"><span class="comment">#当失败时循环5次</span></span><br><span class="line"><span class="keyword">while</span> [ fail ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> [ <span class="variable">$COUNTER</span> -gt 5 ];<span class="keyword">then</span></span><br><span class="line">                <span class="built_in">echo</span> error</span><br><span class="line">                <span class="built_in">exit</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        sleep 60</span><br><span class="line">        <span class="comment">#curl语句</span></span><br><span class="line">        COUNTER=`expr <span class="variable">$COUNTER</span> + 1`</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
-<h3 id="3-文件权限"><a href="#3-文件权限" class="headerlink" title="3. 文件权限"></a>3. 文件权限</h3><p>文件中保存有账户密码，记得设置文件属性为700，避免密码泄露。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>完整脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"By Stackeye's blog"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"www.stackeye.com"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Change the file mod to 700 to keep your password safe!"</span></span><br><span class="line"></span><br><span class="line">username=<span class="string">""</span></span><br><span class="line">password=<span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#login</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br><span class="line"></span><br><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=`cat baidu002.html |grep bdstoken=|awk -F <span class="string">"bdstoken="</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\&amp;"</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#submit the article</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is line2!"</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment">#delete temp files</span></span><br><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure></p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -1106,16 +1031,44 @@
       </tags>
   </entry>
   <entry>
-    <title>Linux下cURL使用教程之十四：libcurl编程</title>
-    <url>/2012/09/linux-curl-libcurl/</url>
-    <content><![CDATA[<p>在<a href="http://127.0.0.1:4000/2012/09/curl-vs-wget/" target="_blank" rel="noopener">Linux下cURL使用教程之十三：curl vs wget</a>中我们谈到，curl是基于libcurl库实现的。<br>而libcurl库是开源免费跨平台的，可用于多种语言。<br>有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。</p>
-<p>官方提供了一些demo代码，大家下载查看。<br>本篇文章我们只谈谈各种语言下的使用，及一些参考。</p>
-<h2 id="C-C"><a href="#C-C" class="headerlink" title="C/C++"></a>C/C++</h2><p>C/C++语言下使用libcurl有些繁琐，但功能很强大、稳定高效。而且尤其C下本身开源库相比其它语言较少，因此libcurl库使用较多。<br>参考：<br><a href="http://curl.haxx.se/libcurl/c/libcurl-tutorial.html" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/c/libcurl-tutorial.html</a><br><a href="http://curl.haxx.se/libcurl/c/" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/c/</a></p>
-<h2 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h2><p>PHP的libcurl库使用较多。<br><a id="more"></a><br>参考：<br><a href="http://cn2.php.net/curl" target="_blank" rel="noopener">http://cn2.php.net/curl</a><br><a href="http://curl.haxx.se/libcurl/php/" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/php/</a></p>
-<h2 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h2><p>python中也有curl库：PycURL。<br>但更易用使用更普遍的还是<a href="https://pypi.python.org/pypi/requests" target="_blank" rel="noopener">requests</a>。</p>
-<h2 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h2><p>Java下的curl库一度被抛弃：<a href="https://curl.haxx.se/libcurl/java/" target="_blank" rel="noopener">accessing libcurl from Java</a>。<br>不知道目前github上的版本是否稳定。<br>更建议使用apache httpclient(貌似现在叫做httpcomponents)，参考：<a href="http://hc.apache.org/" target="_blank" rel="noopener">Apache HttpComponents</a>。</p>
-<h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><p>如果作为日常请求工作使用，如在测试接口时，更建议使用带有GUI界面的postman，功能很强大，而且自带分组、回归等CI功能。<br>参考：<a href="http://www.getpostman.com/" target="_blank" rel="noopener">Postman | Supercharge your API workflow</a>。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>如果需要编写shell脚本进行功能更强大的CI测试，curl仍是首选。<br>此系列告一段落。</p>
+    <title>Linux下cURL使用教程之七：curl基本使用实例之发布文章到百度空间</title>
+    <url>/2012/08/linux-curl-example-post-to-baidu-hi/</url>
+    <content><![CDATA[<p>前六篇之后，我们对curl的基本使用已经有了一定的了解。下面我们就在实际场景中使用我们的所学。<br>本篇实例目标为编写linux脚本,使用curl完成发布文章至百度空间。<br>下文将从百度空间登陆到发表文章，对每个过程的HTTP进行分析，并编写脚本实现。</p>
+<h2 id="工欲善其事，必先利其器"><a href="#工欲善其事，必先利其器" class="headerlink" title="工欲善其事，必先利其器"></a>工欲善其事，必先利其器</h2><p>抓包分析我们使用chrome自带的Developer Tools。<br>实际分析过程中最好把Developer Tools的Network标签左下角的“Preserve Log upon Navigation”选中，如下图圈中处：<br><img src="/img/developertoolspreserve.jpg" alt="Chrome Developer Tools Preserve Log upon Navigation"><br>单击变为红色即可。<br>此选项的作用在于当当前页面跳转到其他网页时，保存原来的日志记录。<br>默认不保存，比如在登陆成功一个网站后，自动跳转到其他网页，这样登陆网站过程中的记录都不保存。我们就没有办法对登陆过程进行具体分析。</p>
+<h2 id="POST登陆"><a href="#POST登陆" class="headerlink" title="POST登陆"></a>POST登陆</h2><h3 id="1-操作过程"><a href="#1-操作过程" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>登陆我们采用网址<code>https://passport.baidu.com/?login</code>，而不使用网址<code>http://hi.baidu.com/index.htm</code>或<code>http://hi.baidu.com/go/login</code> 右侧的登陆框。<br>这是因为后者可能因为百度空间改版等原因改变，而前者是百度账号的登陆界面，变化的几率要小。而且后者界面很多图片等元素，不利于我们抓包分析。</p>
+<h3 id="2-登陆过程分析"><a href="#2-登陆过程分析" class="headerlink" title="2. 登陆过程分析"></a>2. 登陆过程分析</h3><p>登陆成功后找到<code>/?login</code>的POST包，如下图：<br><img src="/img/DeveloperToolsBaiduLogin.jpg" alt="Developer Tools Baidu Login HTTP Analy"><br>主要显示了状态信息、请求头部（Request Headers）、POST数据（Form Data）和响应头部（Response Heades）。<br>Query String Parameters是对GET的参数的解析，即网址中的?login。一般网址中“?”后面的都应该是参数，具体请参考Linux下cURL使用教程之二：HTTP协议概述中“GET命令”一节。<br><a id="more"></a><br>请求头部如下（view source模式）：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST /?login HTTP/1.1 Host: passport.baidu.com Connection: keep-alive Content-Length: 215 Cache-Control: max-age=0 Origin: https://passport.baidu.com User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 Content-Type: application/x-www-form-urlencoded Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8 Referer: https://passport.baidu.com/?login Accept-Encoding: gzip,deflate,sdch Accept-Language: zh-CN,zh;q=0.8 Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3 Cookie: BAIDU_WISE_UID=...无关cookie代码，很长，略去</span><br></pre></td></tr></table></figure></p>
+<p>POST数据如下（view decoded模式，因为curl可以完成urlencode，我们发送明文即可）：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tpl_ok:</span><br><span class="line">next_target:</span><br><span class="line">tpl:</span><br><span class="line">skip_ok:</span><br><span class="line">aid:</span><br><span class="line">need_pay:</span><br><span class="line">need_coin:</span><br><span class="line">pay_method:</span><br><span class="line">u: .%2F</span><br><span class="line">return_method: get</span><br><span class="line">more_param:</span><br><span class="line">return_type:</span><br><span class="line">psp_tt: 0</span><br><span class="line">password: youcan&apos;tsee</span><br><span class="line">safeflg: 0</span><br><span class="line">isphone: false</span><br><span class="line">username: Stackeye</span><br><span class="line">verifycode:</span><br><span class="line">mem_pass: on</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-登陆过程curl脚本"><a href="#3-登陆过程curl脚本" class="headerlink" title="3. 登陆过程curl脚本"></a>3. 登陆过程curl脚本</h3><p>百度要求的不严格，因此我们不考虑来源页面（Referer）等信息，只注意隐藏User-Agent字段。同时保存cookie供后续使用。脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br></pre></td></tr></table></figure></p>
+<p>实验发现其他字段非必要，因此舍弃。</p>
+<h2 id="POST发表文章"><a href="#POST发表文章" class="headerlink" title="POST发表文章"></a>POST发表文章</h2><h3 id="1-操作过程-1"><a href="#1-操作过程-1" class="headerlink" title="1. 操作过程"></a>1. 操作过程</h3><p>点击“我的空间”，进入<a href="http://hi.baidu.com/home，然后点击“文字“，进入到`http://hi.baidu.com/pub/show/createtext`，随便写些内容，右侧加些标签，发表即可。" target="_blank" rel="noopener">http://hi.baidu.com/home，然后点击“文字“，进入到`http://hi.baidu.com/pub/show/createtext`，随便写些内容，右侧加些标签，发表即可。</a></p>
+<h3 id="2-过程分析"><a href="#2-过程分析" class="headerlink" title="2. 过程分析"></a>2. 过程分析</h3><p>找到对createtext的POST包。POST的url为<code>http://hi.baidu.com/pub/submit/createtext</code>。<br>请求头中没有我们关心的字段：cookie不用具体分析，Referer等字段我们不去关注。</p>
+<p>POST数据如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">title: Stackeye&apos;s title</span><br><span class="line">tags[]: stackeyetag</span><br><span class="line">content: &lt;p&gt;Stackeye&amp;#39;s&amp;nbsp;content&lt;/p&gt;&lt;p&gt;This&amp;nbsp;is&amp;nbsp;for&amp;nbsp;curl&amp;nbsp;learning&amp;nbsp;test.&lt;/p&gt;</span><br><span class="line">private: 0</span><br><span class="line">imgnum: 0</span><br><span class="line">bdstoken: 01ae260f7a99a896a16dfa8d9f75cf16</span><br><span class="line">qbid:</span><br><span class="line">refer: http://hi.baidu.com/home</span><br><span class="line">multimedia[]: undefined#undefined#undefined#undefined</span><br><span class="line">private1: 0</span><br><span class="line">qing_request_source:</span><br></pre></td></tr></table></figure></p>
+<p>title是文章标题，tags是标签，content是内容。<br>除此之外还有一个bdstoken字段猜不出其含义。多次测试发现，其他字段基本固定，而bdstoken字段在每次退出重新登陆后就会发生变化。<br>这种字段来源有三种可能性：</p>
+<ul>
+<li>此字段没有实际意义<br>比如只是个简单的标志，服务器端并不校验此字段值。</li>
+<li>服务器生成，然后在POST之前传给客户端<br>需要我们分析POST之前数据包的响应数据。因为可能的数据包不多（一般来讲，图片、css、js等的包可以直接排除）。</li>
+<li>POST之前的某个网页动态生成<br>比如此网页或之前的某个网页上的js、Ajax等在客户端执行的函数生成。<br>这个需要审视此网页和之前的每个网页中的js等代码，甚至需要动态调试，比较麻烦。因此我们最后考虑这种情况。</li>
+</ul>
+<h3 id="3-寻找bdstoken字段"><a href="#3-寻找bdstoken字段" class="headerlink" title="3. 寻找bdstoken字段"></a>3. 寻找bdstoken字段</h3><p>编写脚本，bdstoken传递格式类似的随机值，文章发表失败。<br>寻找之前的数据包，我们从后向前找，查找每个text/html等网页类型的数据包的Response内容。<br>Developer Tools的搜索功能搜索不到，可以右键数据包”save all as har“保存为har文件，用记事本打开即可查找。但是不能批量保存，比较繁琐。<br>更简单的解决方式是使用wireshark抓包，wireshark的字符串搜索可以搜索到。<br>我们很快找到在GET的createtext页面（<code>http://hi.baidu.com/pub/show/createtext</code>）里有bdstoken字段，GET及bdstoken取出语句：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=<span class="string">""</span></span><br><span class="line"><span class="comment">#`cat baidu002.html |grep bdstoken=|awk -F "bdstoken=" '&#123;print $2&#125;'|awk -F "\&amp;" '&#123;print $1&#125;'`</span></span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#check before submit</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure></p>
+<p>脚本中使用了awk用于从html代码中提取bdstoken字段，HTML中相关内容为：<br><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"https://passport.baidu.com?logout&amp;bdstoken=393d8ef656bf74c8f739aa3ae5262f94&amp;u=http://hi.baidu.com/pub/show/createtext"</span>&gt;</span>退出<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>“bdstoken=”作为前分割标志，“&amp;”作为结束标志即可。</p>
+<h3 id="4-curl脚本"><a href="#4-curl脚本" class="headerlink" title="4. curl脚本"></a>4. curl脚本</h3><ul>
+<li><p>POST过程<br>使用的cookie是第一版步产生的bdcookie001<br>这是因为基本上只有第一步登陆的过程产生重要的cookie信息，其他步产生的cookie是非必须的。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is for curl learning test."</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>验证成功与否：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>资源清理语句：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><h3 id="1-POST文章时，title、content中不能含有特殊字符"><a href="#1-POST文章时，title、content中不能含有特殊字符" class="headerlink" title="1. POST文章时，title、content中不能含有特殊字符"></a>1. POST文章时，title、content中不能含有特殊字符</h3><p>title、content中不能含有双引号不能转义的特殊字符，如$,\,<code>。
+单引号不转义除单引号之外的所有特殊字符。而且在title=&quot;Stackeye&#39;s title&quot;和--data-urlencode title=&quot;$title&quot; \两处都使用单引号的会出现错误。
+因此如果实际应用的话，还需要另外一个特殊字符替换函数，替换$,\,</code>和双引号。<br>shell脚本对大批量文字的处理比较繁琐吃力。<br>因此实际场景中，遇到对文字处理较多的场景，shell脚本+curl的方式只作为测试手段探究原理与逻辑，程序使用Java、PHP、Python、C等更强大的语言实现。</p>
+<h3 id="2-没有错误重试"><a href="#2-没有错误重试" class="headerlink" title="2. 没有错误重试"></a>2. 没有错误重试</h3><p>可以使用如下循环进行错误重试：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#retry after fail</span></span><br><span class="line">COUNTER=0</span><br><span class="line"><span class="comment">#当失败时循环5次</span></span><br><span class="line"><span class="keyword">while</span> [ fail ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> [ <span class="variable">$COUNTER</span> -gt 5 ];<span class="keyword">then</span></span><br><span class="line">                <span class="built_in">echo</span> error</span><br><span class="line">                <span class="built_in">exit</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">        sleep 60</span><br><span class="line">        <span class="comment">#curl语句</span></span><br><span class="line">        COUNTER=`expr <span class="variable">$COUNTER</span> + 1`</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="3-文件权限"><a href="#3-文件权限" class="headerlink" title="3. 文件权限"></a>3. 文件权限</h3><p>文件中保存有账户密码，记得设置文件属性为700，避免密码泄露。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>完整脚本如下：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"By Stackeye's blog"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"www.stackeye.com"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Change the file mod to 700 to keep your password safe!"</span></span><br><span class="line"></span><br><span class="line">username=<span class="string">""</span></span><br><span class="line">password=<span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#login</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu001.html -D bdcookie001.txt \</span><br><span class="line">--data-urlencode username=<span class="variable">$username</span> \</span><br><span class="line">--data-urlencode password=<span class="variable">$password</span> \</span><br><span class="line">--data-urlencode mem_pass=on \</span><br><span class="line">https://passport.baidu.com/?login</span><br><span class="line"></span><br><span class="line"><span class="comment">#get bdstoken</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -o baidu002.html \</span><br><span class="line">-D bdcookie002.txt -b bdcookie001.txt \</span><br><span class="line">http://hi.baidu.com/pub/show/createtext</span><br><span class="line">bdstoken=`cat baidu002.html |grep bdstoken=|awk -F <span class="string">"bdstoken="</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\&amp;"</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="built_in">echo</span> bdstoken=<span class="variable">$bdstoken</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#submit the article</span></span><br><span class="line"><span class="keyword">if</span> [ -z <span class="variable">$bdstoken</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"error in getting bdstoken"</span>;</span><br><span class="line">    <span class="built_in">exit</span>;</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">title=<span class="string">"Stackeye's title"</span></span><br><span class="line">content=<span class="string">"Stackeye's content!&lt;p&gt;This is line2!"</span></span><br><span class="line">tags=<span class="string">"testtags"</span></span><br><span class="line">curl -s -A  <span class="string">"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"</span> -e http://hi.baidu.com/pub/show/createtext \</span><br><span class="line">-o baidu003.html -D bdcookie003.txt -b bdcookie001.txt \</span><br><span class="line">--data-urlencode title=<span class="string">"<span class="variable">$title</span>"</span> \</span><br><span class="line">--data-urlencode tags[]=<span class="variable">$tags</span> \</span><br><span class="line">--data-urlencode content=<span class="string">"<span class="variable">$content</span>"</span> \</span><br><span class="line">--data-urlencode private=0 \</span><br><span class="line">--data-urlencode imgnum=0 \</span><br><span class="line">--data-urlencode bdstoken=<span class="variable">$bdstoken</span> \</span><br><span class="line">--data-urlencode qbid= \</span><br><span class="line">--data-urlencode refer=http://hi.baidu.com/home \</span><br><span class="line">--data-urlencode multimedia[]=:undefined<span class="comment">#undefined#undefined#undefined \</span></span><br><span class="line">--data-urlencode private1=0 \</span><br><span class="line">--data-urlencode qing_request_source= \</span><br><span class="line">http://hi.baidu.com/pub/submit/createtext</span><br><span class="line"><span class="comment">#result</span></span><br><span class="line">result=`cat baidu003.html |awk -F <span class="string">": \""</span> <span class="string">'&#123;print $2&#125;'</span>|awk -F <span class="string">"\""</span> <span class="string">'&#123;print $1&#125;'</span>`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$result</span> -eq 0 ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Success!"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Fail!"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment">#delete temp files</span></span><br><span class="line">rm -f baidu001.html baidu002.html baidu003.html</span><br><span class="line">rm -f bdcookie001.txt bdcookie002.txt bdcookie003.txt</span><br></pre></td></tr></table></figure></p>
 ]]></content>
       <categories>
         <category>curl</category>
@@ -1124,7 +1077,73 @@
         <tag>curl</tag>
         <tag>linux curl</tag>
         <tag>linux</tag>
-        <tag>libcurl</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>新域名启用</title>
+    <url>/2016/07/fresh-start/</url>
+    <content><![CDATA[<p>2020更新：<br>感觉可以做一个我曾经用过的域名的列表了：</p>
+<ul>
+<li>adeploy.com：被创业公司抢注</li>
+<li>stackeye.com：被godaddy拿去拍卖几万刀</li>
+<li>kvguru.com：主动放弃</li>
+<li>bingostack.com：我买了3年<a id="more"></a>
+</li>
+</ul>
+<hr>
+<p>说起来比较搞笑：<br>去年下半年比较忙，比较烦，比较拖延。<br>然后旧域名adeploy.com忘了续费。<br>然后竟然被一个创业团队抢注拿去创业了。。<br>是不是我太有眼光。。</p>
+<p>所有就有了现在的域名。</p>
+<p>网站采用<a href="http://hexo.io" target="_blank" rel="noopener">hexo</a>，建在github上。<br>其实本身想用<a href="http://gohugo.io/" target="_blank" rel="noopener">hugo</a>的，毕竟拿go写的。但是试用了下，卡卡的真心无感。<br>既然也做过一段时间的”伪前端”，那就接着nodejs吧。<br>hexo好多模板真心业界良心。</p>
+]]></content>
+      <categories>
+        <category>Life</category>
+      </categories>
+      <tags>
+        <tag>域名</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之二：HTTP协议概述</title>
+    <url>/2012/07/linux-curl-http-protocol/</url>
+    <content><![CDATA[<p>虽然cURL支持多种协议，但日常我们最常用的还是HTTP协议，下文中着重介绍HTTP的相关使用方法，因此我们要对HTTP协议有所了解。</p>
+<blockquote>
+<p>HTTP，超文本传送协议，通过因特网传送万维网文档的数据传送协议。</p>
+</blockquote>
+<p>我们访问一个网页的实际过程如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">客户端C===HTTP请求===&gt;服务端S：GET index.html http/1.1</span><br><span class="line">客户端C&lt;==HTTP响应====服务端S：HTTP/1.1 200 OK HTML文件内容</span><br></pre></td></tr></table></figure></p>
+<p>HTTP协议本身是个无状态协议，它不像其他基于会话的协议那样去不断追踪、记忆事务处理过程。而它要做的就只是简单的：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">连接=&gt;发起HTTP请求(HTTP Request)=&gt;得到HTTP响应(HTTP Response)=&gt;断开连接</span><br></pre></td></tr></table></figure></p>
+<p>而平常我们通过浏览器浏览网页这个过程，浏览器自动完成发送HTTP请求及对服务端应答的数据进行解析的工作，从而将网页呈现给我们。</p>
+<p>我们使用cURL要做的就是模仿浏览器的动作，因此要对HTTP请求的格式进行进一步的解析。</p>
+<h2 id="HTTP请求"><a href="#HTTP请求" class="headerlink" title="HTTP请求"></a>HTTP请求</h2><p>在你向HTTP服务器请求一个资源（比如简单的使用浏览器打开一个网页），TCP三次握手建立连接后，HTTP请求发出。<br>HTTP请求信息由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">l 请求行(Request Line)</span><br><span class="line">l 请求头(Request Header)</span><br><span class="line">l 请求正文(Message Body)</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h3 id="HTTP请求行"><a href="#HTTP请求行" class="headerlink" title="HTTP请求行"></a>HTTP请求行</h3><p>典型的HTTP请求行格式为：<br><code>HTTP命令 请求资源的URI HTTP版本号</code><br>HTTP请求行例子如下：<br><code>GET / HTTP/1.1\r\n</code></p>
+<p>这个请求行的意思是：请求得到（GET）/路径下的默认主页文件，使用HTTP协议1.1版本。</p>
+<p>根据HTTP标准，HTTP请求可以使用多种请求方法。例如：HTTP1.1支持7种请求方法：GET、POST、HEAD、OPTIONS、PUT、DELETE和TARCE。而服务器也可以自定义请求命令供客户端使用。具体请参考HTTP的RFC文档。而我们最常用的是GET和POST命令：</p>
+<h4 id="GET命令"><a href="#GET命令" class="headerlink" title="GET命令"></a>GET命令</h4><p>GET主要用于取得URL指定的资源信息，也可用来提交表单。GET提交的信息实际上是附加在url之后作为URL的一部分。<br>当年盛行一时的SQL注入，最常见的检测手段就是在GET提交的链接后加单引号来检测是否存在注入漏洞。<br>如提交username和password两个字段，正常的GET网址如下：<br><code>http://www.xxx.com/login.php?username=user&amp;password=pass</code><br>网站后台就会在_GET数组中取得username和password的值，从而组建SQL语句：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> user_table <span class="keyword">where</span> username=<span class="keyword">user</span> <span class="keyword">and</span> <span class="keyword">password</span>=pass</span><br></pre></td></tr></table></figure></p>
+<p>如果返回的count值大于0即为用户名密码正确。<br>而添加单引号后：<br><code>http://www.xxx.com/login.php?username=user&amp;password=pass&#39;</code><br>组建的SQL语句为<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> user_table <span class="keyword">where</span> username=<span class="keyword">user</span> <span class="keyword">and</span> <span class="keyword">password</span>=pass<span class="string">'</span></span><br></pre></td></tr></table></figure></p>
+<p>这个SQL语句执行出错，网页显示错误信息，黑客从而得知网页有SQL注入漏洞。<br>因此使用GET提交表单是不安全的，只进行了简单的编码无法加密，可以很容易的从网址猜出各字段的意思。而且受限于URL长度限制，GET提交表单能携带的数据也有限。</p>
+<h4 id="POST命令"><a href="#POST命令" class="headerlink" title="POST命令"></a>POST命令</h4><p>POST主要用于提交表单，尤其是提交大批量的表单数据。<br>POST方法克服了GET方法的一些缺点。通过POST方法提交表单数据时，数据不是作为URL请求的一部分而是作为标准数据传送给Web服务器，这就克服了GET方法中的信息无法加密和数据量太小的缺点。</p>
+<p>HTTP请求的下一段数据为HTTP请求头。</p>
+<h3 id="HTTP请求头"><a href="#HTTP请求头" class="headerlink" title="HTTP请求头"></a>HTTP请求头</h3><p>HTTP请求头中主要包含关于请求本身或者客户端的有用信息，比如浏览器的类型、浏览器语言、编码、压缩算法等信息。服务器上的动态脚本如PHP等可以利用请求头信息生成动态的网页内容。</p>
+<p>典型的HTTP请求头例子如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 QIHU 360EE</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Referer: http://www.adeploy.com/</span><br><span class="line">Accept-Encoding: gzip,deflate,sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br><span class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</span><br></pre></td></tr></table></figure></p>
+<p><code>\r\n</code>表示换行。由此可以看到HTTP请求头是由几行“属性:值”对组成的，例如属性Accept的值为<code>*/*\r\n</code> ，表示客户端可以接受任意数据类型。<br>而我们最常用的是<code>User-Agent</code>字段和<code>Referer</code>字段，分别用于指定客户端类型和来源页面。<br>最末行额外多出的一对<code>\r\n</code>表示一个空白行，此空白行表示HTTP请求头结束，以下部分为请求正文。</p>
+<h3 id="HTTP请求正文"><a href="#HTTP请求正文" class="headerlink" title="HTTP请求正文"></a>HTTP请求正文</h3><p>HTTP请求正文经常为空，除非需要向服务端提交信息，如在使用POST向网站提交表单的时候。<br>例如如下是一个完整的HTTP请求的例子：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET / HTTP/1.1</span><br><span class="line">Host: www.adeploy.com</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age=0</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19 QIHU 360EE</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Referer: http://www.adeploy.com/</span><br><span class="line">Accept-Encoding: gzip,deflate,sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8</span><br><span class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</span><br></pre></td></tr></table></figure></p>
+<h2 id="HTTP响应"><a href="#HTTP响应" class="headerlink" title="HTTP响应"></a>HTTP响应</h2><p>当收到HTTP请求之后，HTTP服务器会进行处理然后返回一个HTTP响应给客户端（典型的客户端为浏览器）。HTTP响应中包含几乎与HTTP请求同样类型的数据。<br>HTTP响应信息也由3部分组成：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">l 响应行(Response Status Line)</span><br><span class="line">l 响应头(Response Header)</span><br><span class="line">l 响应正文(Message Body)</span><br></pre></td></tr></table></figure></p>
+<p>响应行以服务端使用的HTTP协议版本号开始，后加响应状态码，表示请求结果状态，例如：<br><code>HTTP/1.1 200 OK</code><br>状态码200表示请求成功。</p>
+<p>紧接着的是响应头。响应头与请求头十分相似，也是由几行“属性:值”对组成。其中包含关于服务器的有用信息、响应数据等。典型响应头如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Content-Type: text/html; charset=utf-8</span><br><span class="line">Cache-Control: no-cache</span><br><span class="line">Expires: Fri, 01 Jan 1990 00:00:00 GMT</span><br><span class="line">Content-Encoding: gzip</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Date: Tue, 31 Jul 2012 07:20:31 GMT</span><br><span class="line">Server: Google Frontend</span><br><span class="line">Content-Length: 10387</span><br></pre></td></tr></table></figure></p>
+<p>如果请求成功，响应正文中将包含请求的数据，如图片文件的二进制数据、HTML文件等。一旦响应正文传输完毕，服务端又没有使用HTTP 1.1/2版本的Keep-Alive请求，HTTP连接将会断开。</p>
+<h2 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h2><p>Cookie是服务器为了辨别用户身份、进行session跟踪用户识别，而储存在客户端的数据。用以判断在HTTP传输中的状态，从而弥补HTTP协议无状态的缺陷。</p>
+<p>比如我们登录一个网站后，关闭网页后重新打开网页，服务端就可以通过cookie信息判断我们曾经登录过，从而跳过重新登录的过程，让用户感觉到亲切、方便、人性化。</p>
+<p>当客户端向服务端发起请求时，浏览器会自动将cookie信息添加在HTTP请求头中。例子如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Cookie: __utmc=90639562; __utma=90639562.1273157993.1343361841.1343361841.1343718828.2; __utmb=90639562.1.10.1343718828; __utmz=90639562.1343361841.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)</span><br></pre></td></tr></table></figure></p>
+<p>在我们使用cURL时，每次访问网页都相当于浏览器打开关闭一次，因此cookie会起到很大的作用。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇介绍后续会使用的HTTP协议知识，只做简要概括，具体请参考RFC文档。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>http协议</tag>
       </tags>
   </entry>
   <entry>
@@ -1542,61 +1561,6 @@
       </tags>
   </entry>
   <entry>
-    <title>使用redis实现分布式锁的正确姿势</title>
-    <url>/2018/11/redis-setnx-distlock/</url>
-    <content><![CDATA[<p>锁是我们在实现大多数系统时绕不过的话题。一旦有<strong>竞态条件</strong>出现，任何不经保护的操作，都可能带来问题。</p>
-<p>而现代系统大多为分布式系统，这就引入了分布式锁，要求具有在分布各处的服务上保护资源的能力。</p>
-<p>而实现<strong>分布式锁</strong>，目前大多有以下<strong>3种方式</strong>：</p>
-<ul>
-<li>使用数据库实现</li>
-<li>使用redis等缓存系统实现</li>
-<li>使用zookeeper等分布式协调系统实现</li>
-</ul>
-<p>其中redis简便灵活，高可用分布式，且支持持久化。本文即介绍基于redis实现分布式锁。<br><a id="more"></a></p>
-<h2 id="setnx语义"><a href="#setnx语义" class="headerlink" title="setnx语义"></a>setnx语义</h2><p>使用redis实现分布式锁，根本原理是setnx指令。其语义如下：</p>
-<p><code>SETNX key value</code></p>
-<blockquote>
-<p>如果key不存在，则设置key值为value（同set）；如果key已经存在，则不执行赋值操作。并使用不同的返回值标识。<a href="https://redis.io/commands/setnx" target="_blank" rel="noopener">官网文档</a></p>
-</blockquote>
-<p>还可以通过set命令的nx选项使用：<br><code>SET key value [expiration EX seconds|PX milliseconds] [NX|XX]</code></p>
-<blockquote>
-<p>NX - 仅在key不存在时执行赋值操作。官网文档<br>而如下文所述，通过SET的NX选项使用，可同时使用其它选项，如EX/PX设置超时时间，是更好的方式。</p>
-</blockquote>
-<h2 id="setnx实现分布式锁"><a href="#setnx实现分布式锁" class="headerlink" title="setnx实现分布式锁"></a>setnx实现分布式锁</h2><p>下面我们对比下几种具体实现方式。</p>
-<h3 id="方案1：setnx-delete"><a href="#方案1：setnx-delete" class="headerlink" title="方案1：setnx+delete"></a>方案1：setnx+delete</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setnx lock_a random_value</span><br><span class="line">// do sth</span><br><span class="line">delete lock_a</span><br></pre></td></tr></table></figure></p>
-<p>此实现方式的问题在于：一旦服务获取锁之后，因某种原因挂掉，则锁一直无法自动释放。从而导致死锁。</p>
-<h3 id="方案2：setnx-setex"><a href="#方案2：setnx-setex" class="headerlink" title="方案2：setnx + setex"></a>方案2：setnx + setex</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setnx lock_a random_value</span><br><span class="line">setex lock_a 10 random_value // 10s超时</span><br><span class="line">// do sth</span><br><span class="line">delete lock_a</span><br></pre></td></tr></table></figure></p>
-<p>按需设置超时时间。此方案解决了方案1死锁的问题，但同时引入了新的死锁问题：<br>如果setnx之后、setex之前服务挂掉，会陷入死锁。<br>根本原因为setnx/setex分为了两个步骤，非原子操作。</p>
-<h3 id="方案3：set-nx-px"><a href="#方案3：set-nx-px" class="headerlink" title="方案3：set nx px"></a>方案3：set nx px</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SET lock_a random_value NX PX 10000 // 10s超时</span><br><span class="line">// do sth</span><br><span class="line">delete lock_a</span><br></pre></td></tr></table></figure></p>
-<p>此方案通过set的NX/PX选项，将加锁、设置超时两个步骤合并为一个原子操作，从而解决方案1、2的问题。(PX与EX选项的语义相同，差异仅在单位。)<br>此方案目前大多数sdk、redis部署方案都支持，因此是<strong>推荐使用的方式</strong>。<br>但此方案也有如下问题：</p>
-<ul>
-<li>如果锁被错误的释放（如超时），或被错误的抢占，或因redis问题等导致锁丢失，无法很快的感知到。</li>
-</ul>
-<h3 id="方案4：set-key-randomvalue-nx-px"><a href="#方案4：set-key-randomvalue-nx-px" class="headerlink" title="方案4：set key randomvalue nx px"></a>方案4：set key randomvalue nx px</h3><p>方案4在3的基础上，增加对 value 的检查，只解除自己加的锁。<br>类似于 CAS，不过是 compare-and-delete。<br>此方案 redis 原生命令不支持，为保证原子性，需要通过lua脚本实现:。</p>
-<p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SET lock_a random_value NX PX 10000</span><br><span class="line">// do sth</span><br><span class="line">eval &quot;if redis.call(&apos;get&apos;,KEYS[1]) == ARGV[1] then return redis.call(&apos;del&apos;,KEYS[1]) else return 0 end&quot; 1 lock_a random_value</span><br></pre></td></tr></table></figure></p>
-<p>此方案更严谨：即使因为某些异常导致锁被错误的抢占，也能部分保证锁的正确释放。并且在释放锁时能检测到锁是否被错误抢占、错误释放，从而进行特殊处理。</p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="超时时间"><a href="#超时时间" class="headerlink" title="超时时间"></a>超时时间</h3><p>从上述描述可看出，<strong>超时时间</strong>是一个比较重要的变量：</p>
-<ul>
-<li>超时时间不能太短，否则在任务执行完成前就自动释放了锁，导致资源暴露在锁保护之外。</li>
-<li>超时时间不能太长，否则会导致意外死锁后长时间的等待。除非人为接入处理。</li>
-</ul>
-<p>因此建议是根据任务内容，合理衡量超时时间，将超时时间设置为任务内容的几倍即可。<br>如果实在无法确定而又要求比较严格，可以采用定期 setex/expire 更新超时时间实现。</p>
-<h3 id="重试"><a href="#重试" class="headerlink" title="重试"></a>重试</h3><p>如果拿不到锁，建议根据任务性质、业务形式进行轮询等待。<br>等待次数需要参考任务执行时间。</p>
-<h3 id="与redis事务的比较"><a href="#与redis事务的比较" class="headerlink" title="与redis事务的比较"></a>与redis事务的比较</h3><p>setnx 使用更为灵活方案。multi/exec 的事务实现形式更为复杂。<br>且部分redis集群方案(如codis)，不支持multi/exec 事务。</p>
-<h2 id="golang-demo"><a href="#golang-demo" class="headerlink" title="golang demo"></a>golang demo</h2><p>基于 redigo简单实例代码如下。<br><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"sync"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">	<span class="string">"github.com/garyburd/redigo/redis"</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getLock</span><span class="params">(redisAddr, lockKey <span class="keyword">string</span>, ex <span class="keyword">uint</span>, retry <span class="keyword">int</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> retry &lt;= <span class="number">0</span> &#123;</span><br><span class="line">		retry = <span class="number">10</span></span><br><span class="line">	&#125;</span><br><span class="line">	conn, err := redis.DialTimeout(<span class="string">"tcp"</span>, redisAddr, time.Minute, time.Minute, time.Minute)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"conn to redis failed, err:%v"</span>, err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line">	ts := time.Now() <span class="comment">// as random value</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= retry; i++ &#123;</span><br><span class="line">		<span class="keyword">if</span> i &gt; <span class="number">1</span> &#123; <span class="comment">// sleep if not first time</span></span><br><span class="line">			time.Sleep(time.Second)</span><br><span class="line">		&#125;</span><br><span class="line">		v, err := conn.Do(<span class="string">"SET"</span>, lockKey, ts, <span class="string">"EX"</span>, retry, <span class="string">"NX"</span>)</span><br><span class="line">		<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> v == <span class="literal">nil</span> &#123;</span><br><span class="line">				fmt.Println(<span class="string">"get lock failed, retry times:"</span>, i)</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				fmt.Println(<span class="string">"get lock success"</span>)</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"get lock failed with err:"</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> i &gt;= retry &#123;</span><br><span class="line">			err = fmt.Errorf(<span class="string">"get lock failed with max retry times."</span>)</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">unLock</span><span class="params">(redisAddr, lockKey <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	conn, err := redis.DialTimeout(<span class="string">"tcp"</span>, redisAddr, time.Minute, time.Minute, time.Minute)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"conn to redis failed, err:%v"</span>, err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line">	v, err := redis.Bool(conn.Do(<span class="string">"DEL"</span>, lockKey))</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> v &#123;</span><br><span class="line">			fmt.Println(<span class="string">"unLock success"</span>)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"unLock failed"</span>)</span><br><span class="line">			<span class="keyword">return</span> fmt.Errorf(<span class="string">"unLock failed"</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"unLock failed, err:"</span>, err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	RedisAddr = <span class="string">"127.0.0.1:3000"</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">	key := <span class="string">"lock_demo"</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">		wg.Add(<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(id <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">			<span class="keyword">defer</span> wg.Done()</span><br><span class="line">			time.Sleep(time.Second)</span><br><span class="line">			<span class="comment">// getLock</span></span><br><span class="line">			err := getLock(RedisAddr, key, <span class="number">10</span>, <span class="number">10</span>)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] get lock failed:%v"</span>, id, err))</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// sleep for random</span></span><br><span class="line">			<span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">5</span>; j++ &#123;</span><br><span class="line">				time.Sleep(time.Second)</span><br><span class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] hold lock for %ds"</span>, id, j+<span class="number">1</span>))</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// unLock</span></span><br><span class="line">			err = unLock(RedisAddr, key)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] unlock failed:%v"</span>, id, err))</span><br><span class="line">			&#125;</span><br><span class="line">			fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] done"</span>, id))</span><br><span class="line">		&#125;(i)</span><br><span class="line">	&#125;</span><br><span class="line">	wg.Wait()</span><br><span class="line">	fmt.Println(<span class="string">"demo is done!"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://redis.io/commands/setex" target="_blank" rel="noopener">setex 命令</a><br><a href="https://redis.io/commands/set" target="_blank" rel="noopener">set 命令</a><br><a href="https://redis.io/topics/distlock" target="_blank" rel="noopener">Distributed locks with Redis</a></p>
-]]></content>
-      <categories>
-        <category>Redis</category>
-      </categories>
-      <tags>
-        <tag>redis</tag>
-        <tag>nosql</tag>
-        <tag>setnx</tag>
-        <tag>distributed lock</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>SQLAlchemy简介及在OpenStack中的使用</title>
     <url>/2015/07/sqlalchemy-intro/</url>
     <content><![CDATA[<p>SQLAlchemy是Python编程语言下的一款开源软件，提供了SQL工具包及对象关系映射(ORM)工具。</p>
@@ -1889,6 +1853,104 @@
         <tag>keepalive</tag>
         <tag>vip</tag>
         <tag>LVS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用redis实现分布式锁的正确姿势</title>
+    <url>/2018/11/redis-setnx-distlock/</url>
+    <content><![CDATA[<p>锁是我们在实现大多数系统时绕不过的话题。一旦有<strong>竞态条件</strong>出现，任何不经保护的操作，都可能带来问题。</p>
+<p>而现代系统大多为分布式系统，这就引入了分布式锁，要求具有在分布各处的服务上保护资源的能力。</p>
+<p>而实现<strong>分布式锁</strong>，目前大多有以下<strong>3种方式</strong>：</p>
+<ul>
+<li>使用数据库实现</li>
+<li>使用redis等缓存系统实现</li>
+<li>使用zookeeper等分布式协调系统实现</li>
+</ul>
+<p>其中redis简便灵活，高可用分布式，且支持持久化。本文即介绍基于redis实现分布式锁。<br><a id="more"></a></p>
+<h2 id="setnx语义"><a href="#setnx语义" class="headerlink" title="setnx语义"></a>setnx语义</h2><p>使用redis实现分布式锁，根本原理是setnx指令。其语义如下：</p>
+<p><code>SETNX key value</code></p>
+<blockquote>
+<p>如果key不存在，则设置key值为value（同set）；如果key已经存在，则不执行赋值操作。并使用不同的返回值标识。<a href="https://redis.io/commands/setnx" target="_blank" rel="noopener">官网文档</a></p>
+</blockquote>
+<p>还可以通过set命令的nx选项使用：<br><code>SET key value [expiration EX seconds|PX milliseconds] [NX|XX]</code></p>
+<blockquote>
+<p>NX - 仅在key不存在时执行赋值操作。官网文档<br>而如下文所述，通过SET的NX选项使用，可同时使用其它选项，如EX/PX设置超时时间，是更好的方式。</p>
+</blockquote>
+<h2 id="setnx实现分布式锁"><a href="#setnx实现分布式锁" class="headerlink" title="setnx实现分布式锁"></a>setnx实现分布式锁</h2><p>下面我们对比下几种具体实现方式。</p>
+<h3 id="方案1：setnx-delete"><a href="#方案1：setnx-delete" class="headerlink" title="方案1：setnx+delete"></a>方案1：setnx+delete</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setnx lock_a random_value</span><br><span class="line">// do sth</span><br><span class="line">delete lock_a</span><br></pre></td></tr></table></figure></p>
+<p>此实现方式的问题在于：一旦服务获取锁之后，因某种原因挂掉，则锁一直无法自动释放。从而导致死锁。</p>
+<h3 id="方案2：setnx-setex"><a href="#方案2：setnx-setex" class="headerlink" title="方案2：setnx + setex"></a>方案2：setnx + setex</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setnx lock_a random_value</span><br><span class="line">setex lock_a 10 random_value // 10s超时</span><br><span class="line">// do sth</span><br><span class="line">delete lock_a</span><br></pre></td></tr></table></figure></p>
+<p>按需设置超时时间。此方案解决了方案1死锁的问题，但同时引入了新的死锁问题：<br>如果setnx之后、setex之前服务挂掉，会陷入死锁。<br>根本原因为setnx/setex分为了两个步骤，非原子操作。</p>
+<h3 id="方案3：set-nx-px"><a href="#方案3：set-nx-px" class="headerlink" title="方案3：set nx px"></a>方案3：set nx px</h3><p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SET lock_a random_value NX PX 10000 // 10s超时</span><br><span class="line">// do sth</span><br><span class="line">delete lock_a</span><br></pre></td></tr></table></figure></p>
+<p>此方案通过set的NX/PX选项，将加锁、设置超时两个步骤合并为一个原子操作，从而解决方案1、2的问题。(PX与EX选项的语义相同，差异仅在单位。)<br>此方案目前大多数sdk、redis部署方案都支持，因此是<strong>推荐使用的方式</strong>。<br>但此方案也有如下问题：</p>
+<ul>
+<li>如果锁被错误的释放（如超时），或被错误的抢占，或因redis问题等导致锁丢失，无法很快的感知到。</li>
+</ul>
+<h3 id="方案4：set-key-randomvalue-nx-px"><a href="#方案4：set-key-randomvalue-nx-px" class="headerlink" title="方案4：set key randomvalue nx px"></a>方案4：set key randomvalue nx px</h3><p>方案4在3的基础上，增加对 value 的检查，只解除自己加的锁。<br>类似于 CAS，不过是 compare-and-delete。<br>此方案 redis 原生命令不支持，为保证原子性，需要通过lua脚本实现:。</p>
+<p>伪代码如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SET lock_a random_value NX PX 10000</span><br><span class="line">// do sth</span><br><span class="line">eval &quot;if redis.call(&apos;get&apos;,KEYS[1]) == ARGV[1] then return redis.call(&apos;del&apos;,KEYS[1]) else return 0 end&quot; 1 lock_a random_value</span><br></pre></td></tr></table></figure></p>
+<p>此方案更严谨：即使因为某些异常导致锁被错误的抢占，也能部分保证锁的正确释放。并且在释放锁时能检测到锁是否被错误抢占、错误释放，从而进行特殊处理。</p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="超时时间"><a href="#超时时间" class="headerlink" title="超时时间"></a>超时时间</h3><p>从上述描述可看出，<strong>超时时间</strong>是一个比较重要的变量：</p>
+<ul>
+<li>超时时间不能太短，否则在任务执行完成前就自动释放了锁，导致资源暴露在锁保护之外。</li>
+<li>超时时间不能太长，否则会导致意外死锁后长时间的等待。除非人为接入处理。</li>
+</ul>
+<p>因此建议是根据任务内容，合理衡量超时时间，将超时时间设置为任务内容的几倍即可。<br>如果实在无法确定而又要求比较严格，可以采用定期 setex/expire 更新超时时间实现。</p>
+<h3 id="重试"><a href="#重试" class="headerlink" title="重试"></a>重试</h3><p>如果拿不到锁，建议根据任务性质、业务形式进行轮询等待。<br>等待次数需要参考任务执行时间。</p>
+<h3 id="与redis事务的比较"><a href="#与redis事务的比较" class="headerlink" title="与redis事务的比较"></a>与redis事务的比较</h3><p>setnx 使用更为灵活方案。multi/exec 的事务实现形式更为复杂。<br>且部分redis集群方案(如codis)，不支持multi/exec 事务。</p>
+<h2 id="golang-demo"><a href="#golang-demo" class="headerlink" title="golang demo"></a>golang demo</h2><p>基于 redigo简单实例代码如下。<br><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"sync"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">	<span class="string">"github.com/garyburd/redigo/redis"</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getLock</span><span class="params">(redisAddr, lockKey <span class="keyword">string</span>, ex <span class="keyword">uint</span>, retry <span class="keyword">int</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> retry &lt;= <span class="number">0</span> &#123;</span><br><span class="line">		retry = <span class="number">10</span></span><br><span class="line">	&#125;</span><br><span class="line">	conn, err := redis.DialTimeout(<span class="string">"tcp"</span>, redisAddr, time.Minute, time.Minute, time.Minute)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"conn to redis failed, err:%v"</span>, err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line">	ts := time.Now() <span class="comment">// as random value</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">1</span>; i &lt;= retry; i++ &#123;</span><br><span class="line">		<span class="keyword">if</span> i &gt; <span class="number">1</span> &#123; <span class="comment">// sleep if not first time</span></span><br><span class="line">			time.Sleep(time.Second)</span><br><span class="line">		&#125;</span><br><span class="line">		v, err := conn.Do(<span class="string">"SET"</span>, lockKey, ts, <span class="string">"EX"</span>, retry, <span class="string">"NX"</span>)</span><br><span class="line">		<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> v == <span class="literal">nil</span> &#123;</span><br><span class="line">				fmt.Println(<span class="string">"get lock failed, retry times:"</span>, i)</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				fmt.Println(<span class="string">"get lock success"</span>)</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"get lock failed with err:"</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> i &gt;= retry &#123;</span><br><span class="line">			err = fmt.Errorf(<span class="string">"get lock failed with max retry times."</span>)</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">unLock</span><span class="params">(redisAddr, lockKey <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	conn, err := redis.DialTimeout(<span class="string">"tcp"</span>, redisAddr, time.Minute, time.Minute, time.Minute)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"conn to redis failed, err:%v"</span>, err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line">	v, err := redis.Bool(conn.Do(<span class="string">"DEL"</span>, lockKey))</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> v &#123;</span><br><span class="line">			fmt.Println(<span class="string">"unLock success"</span>)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"unLock failed"</span>)</span><br><span class="line">			<span class="keyword">return</span> fmt.Errorf(<span class="string">"unLock failed"</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"unLock failed, err:"</span>, err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	RedisAddr = <span class="string">"127.0.0.1:3000"</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">	key := <span class="string">"lock_demo"</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">		wg.Add(<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(id <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">			<span class="keyword">defer</span> wg.Done()</span><br><span class="line">			time.Sleep(time.Second)</span><br><span class="line">			<span class="comment">// getLock</span></span><br><span class="line">			err := getLock(RedisAddr, key, <span class="number">10</span>, <span class="number">10</span>)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] get lock failed:%v"</span>, id, err))</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// sleep for random</span></span><br><span class="line">			<span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="number">5</span>; j++ &#123;</span><br><span class="line">				time.Sleep(time.Second)</span><br><span class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] hold lock for %ds"</span>, id, j+<span class="number">1</span>))</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// unLock</span></span><br><span class="line">			err = unLock(RedisAddr, key)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] unlock failed:%v"</span>, id, err))</span><br><span class="line">			&#125;</span><br><span class="line">			fmt.Println(fmt.Sprintf(<span class="string">"worker[%d] done"</span>, id))</span><br><span class="line">		&#125;(i)</span><br><span class="line">	&#125;</span><br><span class="line">	wg.Wait()</span><br><span class="line">	fmt.Println(<span class="string">"demo is done!"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://redis.io/commands/setex" target="_blank" rel="noopener">setex 命令</a><br><a href="https://redis.io/commands/set" target="_blank" rel="noopener">set 命令</a><br><a href="https://redis.io/topics/distlock" target="_blank" rel="noopener">Distributed locks with Redis</a></p>
+]]></content>
+      <categories>
+        <category>Redis</category>
+      </categories>
+      <tags>
+        <tag>redis</tag>
+        <tag>nosql</tag>
+        <tag>setnx</tag>
+        <tag>distributed lock</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之一：cURL简介</title>
+    <url>/2012/07/linux-curl-description/</url>
+    <content><![CDATA[<p>随着网络应用的盛行，HTTP脚本编程成为一项流行的技术：<br>你可能需要到某个web页面自动的下载一些信息（采集）或请求某个接口；<br>可能还需要模仿成一个正常浏览器的样子，或者使用代理；<br>甚至需要上传或POST数据。</p>
+<p>而cURL就是HTTP脚本编程的利器。</p>
+<h2 id="什么是cURL"><a href="#什么是cURL" class="headerlink" title="什么是cURL"></a>什么是cURL</h2><p>cURL的官方网站上这样解释：“The name is a play on ‘Client for URLs’”。意思为“访问URL的客户端”。<br>“cURL is a command line tool for doing all sorts of URL manipulations and transfers”，cURL是用于进行各种对URL的操作和访问传输的命令行工具。<br>而在Linux man手册里这样解释：“cURL - transfer a URL”，意思是对URL的访问传输。<br>今天我们要讲的curl是Linux下一个强大的对URL进行操作的命令行工具。<br>而cURL的写法，URL突出大写，也正是强调对URL的操作。<br><a id="more"></a></p>
+<h2 id="cURL主要特点"><a href="#cURL主要特点" class="headerlink" title="cURL主要特点"></a>cURL主要特点</h2><ol>
+<li>支持多协议<br>URL的定义为“统一资源定位符”（详见RFC 3986），是不局限于HTTP协议的。<br>因此cURL支持多种协议，如DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,IMAP, IMAPS,LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP等。</li>
+<li>命令行操作，简单强大<br>CURL是无GUI界面的，全部基于命令行操作，这无疑使它可以很方便的集成在像Linux脚本等程序中，<br>而通过我们进一步编程处理，就可以完成非常强大的功能。</li>
+<li>开源跨平台<br>cURL工具是由<a href="http://curl.haxx.se/" target="_blank" rel="noopener">libcurl开源项目组</a>提供，此项目组提供开源的libcurl库，此库是由C语言实现客户端URL操作库，提供对URL的访问等操作功能，cURL工具就是采用libcurl实现。<br>而因为libcurl库是适用于多个平台的，因此cURL也适用于多个平台，如Win、Linux、OS/400、TPF等平台。<br>这成为cURL比GNU官方的wget更强大的原因之一。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux下cURL使用教程之十四：libcurl编程</title>
+    <url>/2012/09/linux-curl-libcurl/</url>
+    <content><![CDATA[<p>在<a href="http://127.0.0.1:4000/2012/09/curl-vs-wget/" target="_blank" rel="noopener">Linux下cURL使用教程之十三：curl vs wget</a>中我们谈到，curl是基于libcurl库实现的。<br>而libcurl库是开源免费跨平台的，可用于多种语言。<br>有时候linux的功能不足以满足我们的要求，或者是需要在特殊环境下实现某些功能（比如在PHP服务器上完成抓取），这时候就需要用到libcurl编程。</p>
+<p>官方提供了一些demo代码，大家下载查看。<br>本篇文章我们只谈谈各种语言下的使用，及一些参考。</p>
+<h2 id="C-C"><a href="#C-C" class="headerlink" title="C/C++"></a>C/C++</h2><p>C/C++语言下使用libcurl有些繁琐，但功能很强大、稳定高效。而且尤其C下本身开源库相比其它语言较少，因此libcurl库使用较多。<br>参考：<br><a href="http://curl.haxx.se/libcurl/c/libcurl-tutorial.html" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/c/libcurl-tutorial.html</a><br><a href="http://curl.haxx.se/libcurl/c/" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/c/</a></p>
+<h2 id="PHP"><a href="#PHP" class="headerlink" title="PHP"></a>PHP</h2><p>PHP的libcurl库使用较多。<br><a id="more"></a><br>参考：<br><a href="http://cn2.php.net/curl" target="_blank" rel="noopener">http://cn2.php.net/curl</a><br><a href="http://curl.haxx.se/libcurl/php/" target="_blank" rel="noopener">http://curl.haxx.se/libcurl/php/</a></p>
+<h2 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h2><p>python中也有curl库：PycURL。<br>但更易用使用更普遍的还是<a href="https://pypi.python.org/pypi/requests" target="_blank" rel="noopener">requests</a>。</p>
+<h2 id="Java"><a href="#Java" class="headerlink" title="Java"></a>Java</h2><p>Java下的curl库一度被抛弃：<a href="https://curl.haxx.se/libcurl/java/" target="_blank" rel="noopener">accessing libcurl from Java</a>。<br>不知道目前github上的版本是否稳定。<br>更建议使用apache httpclient(貌似现在叫做httpcomponents)，参考：<a href="http://hc.apache.org/" target="_blank" rel="noopener">Apache HttpComponents</a>。</p>
+<h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><p>如果作为日常请求工作使用，如在测试接口时，更建议使用带有GUI界面的postman，功能很强大，而且自带分组、回归等CI功能。<br>参考：<a href="http://www.getpostman.com/" target="_blank" rel="noopener">Postman | Supercharge your API workflow</a>。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>如果需要编写shell脚本进行功能更强大的CI测试，curl仍是首选。<br>此系列告一段落。</p>
+]]></content>
+      <categories>
+        <category>curl</category>
+      </categories>
+      <tags>
+        <tag>curl</tag>
+        <tag>linux curl</tag>
+        <tag>linux</tag>
+        <tag>libcurl</tag>
       </tags>
   </entry>
 </search>
